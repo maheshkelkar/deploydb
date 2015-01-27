@@ -511,11 +511,19 @@ table.CodeRay td.code>pre{padding:0}
 <ul class="sectlevel2">
 <li><a href="#_notifications">Notifications</a></li>
 <li><a href="#_triggers">Triggers</a></li>
+<li><a href="#_configuring_webhooks">Configuring Webhooks</a></li>
+<li><a href="#_web_hook_payloads">Web hook payloads</a></li>
 </ul>
 </li>
 <li><a href="#_queueing">Queueing</a></li>
 <li><a href="#_data_storage">Data storage</a></li>
-<li><a href="#_environments_pipelines">Environments/Pipelines</a></li>
+<li><a href="#_environments_pipelines_promotions">Environments/Pipelines/Promotions</a>
+<ul class="sectlevel2">
+<li><a href="#_pipelines">Pipelines</a></li>
+<li><a href="#_services">Services</a></li>
+<li><a href="#_promotions">Promotions</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -533,7 +541,11 @@ components within the conceptual "DeployDB box."</p>
 <div class="sect1">
 <h2 id="_web_hooks">Web hooks</h2>
 <div class="sectionbody">
-
+<div class="paragraph">
+<p>"Web hooks" in this section technically covers "web hooks" but also public APIs
+that other services like Jenkins might use to trigger changes in the DeployDB
+system.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -550,10 +562,10 @@ components within the conceptual "DeployDB box."</p>
 <p>Artifact is ready/available</p>
 </li>
 <li>
-<p>Deploy completed</p>
+<p>Deploy completed with success/failure indicated in the payload</p>
 </li>
 <li>
-<p>Verification of a deployment completed</p>
+<p>Status change of a Deployment (e.g. a promotion criteria was met)</p>
 </li>
 </ul>
 </div>
@@ -569,12 +581,60 @@ components within the conceptual "DeployDB box."</p>
 <p>Artifact of a new version is available</p>
 </li>
 <li>
-<p>Deployment has completed</p>
+<p>Create a Deployment</p>
 </li>
 <li>
-<p>Verficiation completed</p>
+<p>Change status on a known Deployment</p>
 </li>
 </ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_configuring_webhooks">Configuring Webhooks</h3>
+<div class="listingblock">
+<div class="title">webhooks.yml</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml"><span class="key">artifact</span>:
+    - <span class="string"><span class="content">created:</span></span>
+<span class="key">deployment</span>:
+    - <span class="string"><span class="content">created:</span><span class="content">
+        - http://jenkins.example.com/job/notify-deploy-created/build</span></span>
+    - <span class="string"><span class="content">completed:</span><span class="content">
+        - http://jenkins.example.com/job/notify-deploy-completed/build</span></span>
+<span class="key">promotion</span>:
+    - <span class="string"><span class="content">completed:</span></span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_web_hook_payloads">Web hook payloads</h3>
+<div class="listingblock">
+<div class="title">Artifact created</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">{
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Deployment created</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">{
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Deployment completed</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">{
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Promotion completed</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">{
+}</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -615,7 +675,7 @@ information into a database. This should be abstracted through a JDBC connector.
 </div>
 </div>
 <div class="sect1">
-<h2 id="_environments_pipelines">Environments/Pipelines</h2>
+<h2 id="_environments_pipelines_promotions">Environments/Pipelines/Promotions</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Current thinking: if pipelines are defined in "configuration" as are
@@ -626,6 +686,8 @@ be in configuration but rather registered via an API.</p>
 <p>It might make sense to have that registration API write some YAML to disk or
 something and allow DeployDB to register artifacts from the same place on disk</p>
 </div>
+<div class="sect2">
+<h3 id="_pipelines">Pipelines</h3>
 <div class="listingblock">
 <div class="title">pipelines/devtoprod.yml</div>
 <div class="content">
@@ -633,25 +695,70 @@ something and allow DeployDB to register artifacts from the same place on disk</
   - <span class="string"><span class="content">dev-alpha</span></span>
   - <span class="string"><span class="content">dev-beta</span></span>
   - <span class="string"><span class="content">integ</span></span>
-  - <span class="string"><span class="content">preprod</span></span>
+  - <span class="string"><span class="content">preprod:</span></span>
+    <span class="key">promotions</span>:
+        - <span class="string"><span class="content">prod-preflight</span></span>
+        - <span class="string"><span class="content">manual</span></span>
   - <span class="string"><span class="content">prod</span></span></code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>The Pipeline concept allows for the configuring of a linear set of Environments
+for Artifacts to be passed through. At each step of the way the Promotions
+defined for a given Service traversing the pipeline will need to be
+validated. E.g. the "FoaS" Service much execute its Promotions between
+<code>integ</code> and <code>preprod</code>, but before going from <code>preprod</code> to <code>prod</code> the
+<code>prod-preflight</code> and a <code>manual</code> Promotion must be satisfied.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_services">Services</h3>
 <div class="listingblock">
 <div class="title">services/foas.yml</div>
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="yaml"><span class="key">name</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Fun as a Service</span><span class="delimiter">&quot;</span></span>
 <span class="key">artifacts</span>:
-  - <span class="string"><span class="content">foas</span></span>
-  - <span class="string"><span class="content">puppet-foas</span></span>
-  - <span class="string"><span class="content">puppet-mysql</span></span>
+  - <span class="string"><span class="content">com.github.lookout:foas</span></span>
+  - <span class="string"><span class="content">com.github.lookout.puppet:puppet-foas</span></span>
+  - <span class="string"><span class="content">com.github.lookout:puppet-mysql</span></span>
 <span class="key">pipelines</span>:
   - <span class="string"><span class="content">devtoprod</span></span>
 <span class="key">promotions</span>:
-  - <span class="string"><span class="content">manual</span></span>
-  - <span class="string"><span class="content">jenkins-smoke</span></span>
-  - <span class="string"><span class="content">status-check</span></span></code></pre>
+  - <span class="string"><span class="content">status-check</span></span>
+  - <span class="string"><span class="content">jenkins-smoke</span></span></code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+The "artifact" declarations in the configuration file are using the
+<code>groupname:artifactname</code> syntax which ensure that we can uniquely identify an
+krtifact. It is expected that all artifacts have at least a unique
+<code>groupname:artifactname</code> for storage in the data store.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_promotions">Promotions</h3>
+<div class="listingblock">
+<div class="title">promotions/jenkins-smoke.yml</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml"><span class="key">type</span>: <span class="string"><span class="content">JenkinsPromotion</span></span>
+<span class="key">jobs</span>:
+  - <span class="string"><span class="content">basic-smokes-test</span></span>
+  - <span class="string"><span class="content">basic-perf-test</span></span>
+  - <span class="string"><span class="content">end2end-smoke-test</span></span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>JenkinsPromotion</code> as a typed concept would require a list of Jenkins job names
+that would be required to succeed in order to execute the promotion.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -668,20 +775,6 @@ work.
 </table>
 </div>
 <div class="listingblock">
-<div class="title">promotions/jenkins-smoke.yml</div>
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="yaml"><span class="key">type</span>: <span class="string"><span class="content">JenkinsPromotion</span></span>
-<span class="key">jobs</span>:
-  - <span class="string"><span class="content">basic-smokes-test</span></span>
-  - <span class="string"><span class="content">basic-perf-test</span></span>
-  - <span class="string"><span class="content">end2end-smoke-test</span></span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p><code>JenkinsPromotion</code> as a typed concept would require a list of Jenkins job names
-that would be required to succeed in order to execute the promotion.</p>
-</div>
-<div class="listingblock">
 <div class="title">promotions/status-check.yml</div>
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="yaml"><span class="key">type</span>: <span class="string"><span class="content">WebhookPromotion</span></span>
@@ -695,12 +788,17 @@ that would be required to succeed in order to execute the promotion.</p>
 application and see if it&#8217;s online before identifying it as "promoted." How
 this might work with a cluster of applications in one service, I&#8217;m not yet sure.</p>
 </div>
+<div class="paragraph">
+<p>`A <strong>manual</strong> promotion is a special case scenario where the UI for DeployDB is
+going to need to present a button to a user to click</p>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2014-12-22 08:43:21 PST
+Last updated 2015-01-27 05:28:35 PST
 </div>
 </div>
 </body>
