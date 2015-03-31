@@ -48,6 +48,19 @@ public class ArtifactResource {
     }
 
     @GET
+    @UnitOfWork
+    @Timed(name = "get-requests")
+    List<Artifact> byName(@QueryParam("query") String type) {
+        List<Artifact> artifacts =
+                this.workFlow.artifactDAO.findByQuery(type)
+
+        if (artifacts.isEmpty()) {
+            throw new WebApplicationException(Response.Status.NOT_FOUND)
+        }
+        return artifacts
+    }
+
+    @GET
     @Path("{id}")
     @UnitOfWork
     @Timed(name = "get-requests")

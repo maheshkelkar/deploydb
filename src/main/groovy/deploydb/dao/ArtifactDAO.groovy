@@ -45,4 +45,25 @@ class ArtifactDAO extends AbstractDAO<Artifact> {
         }
         return null
     }
+
+    /**
+     * Locate an Artifact based on generic query parameter
+     *
+     * @param group A valid group name (e.g. "com.example")
+     * @param name The artifact's name (e.g. "dropwizard-core")
+     */
+    List<Artifact> findByQuery(String type) {
+        // Make the type wild card
+        type = "%"+type+"%"
+
+        // logically "or" all the columns you want to search on
+        List<Artifact> artifacts = criteria().add( Restrictions.disjunction()
+                                               .add(Restrictions.like('name', type))
+                                               .add(Restrictions.like('group', type))
+                                               .add(Restrictions.like('version', type)))
+                                             .addOrder(Order.desc('createdAt'))
+                                             .list()
+        return artifacts
+    }
+
 }
