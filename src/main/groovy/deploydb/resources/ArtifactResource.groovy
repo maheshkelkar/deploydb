@@ -50,9 +50,13 @@ public class ArtifactResource {
     @GET
     @UnitOfWork
     @Timed(name = "get-requests")
-    List<Artifact> byName(@QueryParam("query") String type) {
+    List<Artifact> byName(@QueryParam("query") String type,
+                          @QueryParam("pageNumber") @DefaultValue("0") IntParam artifactPageNumber,
+                          @QueryParam("perPageSize") @DefaultValue("5") deploydb.ModelPageSizeParam
+                                  artifactPerPageSize) {
         List<Artifact> artifacts =
-                this.workFlow.artifactDAO.findByQuery(type)
+                this.workFlow.artifactDAO.findByQuery(type, artifactPageNumber.get(),
+                        artifactPerPageSize.get())
 
         if (artifacts.isEmpty()) {
             throw new WebApplicationException(Response.Status.NOT_FOUND)

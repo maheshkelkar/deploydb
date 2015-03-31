@@ -192,20 +192,20 @@ Feature: Artifact READ APIs
     And the body should be JSON:
     """
      [{
-        "id" : 1,
-        "createdAt" : "{{created_timestamp}}",
-        "group" : "com.example.cucumber",
-        "name" : "cucumber-artifact",
-        "version" : "1.0.1",
-        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar"
-      },
-      {
         "id" : 2,
         "createdAt" : "{{created_timestamp}}",
         "group" : "com.example.cucumber",
         "name" : "cucumber-artifact",
         "version" : "1.0.2",
         "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.2/cucumber-artifact-1.0.2.jar"
+      },
+      {
+        "id" : 1,
+        "createdAt" : "{{created_timestamp}}",
+        "group" : "com.example.cucumber",
+        "name" : "cucumber-artifact",
+        "version" : "1.0.1",
+        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar"
       }]
     """
 
@@ -218,20 +218,20 @@ Feature: Artifact READ APIs
     And the body should be JSON:
     """
      [{
-        "id" : 1,
-        "createdAt" : "{{created_timestamp}}",
-        "group" : "com.example.cucumber",
-        "name" : "cucumber-artifact",
-        "version" : "1.0.1",
-        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar"
-      },
-      {
         "id" : 2,
         "createdAt" : "{{created_timestamp}}",
         "group" : "com.example.cucumber",
         "name" : "cucumber-artifact",
         "version" : "1.0.2",
         "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.2/cucumber-artifact-1.0.2.jar"
+      },
+      {
+        "id" : 1,
+        "createdAt" : "{{created_timestamp}}",
+        "group" : "com.example.cucumber",
+        "name" : "cucumber-artifact",
+        "version" : "1.0.1",
+        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar"
       }]
     """
 
@@ -245,20 +245,20 @@ Feature: Artifact READ APIs
     And the body should be JSON:
     """
      [{
-        "id" : 1,
-        "createdAt" : "{{created_timestamp}}",
-        "group" : "com.example.cucumber",
-        "name" : "cucumber-artifact",
-        "version" : "1.0.1",
-        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar"
-      },
-      {
         "id" : 2,
         "createdAt" : "{{created_timestamp}}",
         "group" : "com.example.cucumber",
         "name" : "cucumber-artifact",
         "version" : "1.0.2",
         "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.2/cucumber-artifact-1.0.2.jar"
+      },
+      {
+        "id" : 1,
+        "createdAt" : "{{created_timestamp}}",
+        "group" : "com.example.cucumber",
+        "name" : "cucumber-artifact",
+        "version" : "1.0.1",
+        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar"
       }]
     """
 
@@ -272,20 +272,20 @@ Feature: Artifact READ APIs
     And the body should be JSON:
     """
      [{
-        "id" : 1,
-        "createdAt" : "{{created_timestamp}}",
-        "group" : "com.example.cucumber",
-        "name" : "cucumber-artifact",
-        "version" : "1.0.1",
-        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar"
-      },
-      {
         "id" : 2,
         "createdAt" : "{{created_timestamp}}",
         "group" : "com.example.cucumber",
         "name" : "cucumber-artifact",
         "version" : "1.0.2",
         "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.2/cucumber-artifact-1.0.2.jar"
+      },
+      {
+        "id" : 1,
+        "createdAt" : "{{created_timestamp}}",
+        "group" : "com.example.cucumber",
+        "name" : "cucumber-artifact",
+        "version" : "1.0.1",
+        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar"
       }]
     """
 
@@ -299,20 +299,46 @@ Feature: Artifact READ APIs
     And the body should be JSON:
     """
      [{
-        "id" : 1,
-        "createdAt" : "{{created_timestamp}}",
-        "group" : "com.example.cucumber",
-        "name" : "cucumber-artifact",
-        "version" : "1.0.1",
-        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar"
-      },
-      {
         "id" : 2,
         "createdAt" : "{{created_timestamp}}",
         "group" : "com.example.cucumber",
         "name" : "cucumber-artifact",
         "version" : "1.0.2",
         "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.2/cucumber-artifact-1.0.2.jar"
+      },
+      {
+        "id" : 1,
+        "createdAt" : "{{created_timestamp}}",
+        "group" : "com.example.cucumber",
+        "name" : "cucumber-artifact",
+        "version" : "1.0.1",
+        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar"
+      }]
+    """
+
+  @query @freezetime
+  Scenario: Fetching an artifact by version query and pagination parameters
+
+    Given there are artifacts
+    When I GET "/api/artifacts?query=1.0&pageNumber=0&perPageSize=3"
+    Then the response should be 200
+    And the body should be JSON:
+    """
+     [{
+        "id" : 2,
+        "createdAt" : "{{created_timestamp}}",
+        "group" : "com.example.cucumber",
+        "name" : "cucumber-artifact",
+        "version" : "1.0.2",
+        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.2/cucumber-artifact-1.0.2.jar"
+      },
+      {
+        "id" : 1,
+        "createdAt" : "{{created_timestamp}}",
+        "group" : "com.example.cucumber",
+        "name" : "cucumber-artifact",
+        "version" : "1.0.1",
+        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar"
       }]
     """
 

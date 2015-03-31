@@ -52,7 +52,7 @@ class ArtifactDAO extends AbstractDAO<Artifact> {
      * @param group A valid group name (e.g. "com.example")
      * @param name The artifact's name (e.g. "dropwizard-core")
      */
-    List<Artifact> findByQuery(String type) {
+    List<Artifact> findByQuery(String type, int pageNumber, int perPageSize) {
         // Make the type wild card
         type = "%"+type+"%"
 
@@ -62,6 +62,8 @@ class ArtifactDAO extends AbstractDAO<Artifact> {
                                                .add(Restrictions.like('group', type))
                                                .add(Restrictions.like('version', type)))
                                              .addOrder(Order.desc('createdAt'))
+                                             .setFirstResult(pageNumber)
+                                             .setMaxResults(perPageSize)
                                              .list()
         return artifacts
     }
