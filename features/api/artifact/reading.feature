@@ -165,6 +165,103 @@ Feature: Artifact READ APIs
       }
     """
 
+  @wip @freezetime
+  Scenario: Fetching an artifact by version query
+
+    Given there are artifacts
+    When I GET "/api/artifacts?query=1.0.1"
+    Then the response should be 200
+    And the body should be JSON:
+    """
+     [{
+        "id" : 1,
+        "createdAt" : "{{created_timestamp}}",
+        "group" : "com.example.cucumber",
+        "name" : "cucumber-artifact",
+        "version" : "1.0.1",
+        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar"
+      }]
+    """
+
+  @wip @freezetime
+  Scenario: Fetching an artifact by partial version query
+
+    Given there are artifacts
+    When I GET "/api/artifacts?query=1.0"
+    Then the response should be 200
+    And the body should be JSON:
+    """
+     [{
+        "id" : 1,
+        "createdAt" : "{{created_timestamp}}",
+        "group" : "com.example.cucumber",
+        "name" : "cucumber-artifact",
+        "version" : "1.0.1",
+        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar"
+      },
+      {
+        "id" : 2,
+        "createdAt" : "{{created_timestamp}}",
+        "group" : "com.example.cucumber",
+        "name" : "cucumber-artifact",
+        "version" : "1.0.2",
+        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.2/cucumber-artifact-1.0.2.jar"
+      }]
+    """
+
+  @wip @freezetime
+  Scenario: Fetching an artifact by partial name
+
+    Given there are artifacts
+    When I GET "/api/artifacts?query=cucumber"
+    Then the response should be 200
+    And the body should be JSON:
+    """
+     [{
+        "id" : 1,
+        "createdAt" : "{{created_timestamp}}",
+        "group" : "com.example.cucumber",
+        "name" : "cucumber-artifact",
+        "version" : "1.0.1",
+        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar"
+      },
+      {
+        "id" : 2,
+        "createdAt" : "{{created_timestamp}}",
+        "group" : "com.example.cucumber",
+        "name" : "cucumber-artifact",
+        "version" : "1.0.2",
+        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.2/cucumber-artifact-1.0.2.jar"
+      }]
+    """
+
+
+  @wip @freezetime
+  Scenario: Fetching an artifact by partial group
+
+    Given there are artifacts
+    When I GET "/api/artifacts?query=example"
+    Then the response should be 200
+    And the body should be JSON:
+    """
+     [{
+        "id" : 1,
+        "createdAt" : "{{created_timestamp}}",
+        "group" : "com.example.cucumber",
+        "name" : "cucumber-artifact",
+        "version" : "1.0.1",
+        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar"
+      },
+      {
+        "id" : 2,
+        "createdAt" : "{{created_timestamp}}",
+        "group" : "com.example.cucumber",
+        "name" : "cucumber-artifact",
+        "version" : "1.0.2",
+        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.2/cucumber-artifact-1.0.2.jar"
+      }]
+    """
+
   @wip
   Scenario: Fetching an artifact's versions
 
