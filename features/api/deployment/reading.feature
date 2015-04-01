@@ -244,9 +244,43 @@ Feature: Deployment READ APIs
       }
     """
 
+  @freezetime @wip
+  Scenario: Fetching deployment based on artifact id
+
+    Given there are deployments
+    When I GET "/api/deployments/by-artifact/1"
+    Then the response should be 200
+    And the body should be JSON:
+    """
+      [{
+        "id" : 1,
+        "artifact" : {
+          "id" : 1,
+          "group" : "com.example.cucumber",
+          "name" : "cucumber-artifact",
+          "version" : "1.0.1",
+          "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar",
+          "createdAt" : "{{created_timestamp}}"
+        },
+        "environment" : "pre-prod",
+        "service" : "faas",
+        "status" : "STARTED",
+        "promotions" : [{
+          "id" : 1,
+          "promotion" : "jenkins-smoke",
+          "status" : "STARTED",
+          "infoUrl" : null,
+          "createdAt" : "{{created_timestamp}}"
+         }],
+        "createdAt" : "{{created_timestamp}}"
+      }]
+    """
+
   @error
   Scenario: Fetching an deployment by pageNumber=0 and perPageSize=0 returns 0 deployments
 
     Given there are deployments
     When I GET "/api/deployments?pageNumber=0&perPageSize=0"
     Then the response should be 400
+
+

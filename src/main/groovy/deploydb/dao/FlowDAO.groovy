@@ -1,5 +1,6 @@
 package deploydb.dao
 
+import deploydb.models.Deployment
 import deploydb.models.Flow
 import deploydb.Status
 import groovy.transform.InheritConstructors
@@ -22,5 +23,10 @@ class FlowDAO extends AbstractDAO<Flow> {
                 Restrictions.ne("status", Status.SUCCESS),
                 Restrictions.ne("status", Status.FAILED)))
                 .setProjection(Projections.rowCount()).uniqueResult()
+    }
+
+    List<Deployment> findDeploymentsByArtifactId(long artifactId) {
+        Flow flow =  criteria().add(Restrictions.eq('artifact.id', artifactId)).uniqueResult()
+        return flow.getDeployments()
     }
 }
