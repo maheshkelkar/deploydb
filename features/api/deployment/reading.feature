@@ -284,8 +284,8 @@ Feature: Deployment READ APIs
       }]
     """
 
-  @wip @error @freezetime
-  Scenario: Fetching deployment by a invalid artifact id
+  @wip
+  Scenario: Fetching deployment by artifact id that doesn't exist
 
     When I GET "/api/deployments/by-artifact/1"
     Then the response should be 404
