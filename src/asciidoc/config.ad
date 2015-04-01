@@ -1,0 +1,122 @@
+= #DeployDB Configuration
+
+== Configuration Details:
+. There are two types of configurations: Launch-Configuration and Models-Configuration.
+. Launch-Configuration:
+.. DeployDB is launched with this configuration provided in the YAML file.
+.. The YAML file is passed at the command line (Ref: <<running.ad#To run the server,Running the Server>>)
+
+[source,yaml,indent=4]
+.deploydb.example.yml
+----
+# Database specifics
+database:
+  driverClass: org.h2.Driver
+  user: nobody
+  url: "jdbc:h2:./deployDB.example.db"
+
+# Models-Configuration directory (cannonical path)
+# YAML configuration files for models - services, environments, pipelines,
+# webhooks and promotions - should be stored in respective sub-directories
+configDirectory: config
+
+# Whoas library specifics
+whoas:
+  queue:
+    type: "com.github.lookout.whoas.InMemoryQueue"
+    key: "queue"
+    hostname: "localhost"
+    port: 6379
+  runnerType: "com.github.lookout.whoas.SequentialHookRunner"
+
+# Logging specifics
+logging:
+  level: INFO
+  loggers:
+    org.hibernate.SQL: ALL
+----
+
+. Models-Configuration:
+.. When DeployDB is launched, it consumes Models-Configuration and creates model objects.
+.. The configuration driven models are Service, Environment, Pipeline, Promotion,
+   Webhook, etc.
+.. These configuration driven models are used to create and manage Flows and Deployments
+   (Ref: <<workflow.ad#DeployDB WorkFlow,WorkFlow)
+.. The Launch-Configuration provides the "configDirectory" path, a Models-Configuration
+   directory path.
+.. YAML configurations for each Model are stored under the respective sub-directory.
+... ${configDirectory} - base Models-Configuration directory path. E.g.
+* /etc/deploydb/config/
+... ${configDirectory}/services/ - Directory path for Service Models. E.g.
+* /etc/deploydb/services/FunAsService.yml,
+* /etc/deploydb/services/AuditLogAsService.yml,
+* <<internals.ad#Services,Services Configuration>>
+... ${configDirectory}/pipelines/ - Directory path for Pipeline Models. E.g.
+* /etc/deploydb/pipelines/devtoprod.yml
+* <<internals.ad#Pipelines,Pipelines Configuration>>
+... ${configDirectory}/environments/ - Directory path for Environment Models. E.g.
+* /etc/deploydb/environments/integ.yml
+* <<internals.ad#Environment,Environments Configuration>>
+... ${configDirectory}/promotions/ - Directory path for Promotion Models. E.g.
+* /etc/deploydb/environments/jenkins-smoke.yml
+* <<internals.ad#Promotions,Promotions Configuration>>
+... ${configDirectory}/webhook/ - Directory path for Webhook Model (Note that
+    ONLY 1 webhook file is allowed to represent global webhooks). E.g.
+* /etc/deploydb/webhook/global.yml
+* <<internals.ad#Configuring Webhooks,Webhook Configuration>>
+
+
+== Reloading Models-Configuration:
+. The configuration for models, can be changed and reloaded while DeployDB is running.
+. An admin task is available to reload configuration from the "configDirectory".
+. A POST to "http://<server-host>:<port>/tasks/configReload" from admin app will
+  invoke this task.
+. Reloading a changed configuration would have no impact on the extant in-progress or
+  verified deployments.
+
+
+== Models-Configuration Management:
+. DeployDB consumes the Models-Configuration during launch or when its reloaded
+  via the admin task
+. The configuration for each model is saved in DB to protect extant deployments
+  from change in configuration.
+. The contents of DB record are as follows:
+
+    +----+----------+----------+---------------+-------------+
+    | id | checksum | contents | ident         | type        |
+    +----+----------+----------+---------------+-------------+
+    | 1  | 0xdead   | <YAML>   | FunAsService  | Service     |
+    +----+----------+----------+---------------+-------------+
+    | 2  | 0xdead   | <YAML>   | devtoprod     | Pipeline    |
+    +----+----------+----------+---------------+-------------+
+    | 3  | 0xdead   | <YAML>   | integ         | Environment |
+    +----+----------+----------+---------------+-------------+
+    | 4  | 0xdead   | <YAML>   | jenkins-smoke | Promotion   |
+    +----+----------+----------+---------------+-------------+
+    | 5  | 0xdead   | <YAML>   | global        | Webhook     |
+    +----+----------+----------+---------------+-------------+
+    | 6  | 0xbeef   | <YAML>   | FunAsService  | Service     |
+    +----+----------+----------+---------------+-------------+
+    | 7  | 0xbeef   | <YAML>   | devtoprod     | Pipeline    |
+    +----+----------+----------+---------------+-------------+
+    | 8  | 0xbeef   | <YAML>   | integ         | Environment |
+    +----+----------+----------+---------------+-------------+
+    | 9  | 0xbeef   | <YAML>   | jenkins-smoke | Promotion   |
+    +----+----------+----------+---------------+-------------+
+    | 10 | 0xbeef   | <YAML>   | global        | Webhook     |
+    +----+----------+----------+---------------+-------------+
+
+.. checksum - of the base Models-Configuration directory. Remains constant for a given iteration
+   of the Models-Configuration
+.. contents - of YMAL file in String format
+.. ident - identifier for the model
+.. type - type of model (e.g. Service, Pipeline, etc.)
+.. The contents of (checksum, ident, type) will form a unique key
+.. Thus, each change in configuration will create new DB records
+.. As shown in the table above: Rows 1 thr 5 were added on initial DeployDB launch. And rows
+   6 thr 10 were populated on reload after a config change.
+. Impact on WorkFlow:
+.. When Flow is created, the checksum is stored in the Flow to associate the Models-Configuration with it.
+.. When subsequent triggers are executed on the Flow, it retrieves Models-Configuration from DB
+   and uses it. This allows us to Models-Configuration to change while Flows and Deployments
+   are being verified.
