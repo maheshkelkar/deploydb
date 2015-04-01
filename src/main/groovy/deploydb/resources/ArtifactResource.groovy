@@ -85,7 +85,7 @@ public class ArtifactResource {
     List<Artifact> byName(@PathParam('group') String artifactGroup,
                          @PathParam("name") String artifactName,
                          @QueryParam("pageNumber") @DefaultValue("0") IntParam artifactPageNumber,
-                         @QueryParam("perPageSize") @DefaultValue("5") deploydb.ModelPageSizeParam
+                         @QueryParam("perPageSize") @DefaultValue("20") deploydb.ModelPageSizeParam
                                  artifactPerPageSize) {
         List<Artifact> artifacts =
                 this.workFlow.artifactDAO.findByGroupAndName(
