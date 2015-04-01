@@ -276,11 +276,20 @@ Feature: Deployment READ APIs
       }]
     """
 
+
+  @wip
+  Scenario: Fetching deployment by artifact id that doesn't exist
+
+    When I GET "/api/deployments/by-artifact/1"
+    Then the response should be 404
+
+
   @error
   Scenario: Fetching an deployment by pageNumber=0 and perPageSize=0 returns 0 deployments
 
     Given there are deployments
     When I GET "/api/deployments?pageNumber=0&perPageSize=0"
     Then the response should be 400
+
 
 
