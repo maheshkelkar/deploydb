@@ -71,9 +71,13 @@ logging:
 . An admin task is available to reload configuration from the "configDirectory".
 . A POST to "http://<server-host>:<port>/tasks/configReload" from admin app will
   invoke this task.
-. Reloading a changed configuration would have no impact on the extant in-progress or
+. Reloading a changed configuration would have no impact on the in-progress or
   verified deployments.
-
+. Reading the configuration during DeployDB version upgrade should have no impact on
+  the in-progress or verified deployments, if following rules are followed by the DeployDB
+  developer:
+.. Do not change data type of the existing fields in Models (e.g. Service, Pipeline, etc)
+.. New fields can be added in Models, but do not make new fields mandatory
 
 == Models-Configuration Management:
 . DeployDB consumes the Models-Configuration during launch or when its reloaded
