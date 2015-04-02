@@ -74,6 +74,7 @@ repositories {
 
 codenarc {
     sourceSets = [sourceSets.main, sourceSets.cucumber]
+    configFile = file('gradle/codenarc/codenarc.xml')
 }
 
 cucumber {
