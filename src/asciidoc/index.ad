@@ -19,11 +19,10 @@ image:https://travis-ci.org/lookout/deploydb.svg?branch=master["Build Status", l
 * link:restapi/index.html[REST API documentation]
 * link:groovydoc/index.html[Groovydocs]
 * <<internals.ad#,Data model/Internals>>
+* <<config.ad#,Configuration>>
 * <<workflow.ad#,Workflow>>
 * <<webui.ad#,Web UI Design/concepts>>
 
-
----
 
 == The Problem
 

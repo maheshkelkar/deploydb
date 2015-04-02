@@ -11,11 +11,12 @@ apply plugin: 'groovy'
 apply plugin: 'application'
 apply plugin: 'codenarc'
 
-version = '0.2.1'
+version = '0.2.2'
 group = 'com.github.lookout'
 description = 'DeployDB is a tool to provide a single source of truth for artifact-based deployments'
 // Needed for the application plugin's `run` task
 mainClassName = 'deploydb.DeployDBApp'
+project.targetCompatibility = 1.7
 
 ////////////////////////////////////////////////////////////////////////////////
 // DEPENDENCY MANAGEMENT
