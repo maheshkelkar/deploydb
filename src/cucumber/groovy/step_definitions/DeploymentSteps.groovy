@@ -88,3 +88,70 @@ Given(~/^there are deployments$/) { ->
         dao.persist(d2)
     }
 }
+
+Given(~/^there are deployments for artifacts$/) { ->
+    withSession {
+
+        /**
+         * Create sample artifact
+         */
+        ArtifactDAO adao = new ArtifactDAO(sessionFactory)
+        Artifact a1 = sampleArtifact()
+        Artifact a2 = sampleArtifactV2()
+        adao.persist(a1)
+        adao.persist(a2)
+
+        /**
+         * Create deployments for artifact a1
+         */
+        Deployment da11 = new Deployment(adao.persist(a1),
+                "dev-integ",
+                "faas",
+                Status.STARTED)
+        Deployment da12 = new Deployment(adao.persist(a1),
+                "integ",
+                "faas",
+                Status.STARTED)
+        Deployment da13 = new Deployment(adao.persist(a1),
+                "pre-prod",
+                "faas",
+                Status.STARTED)
+        Deployment da14 = new Deployment(adao.persist(a1),
+                "prod",
+                "faas",
+                Status.STARTED)
+
+        /**
+         * Create deployment for artifact a2
+         */
+        Deployment da21 = new Deployment(adao.persist(a2),
+                "dev-integ",
+                "faas",
+                Status.STARTED)
+        Deployment da22 = new Deployment(adao.persist(a2),
+                "integ",
+                "faas",
+                Status.STARTED)
+        Deployment da23 = new Deployment(adao.persist(a2),
+                "pre-prod",
+                "faas",
+                Status.STARTED)
+        Deployment da24 = new Deployment(adao.persist(a2),
+                "prod",
+                "faas",
+                Status.STARTED)
+
+        /**
+         * Save deployments in DB
+         */
+        DeploymentDAO dao = new DeploymentDAO(sessionFactory)
+        dao.persist(da11)
+        dao.persist(da12)
+        dao.persist(da13)
+        dao.persist(da14)
+        dao.persist(da21)
+        dao.persist(da22)
+        dao.persist(da23)
+        dao.persist(da24)
+    }
+}
