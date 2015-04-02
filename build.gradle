@@ -117,7 +117,7 @@ test {
 }
 
 run {
-    args 'server', 'deploydb.example.yml'
+    args 'server', 'example/deploydb.launch.yml'
 }
 
 shadowJar {
