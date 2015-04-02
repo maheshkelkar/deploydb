@@ -17,7 +17,7 @@ class WebhookManager implements Managed {
     private AbstractHookRunner runner = null
     private AbstractHookQueue queue = null
     private final Logger logger = LoggerFactory.getLogger(WebhookManager.class)
-    private Webhook webhook = null
+
     /*
      * We should we move this to application and make sure through out the code we use this variable
      */
@@ -44,7 +44,6 @@ class WebhookManager implements Managed {
      * @param deployDBConfiguration
      */
     WebhookManager(DeployDBConfiguration deployDBConfiguration ) {
-
         queue = deployDBConfiguration.whoasFactory.buildQueue()
         runner =  deployDBConfiguration.whoasFactory.buildRunner(queue)
 
@@ -76,9 +75,12 @@ class WebhookManager implements Managed {
      * @param webhookModelMapper The mapper class to translate from model to webhook
      * @return Fail if push of hook request fails
      */
-    boolean sendDeploymentWebhook(String eventType, Webhook environmentWebhook,
+    boolean sendDeploymentWebhook(String eventType,
+                                  Webhook globalWebhook,
+                                  Webhook environmentWebhook,
                                   WebhookModelMapper webhookModelMapper) {
-        return sendDeployDbWebhook(eventType, "deployment", environmentWebhook, webhookModelMapper)
+        return sendDeployDbWebhook(eventType, "deployment", globalWebhook,
+                environmentWebhook, webhookModelMapper)
     }
 
     /**
@@ -88,9 +90,12 @@ class WebhookManager implements Managed {
      * @param webhookModelMapper The mapper class to translate from model to webhook
      * @return Fail if push of hook request fails
      */
-    boolean sendPromotionWebhook(String eventType, Webhook environmentWebhook,
-                                  WebhookModelMapper webhookModelMapper) {
-        return sendDeployDbWebhook(eventType, "promotion", environmentWebhook, webhookModelMapper)
+    boolean sendPromotionWebhook(String eventType,
+                                 Webhook globalWebhook,
+                                 Webhook environmentWebhook,
+                                 WebhookModelMapper webhookModelMapper) {
+        return sendDeployDbWebhook(eventType, "promotion", globalWebhook,
+                environmentWebhook, webhookModelMapper)
     }
 
     /**
@@ -101,8 +106,10 @@ class WebhookManager implements Managed {
      * @param webhookModelMapper The mapper class to translate from model to webhook
      * @return Fail if push of hook request fails
      */
-    boolean sendDeployDbWebhook( String eventType, String webhookType, Webhook environmentWebhook,
-                                   WebhookModelMapper webhookModelMapper) {
+    boolean sendDeployDbWebhook(String eventType, String webhookType,
+                                Webhook globalWebhook,
+                                Webhook environmentWebhook,
+                                WebhookModelMapper webhookModelMapper) {
         /*
          *  Initialize the list for URL's configured in webhooks
          */
@@ -120,10 +127,10 @@ class WebhookManager implements Managed {
             getMemberOfObject(getMemberOfObject(environmentWebhook, webhookType), eventType) != null) {
             eventUrlList =  getMemberOfObject(getMemberOfObject(environmentWebhook, webhookType), eventType)
         }
-        if (webhook != null &&
-            getMemberOfObject(webhook, webhookType) != null &&
-            getMemberOfObject( getMemberOfObject(webhook, webhookType), eventType) != null) {
-            eventUrlList += getMemberOfObject( getMemberOfObject(webhook, webhookType), eventType)
+        if (globalWebhook != null &&
+            getMemberOfObject(globalWebhook, webhookType) != null &&
+            getMemberOfObject(getMemberOfObject(globalWebhook, webhookType), eventType) != null) {
+            eventUrlList += getMemberOfObject(getMemberOfObject(globalWebhook, webhookType), eventType)
         }
 
         /*
@@ -148,6 +155,7 @@ class WebhookManager implements Managed {
         }
         return pushReturn
     }
+
     /**
      * Return true if the webhook thread is running
      */

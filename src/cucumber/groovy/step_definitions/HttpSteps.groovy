@@ -2,6 +2,7 @@
 import cucumber.api.DataTable
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import deploydb.WorkFlow
 import org.glassfish.jersey.client.JerseyInvocation
 import org.joda.time.DateTime
 
@@ -93,6 +94,15 @@ Then(~/^the body should be JSON:$/) { String expectedBody ->
     assert bodyNode == expectedNode
 }
 
-Given(~/^DeployDb configuration directory path is "(.*?)"$/) { String configDir ->
+Given(~/^Models configuration directory path is "(.*?)"$/) { String configDir ->
     setConfigDirectory(configDir)
+}
+
+Given(~/^Models configuration is reloaded from directory path "(.*?)"$/) { String configDir ->
+    setConfigDirectory(configDir)
+    withWorkFlow { WorkFlow workFlow ->
+        withSession {
+            workFlow.loadConfigModels()
+        }
+    }
 }

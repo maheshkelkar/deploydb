@@ -12,7 +12,10 @@ import io.dropwizard.hibernate.SessionFactoryFactory
 import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
 import io.dropwizard.views.ViewBundle
+import org.hibernate.Session
 import org.hibernate.SessionFactory
+import org.hibernate.Transaction
+import org.hibernate.context.internal.ManagedSessionContext
 import org.joda.time.DateTimeZone
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -21,12 +24,13 @@ import org.slf4j.LoggerFactory
 class DeployDBApp extends Application<DeployDBConfiguration> {
     private final ImmutableList models = ImmutableList.of(
             models.Artifact, models.Deployment,
-            models.PromotionResult, models.Flow)
+            models.PromotionResult, models.Flow, models.ModelConfig)
     private static final Logger logger = LoggerFactory.getLogger(DeployDBApp.class)
     private WebhookManager webhooksManager
     private WorkFlow workFlow
     private provider.V1TypeProvider typeProvider
     private String configDirectory
+    private String configChecksum
 
     static void main(String[] args) throws Exception {
         new DeployDBApp().run(args)
@@ -57,7 +61,7 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
 
 
     @Override
-    public void initialize(Bootstrap<DeployDBConfiguration> bootstrap) {
+    void initialize(Bootstrap<DeployDBConfiguration> bootstrap) {
         bootstrap.addBundle(new AssetsBundle())
         bootstrap.addBundle(hibernate)
         workFlow = new WorkFlow(this)
@@ -93,7 +97,7 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
     }
 
     @Override
-    public void run(DeployDBConfiguration configuration,
+    void run(DeployDBConfiguration configuration,
                     Environment environment) {
         /*
          * Create webhook manager based on configuration
@@ -110,11 +114,14 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
          * Load configuration models
          */
         this.configDirectory = configuration.configDirectory
-        try {
-            workFlow.loadConfigModels(false)
-        } catch (Exception e) {
-            logger.error("failed to read config from directory: " +
-                    "${configDirectory}, error: ${e.toString()}")
+        withHibernateSession() {
+            try {
+                workFlow.loadConfigModels()
+            } catch (Exception e) {
+                logger.error("failed to read config from directory: " +
+                        "${configDirectory} with an exception: ", e)
+                throw e
+            }
         }
 
         /**
@@ -129,7 +136,7 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
         environment.healthChecks().register('webhook', new health.WebhookHealthCheck(webhooksManager))
 
         /** Add admin task for config reload */
-        environment.admin().addTask(new ConfigReloadTask(workFlow));
+        environment.admin().addTask(new ConfigReloadTask(workFlow))
 
         /**
          * Instantiate Resources classes for Jersey handlers
@@ -143,5 +150,22 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
         environment.jersey().register(new resources.EnvironmentResource(workFlow.environmentRegistry))
         environment.jersey().register(new resources.PipelineResource(workFlow.pipelineRegistry))
         environment.jersey().register(new resources.ServiceResource(workFlow.serviceRegistry))
+    }
+
+    /** Execute DB operations */
+    void withHibernateSession(Closure c) {
+        Session session = this.getSessionFactory().openSession()
+        Transaction transaction
+        try {
+            ManagedSessionContext.bind(session)
+            transaction = session.beginTransaction()
+            c.call()
+            transaction.commit()
+        } catch (Exception e) {
+            transaction.rollback()
+        } finally {
+            session.close()
+            ManagedSessionContext.unbind(this.getSessionFactory())
+        }
     }
 }

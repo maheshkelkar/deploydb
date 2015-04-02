@@ -52,7 +52,7 @@ class AppHelper {
      * @param c (required) Closure to execute
      */
     void withServiceRegistry(Closure c) {
-        c.call(this.runner.serviceRegistry)
+        c.call(this.runner.workFlow.serviceRegistry)
     }
 
     /**
@@ -61,7 +61,7 @@ class AppHelper {
      * @param c (required) Closure to execute
      */
     void withEnvironmentRegistry(Closure c) {
-        c.call(this.runner.environmentRegistry)
+        c.call(this.runner.workFlow.environmentRegistry)
     }
 
     /**
@@ -70,7 +70,7 @@ class AppHelper {
      * @param c (required) Closure to execute
      */
     void withPromotionRegistry(Closure c) {
-        c.call(this.runner.promotionRegistry)
+        c.call(this.runner.workFlow.promotionRegistry)
     }
 
    /**
@@ -79,7 +79,16 @@ class AppHelper {
     * @param c (required) Closure to execute
     */
     void withPipelineRegistry(Closure c) {
-        c.call(this.runner.pipelineRegistry)
+        c.call(this.runner.workFlow.pipelineRegistry)
+    }
+
+    /**
+     *  Execute the {@link Closure} with a proper WorkFlow object
+     *
+     * @param c (required) Closure to execute
+     */
+    void withWorkFlow(Closure c) {
+        c.call(this.runner.workFlow)
     }
 
     /**
@@ -87,9 +96,8 @@ class AppHelper {
      *
      * @param c (required) Closure to execute
      */
-    void withWebhookManager(Closure c) {
-        c.call(this.runner.webhookManager,
-                this.webhookRunner.getApplication().requestWebhookObject)
+    void withTestWebhookServer(Closure c) {
+        c.call(this.webhookRunner.getApplication().requestWebhookObject)
     }
 
     /**
