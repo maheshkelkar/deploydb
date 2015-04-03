@@ -6,7 +6,7 @@ database:
 # DeployDB base configuration directory (cannonical path)
 # YAML configuration files for models - services, environments, pipelines,
 # webhooks and promotions - should be stored in respective sub-directories
-configDirectory: example/launch-config
+configDirectory: example/modelConfig
 
 whoas:
   queue:

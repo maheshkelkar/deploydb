@@ -6,7 +6,7 @@ Feature: DeployDB config APIs
 
   Scenario: When the system is idle, reloading the shall succeed
 
-    Given DeployDb configuration directory path is "./example/launch-config"
+    Given DeployDb configuration directory path is "./example/modelConfig"
     When I POST to "/tasks/configReload" from the admin app
     Then the response should be 200
     And the response body should be:
