@@ -244,6 +244,87 @@ Feature: Deployment READ APIs
       }
     """
 
+  @freezetime
+  Scenario: Fetching deployment based on artifact id
+
+    Given there are deployments for artifacts
+    When I GET "/api/deployments/by-artifact/2"
+    Then the response should be 200
+    And the body should be JSON:
+    """
+    [{
+      "id" : 5,
+      "artifact" : {
+        "id" : 2,
+        "group" : "com.example.cucumber",
+        "name" : "cucumber-artifact",
+        "version" : "1.0.2",
+        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.2/cucumber-artifact-1.0.2.jar",
+        "createdAt" : "{{created_timestamp}}"
+      },
+      "environment" : "dev-integ",
+      "service" : "faas",
+      "promotions":[],
+      "status" : "STARTED",
+      "createdAt" : "{{created_timestamp}}"
+    },
+    {
+      "id" : 6,
+      "artifact" : {
+        "id" : 2,
+        "group" : "com.example.cucumber",
+        "name" : "cucumber-artifact",
+        "version" : "1.0.2",
+        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.2/cucumber-artifact-1.0.2.jar",
+        "createdAt" : "{{created_timestamp}}"
+      },
+      "environment" : "integ",
+      "service" : "faas",
+      "promotions":[],
+      "status" : "STARTED",
+      "createdAt" : "{{created_timestamp}}"
+    },
+    {
+      "id" : 7,
+      "artifact" : {
+        "id" : 2,
+        "group" : "com.example.cucumber",
+        "name" : "cucumber-artifact",
+        "version" : "1.0.2",
+        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.2/cucumber-artifact-1.0.2.jar",
+        "createdAt" : "{{created_timestamp}}"
+      },
+      "environment" : "pre-prod",
+      "service" : "faas",
+      "promotions":[],
+      "status" : "STARTED",
+      "createdAt" : "{{created_timestamp}}"
+    },
+    {
+      "id" : 8,
+      "artifact" : {
+        "id" : 2,
+        "group" : "com.example.cucumber",
+        "name" : "cucumber-artifact",
+        "version" : "1.0.2",
+        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.2/cucumber-artifact-1.0.2.jar",
+        "createdAt" : "{{created_timestamp}}"
+      },
+      "environment" : "prod",
+      "service" : "faas",
+      "promotions":[],
+      "status" : "STARTED",
+      "createdAt" : "{{created_timestamp}}"
+    }]
+    """
+
+
+  Scenario: Fetching deployment by artifact id that doesn't exist
+
+    When I GET "/api/deployments/by-artifact/1"
+    Then the response should be 404
+
+
   @error
   Scenario: Fetching an deployment by pageNumber=0 and perPageSize=0 returns 0 deployments
 
@@ -252,40 +333,4 @@ Feature: Deployment READ APIs
     Then the response should be 400
 
 
-  @wip @freezetime
-  Scenario: Fetching deployment by artifact id
 
-    Given there is a deployment
-    When I GET "/api/deployments/by-artifact/1"
-    Then the response should be 200
-    And the body should be JSON:
-    """
-      [{
-        "id" : 1,
-        "artifact" : {
-          "id" : 1,
-          "group" : "com.example.cucumber",
-          "name" : "cucumber-artifact",
-          "version" : "1.0.1",
-          "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar",
-          "createdAt" : "{{created_timestamp}}"
-        },
-        "environment" : "pre-prod",
-        "service" : "faas",
-        "status" : "STARTED",
-        "promotions" : [{
-          "id" : 1,
-          "promotion" : "jenkins-smoke",
-          "status" : "STARTED",
-          "infoUrl" : null,
-          "createdAt" : "{{created_timestamp}}"
-         }],
-        "createdAt" : "{{created_timestamp}}"
-      }]
-    """
-
-  @wip
-  Scenario: Fetching deployment by artifact id that doesn't exist
-
-    When I GET "/api/deployments/by-artifact/1"
-    Then the response should be 404
