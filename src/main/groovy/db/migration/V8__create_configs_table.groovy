@@ -31,7 +31,7 @@ class V8__create_configs_table extends DeployDBMigration {
         commands += """
             CREATE TABLE modelConfigs (
                 id BIGINT AUTO_INCREMENT,
-                checksum TEXT NOT NULL,
+                checksum VARCHAR(64) NOT NULL,
                 contents TEXT NOT NULL,
                 ident VARCHAR(8192),
                 modelType INT NOT NULL,
@@ -45,7 +45,7 @@ class V8__create_configs_table extends DeployDBMigration {
          * Add checksum column to flows table
          */
         commands += """
-            ALTER TABLE flows ADD COLUMN checksum TEXT;
+            ALTER TABLE flows ADD COLUMN checksum VARCHAR(64);
         """
 
         return commands

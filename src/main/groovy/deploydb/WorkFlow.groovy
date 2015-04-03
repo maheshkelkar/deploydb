@@ -91,7 +91,10 @@ class WorkFlow {
                     /** Read YAML file into model object */
                     def model = loader.load(modelFile)
 
-                    /** If registry is available, then insert model object into registry */
+                    /**
+                     * If registry is available, then insert model object into registry. In case
+                     * of singular models (webhook), it can be null, assume a "deafult" ident.
+                     */
                     String ident = defaultIdent
                     if (registry) {
                         ident = model.ident = loader.getIdent(modelFile.name)

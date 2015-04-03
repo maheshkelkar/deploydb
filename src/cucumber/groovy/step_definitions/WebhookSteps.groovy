@@ -30,12 +30,15 @@ Given(~/^a (.*?) webhook "(.*?)" configuration:$/) { String webhookType,
     List<String> paths = getUrlPathFromWebhookConfigBody(configBody, eventType)
     withWorkFlow { WorkFlow workFlow ->
         /*
-         * Load the webhook configuration in webhookManager
+         * Instantiate the webhook object from configuration
         */
         ModelLoader<Webhook> webhookLoader = new ModelLoader<>(Webhook.class)
         workFlow.globalWebhook = webhookLoader.loadFromString(configBody)
 
-        /* Create ModelConfig */
+        /**
+         * Create ModelConfig. This feature allows us to remember the config in
+         * case of configReload
+         */
         ModelConfig modelConfig = new ModelConfig(
                 workFlow.deployDBApp.configChecksum, configBody,
                 workFlow.defaultIdent, ModelType.WEBHOOK)
@@ -58,7 +61,7 @@ Given(~/^a (.*?) webhook "(.*?)" configuration:$/) { String webhookType,
          * checked when deploydb invokes webhooks
          */
         requestWebhookObject.contentTypeParam = "application/vnd.deploydb."+
-                webhookType+eventType+".v1+json"
+                                                 webhookType+eventType+".v1+json"
     }
 }
 
@@ -94,7 +97,10 @@ Given(~/^an (.*?) environment webhook "(.*?)" configuration named "(.*?)":$/) {S
         environmentRegistry.put(envIdent, a)
     }
 
-    /* Create ModelConfig */
+    /**
+     * Create ModelConfig. This feature allows us to remember the config in
+     * case of configReload
+     */
     withWorkFlow { WorkFlow workFlow ->
 
         ModelConfig modelConfig = new ModelConfig(

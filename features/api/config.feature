@@ -15,9 +15,9 @@ Feature: DeployDB config APIs
     """
 
 
-  Scenario: If deployments are NOT verified i.e. are in progress, then attempt to reload
-            config should succeed. A deployment is considered as in progress, if the status
-            is NOT SUCCESS or FAILED
+  Scenario: If deployments are in progress, then attempt to reload config should succeed.
+            A deployment is considered as in progress (aka NOT verified), if the status
+            does not have value of SUCCESS or FAILED
 
     Given there is a deployment
     And Models configuration directory path is "./config"
@@ -30,7 +30,8 @@ Feature: DeployDB config APIs
 
 
   @freezetime
-  Scenario: If deployment is CREATED state and configuration is reloaded, then
+  Scenario: After config reload, transitions of in-progress deployments should use old config.
+            If a deployment is in CREATED state and configuration is reloaded, then
             a deployment update of STARTED state should invoke set of global webhook
             and environment webhook, as specified by the older config
     Given a deployment webhook "started" configuration:
@@ -92,67 +93,4 @@ Feature: DeployDB config APIs
       }
     """
 
-
-  @freezetime
-  Scenario: If deployment is STARTED state and configuration is reloaded, then
-            a deployment update to COMPLETED state should invoke set of global webhook
-            and environment webhook, as specified by the older config
-    Given a deployment webhook "completed" configuration:
-    """
-      deployment:
-        completed:
-           - http://localhost:10000/job/old-notify-deployment-completed/build
-    """
-    And an deployment environment webhook "completed" configuration named "pre-prod":
-    """
-    description: "DeployDB Primary Integration"
-    webhooks:
-      deployment:
-        completed:
-          - http://localhost:10000/job/another-old-notify-deployment-completed/build
-    """
-    And there is a deployment in "STARTED" state
-    And Models configuration is reloaded from directory path "./config"
-    When I PATCH "/api/deployments/1" with:
-    """
-      {
-        "status" : "COMPLETED"
-      }
-    """
-    Then the webhook 1 should be invoked with the JSON:
-    """
-      {
-        "id" : 1,
-        "artifact" : {
-          "id" : 1,
-          "group" : "com.example.cucumber",
-          "name" : "cucumber-artifact",
-          "version" : "1.0.1",
-          "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar",
-          "createdAt" : "{{created_timestamp}}"
-        },
-        "status" : "COMPLETED",
-        "service" : "faas",
-        "environment" : "pre-prod",
-        "createdAt" : "{{created_timestamp}}"
-      }
-    """
-    And the webhook 2 should be invoked with the JSON:
-    """
-      {
-        "id" : 1,
-        "artifact" : {
-          "id" : 1,
-          "group" : "com.example.cucumber",
-          "name" : "cucumber-artifact",
-          "version" : "1.0.1",
-          "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar",
-          "createdAt" : "{{created_timestamp}}"
-        },
-        "status" : "COMPLETED",
-        "service" : "faas",
-        "environment" : "pre-prod",
-        "createdAt" : "{{created_timestamp}}"
-      }
-    """
 
