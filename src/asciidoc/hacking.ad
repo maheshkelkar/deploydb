@@ -22,7 +22,7 @@
 === Running the app
 
 * `./gradlew run` will run the application locally, outside of a `.jar` file,
-  with the `deploydb.example.yml` configuration.
+  with the `deploydb.launch.yml` configuration.
 
 
 == Code Structure
