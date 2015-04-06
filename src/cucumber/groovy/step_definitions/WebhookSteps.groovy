@@ -1,22 +1,14 @@
 this.metaClass.mixin(cucumber.api.groovy.EN)
 
 
-import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import deploydb.ModelLoader
 import deploydb.ModelType
-import deploydb.Status
 import deploydb.WorkFlow
-import deploydb.dao.ArtifactDAO
-import deploydb.dao.FlowDAO
 import deploydb.dao.ModelConfigDAO
-import deploydb.models.Artifact
-import deploydb.models.Deployment
 import deploydb.models.Environment
-import deploydb.models.Flow
 import deploydb.models.ModelConfig
-import deploydb.models.PromotionResult
 import deploydb.models.Webhook.Webhook
 import deploydb.registry.ModelRegistry
 import org.joda.time.DateTime
@@ -73,7 +65,7 @@ Given(~/^an (.*?) environment webhook "(.*?)" configuration named "(.*?)":$/) {S
     ModelLoader<Environment> environmentLoader = new ModelLoader<>(Environment.class)
     Environment a = environmentLoader.loadFromString(configBody)
 
-    List<String> paths = getUrlPathFromWebhook(a.webhooks, configBody, eventType)
+    List<String> paths = getUrlPathFromWebhook(a.webhook, configBody, eventType)
 
     /*
      * Save the configured webhook uri(s) in requestWebhookObject. These paths will be compared
@@ -161,47 +153,6 @@ Then(~/^the webhook ([1-9][0-9]*) should be invoked with the JSON:$/) { int webh
 
         assert expectedNode == requestNode
     }
-}
-
-When(~/I trigger deployment PATCH with:$/) { String path ->
-    response = postJsonToPath(path, requestBody, false)
-}
-
-And(~/there is a deployment in "(.*?)" state$/) { String deploymentState ->
-
-    withSession {
-
-        /**
-         * Create sample artifact
-         */
-        ArtifactDAO adao = new ArtifactDAO(sessionFactory)
-        Artifact a1 = sampleArtifact()
-        adao.persist(a1)
-
-        /**
-         * Create sample promotionResult(s)
-         */
-        PromotionResult p1 = new PromotionResult("jenkins-smoke", Status.STARTED, null)
-        /**
-         * Create deployment
-         */
-        Deployment d1 = new Deployment(a1,
-                "pre-prod",
-                "faas",
-                Status."${deploymentState}")
-        d1.addPromotionResult(p1)
-
-        /* Create a flow */
-        Flow f = new Flow(a1, "faas", "0xdead")
-        f.addDeployment(d1)
-
-        /**
-         * Save flow in DB, which will save the deployments & promotionResults as well
-         */
-        FlowDAO fdao = new FlowDAO(sessionFactory)
-        fdao.persist(f)
-    }
-
 }
 
 And (~/the webhook should have the headers:$/){ DataTable headers ->

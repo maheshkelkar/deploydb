@@ -30,7 +30,7 @@ class Environment {
      * Webhook
      */
     @JsonProperty
-    Webhook webhooks
+    Webhook webhook
 
     /**
      * Empty constructor used by Jackson for object deserialization
@@ -43,10 +43,10 @@ class Environment {
      */
     Environment(String ident,
                 String description,
-                Webhook webhooks) {
+                Webhook webhook) {
         this.ident = ident
         this.description = description
-        this.webhooks = webhooks
+        this.webhook = webhook
     }
 
     @Override
@@ -65,16 +65,16 @@ class Environment {
 
         return Objects.equals(this.ident, that.ident) &&
                 Objects.equals(this.description, that.description) &&
-                Objects.equals(this.webhooks, that.webhooks)
+                Objects.equals(this.webhook, that.webhook)
     }
 
     @Override
     int hashCode() {
-        return Objects.hash(this.ident, this.description, this.webhooks)
+        return Objects.hash(this.ident, this.description, this.webhook)
     }
 
     @Override
     String toString() {
-        return "ident = ${ident}, description: ${description}, webhooks: ${webhooks}"
+        return "ident = ${ident}, description: ${description}, webhook: ${webhook}"
     }
 }

@@ -28,7 +28,7 @@ class EnvironmentWithArgsSpec extends Specification {
         given:
         String fileContents = """
 description: "DeployDB Primary Integration"
-webhooks:
+webhook:
   deployment:
     created:
       - http://jenkins.example.com/job/integ-deploy-created/build
@@ -42,9 +42,9 @@ webhooks:
         expect:
         environment.ident == 'integ'
         environment.description == 'DeployDB Primary Integration'
-        environment.webhooks.deployment.created[0] ==
+        environment.webhook.deployment.created[0] ==
                 "http://jenkins.example.com/job/integ-deploy-created/build"
-        environment.webhooks.deployment.completed[0] ==
+        environment.webhook.deployment.completed[0] ==
                 "http://jenkins.example.com/job/integ-deploy-completed/build"
         environmentRegistry.get('integ') == environment
         environmentRegistry.getAll() == [environment]
@@ -69,7 +69,7 @@ webhooks:
     def "Loading a invalid environment config file throws throws a validation exception"() {
         when:
         String fileContents = """
-webhooks:
+webhook:
   deployment:
     created:
       - http://jenkins.example.com/job/integ-deploy-created/build

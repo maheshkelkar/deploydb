@@ -1,17 +1,12 @@
 package deploydb
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.google.common.io.Resources
 import groovy.transform.TypeChecked
 import io.dropwizard.configuration.ConfigurationFactory
 import io.dropwizard.jackson.Jackson
-import io.dropwizard.configuration.ConfigurationException
 import io.dropwizard.configuration.ConfigurationParsingException
 import io.dropwizard.configuration.ConfigurationValidationException
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
-import java.io.File
 import javax.validation.Validation
 import javax.validation.Validator
 

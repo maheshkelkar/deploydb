@@ -43,7 +43,7 @@ Feature: DeployDB config APIs
     And an deployment environment webhook "started" configuration named "pre-prod":
     """
     description: "DeployDB Primary Integration"
-    webhooks:
+    webhook:
       deployment:
         started:
           - http://localhost:10000/job/another-old-notify-deployment-started/build

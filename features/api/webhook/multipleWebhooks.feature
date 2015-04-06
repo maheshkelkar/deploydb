@@ -56,7 +56,7 @@ Feature: Webhook invocation  when deployment is created with multiple webhooks
     Given an deployment environment webhook "created" configuration named "integ":
     """
     description: "DeployDB Primary Integration"
-    webhooks:
+    webhook:
       deployment:
         created:
           - http://localhost:10000/job/notify-deployment-created/build
@@ -115,7 +115,7 @@ Feature: Webhook invocation  when deployment is created with multiple webhooks
     And an deployment environment webhook "created" configuration named "integ":
     """
     description: "DeployDB Primary Integration"
-    webhooks:
+    webhook:
       deployment:
         created:
           - http://localhost:10000/job/another-notify-deployment-created/build
@@ -173,7 +173,7 @@ Feature: Webhook invocation  when deployment is created with multiple webhooks
     And an promotion environment webhook "completed" configuration named "pre-prod":
     """
     description: "DeployDB Primary Integration"
-    webhooks:
+    webhook:
       promotion:
         completed:
           - http://localhost:10000/job/another-notify-promotion-completed/build
@@ -251,7 +251,7 @@ Feature: Webhook invocation  when deployment is created with multiple webhooks
     And an deployment environment webhook "created" configuration named "integ":
     """
     description: "DeployDB Primary Integration"
-    webhooks:
+    webhook:
       deployment:
         completed:
           - http://localhost:10000/job/notify-deployment-completed/build
@@ -292,7 +292,7 @@ Feature: Webhook invocation  when deployment is created with multiple webhooks
     And an deployment environment webhook "created" configuration named "integ":
     """
     description: "DeployDB Primary Integration"
-    webhooks:
+    webhook:
       deployment:
         created:
           - http://localhost:10000/notify-deployment-created/build
@@ -362,7 +362,7 @@ Feature: Webhook invocation  when deployment is created with multiple webhooks
     And an deployment environment webhook "started" configuration named "pre-prod":
     """
     description: "DeployDB Primary Integration"
-    webhooks:
+    webhook:
       deployment:
         created:
           - http://localhost:10000/notify-deployment-created/build
@@ -499,7 +499,7 @@ Feature: Webhook invocation  when deployment is created with multiple webhooks
     And an promotion environment webhook "completed" configuration named "pre-prod":
     """
     description: "DeployDB Primary Integration"
-    webhooks:
+    webhook:
       promotion:
         completed:
           - http://localhost:10000/job/notify-promotion-completed/build

@@ -1,6 +1,7 @@
 package deploydb.cucumber
 
 import deploydb.models.Artifact
+import deploydb.models.Deployment
 import deploydb.models.Promotion
 import deploydb.models.Service
 import deploydb.models.Webhook.Webhook
@@ -79,5 +80,11 @@ class ModelHelper {
                 ["integ" : environment ])
 
         return pipeline
+    }
+
+    Deployment sampleDeployment(Artifact a, String env, deploydb.Status s) {
+        deploydb.models.Deployment deployment = new deploydb.models.Deployment(a,
+        env, "faas", s)
+        return deployment
     }
 }

@@ -18,7 +18,6 @@ import org.eclipse.jetty.server.ServerConnector
 import org.flywaydb.core.Flyway
 import org.hibernate.SessionFactory
 
-
 /**
  * Class for running the Dropwizard app
  *

@@ -243,7 +243,8 @@ class WorkFlow {
                 throw new BreakLoopException()
             }
         } catch (BreakLoopException e) {
-            /* Nothing to do here */
+            /* Neeed the log to make codenarc happy */
+            logger.debug("Done with webhook load")
         }
 
         /* Compute a checksum for this iteration of Models configuration */
@@ -500,7 +501,7 @@ class WorkFlow {
         models.Webhook.Webhook webhook = retrieveWebhook(deployment)
         models.Environment environment = retrieveEnvironment(deployment)
         models.Webhook.Webhook environmentWebhook =
-                environment ? environment.webhooks : null
+                environment ? environment.webhook : null
 
         /*
          * Use webhook manager to send the webhook
@@ -537,7 +538,7 @@ class WorkFlow {
         models.Webhook.Webhook webhook = retrieveWebhook(deployment)
         models.Environment environment = retrieveEnvironment(deployment)
         models.Webhook.Webhook environmentWebhook =
-                environment ? environment.webhooks : null
+                environment ? environment.webhook : null
 
         /*
          * Use webhook manager to send the webhook
@@ -577,7 +578,7 @@ class WorkFlow {
         models.Webhook.Webhook webhook = retrieveWebhook(deployment)
         models.Environment environment = retrieveEnvironment(deployment)
         models.Webhook.Webhook environmentWebhook =
-                environment ? environment.webhooks : null
+                environment ? environment.webhook : null
 
         /*
          * Use webhook manager to send the webhook
@@ -630,7 +631,7 @@ class WorkFlow {
         models.Webhook.Webhook webhook = retrieveWebhook(deployment)
         models.Environment environment = retrieveEnvironment(deployment)
         models.Webhook.Webhook environmentWebhook =
-                environment ? environment.webhooks : null
+                environment ? environment.webhook : null
 
         /*
          * Use webhook manager to send the webhook
@@ -683,7 +684,7 @@ class WorkFlow {
         models.Webhook.Webhook webhook = retrieveWebhook(deployment)
         models.Environment environment = retrieveEnvironment(deployment)
         models.Webhook.Webhook environmentWebhook =
-                environment ? environment.webhooks : null
+                environment ? environment.webhook : null
 
         /*
          * Use webhook manager to send the webhook

@@ -58,7 +58,13 @@ dependencies {
     testCompile 'cglib:cglib-nodep:2.2.+'
 
     cucumberCompile 'info.cukes:cucumber-groovy:1.2.+'
+
+    codenarc(
+            "org.codenarc:CodeNarc:0.22",
+            "org.codehaus.groovy:groovy-all:2.4.0+"
+    )
 }
+
 
 repositories {
     jcenter()

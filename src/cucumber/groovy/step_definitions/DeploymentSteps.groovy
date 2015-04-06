@@ -29,10 +29,7 @@ Given(~/^there is a deployment$/) { ->
         /**
          * Create deployment
          */
-        Deployment d1 = new Deployment(a1,
-                "pre-prod",
-                "faas",
-                Status.STARTED)
+        Deployment d1 = sampleDeployment(a1, "pre-prod",Status.STARTED)
         d1.addPromotionResult(p1)
 
         /* Create a flow */
@@ -69,15 +66,9 @@ Given(~/^there are deployments$/) { ->
         /**
          * Create deployment
          */
-        Deployment d1 = new Deployment(adao.persist(a1),
-                "pre-prod",
-                "faas",
-                Status.STARTED)
+        Deployment d1 = sampleDeployment(adao.persist(a1), "pre-prod", Status.STARTED)
         d1.addPromotionResult(p1)
-        Deployment d2 = new Deployment(adao.persist(a2),
-                "pre-prod",
-                "faas",
-                Status.STARTED)
+        Deployment d2 = sampleDeployment(adao.persist(a2), "pre-prod", Status.STARTED)
         d2.addPromotionResult(p2)
 
         /**
@@ -104,11 +95,48 @@ Given(~/^there are deployments for artifacts$/) { ->
         List<Deployment> deployments = []
         [a1, a2].each { Artifact artifact ->
             ['dev-integ', 'integ', 'pre-prod', 'prod'].each { String env ->
-                deployments << new Deployment(adao.persist(artifact), env, 'faas', Status.STARTED)
+                deployments << sampleDeployment(adao.persist(artifact), env, Status.STARTED)
             }
         }
 
         DeploymentDAO dao = new DeploymentDAO(sessionFactory)
         deployments.each { dao.persist(it) }
+    }
+}
+
+When(~/I trigger deployment PATCH with:$/) { String path ->
+    response = postJsonToPath(path, requestBody, false)
+}
+
+And(~/there is a deployment in "(.*?)" state$/) { String deploymentState ->
+
+    withSession {
+
+        /**
+         * Create sample artifact
+         */
+        ArtifactDAO adao = new ArtifactDAO(sessionFactory)
+        Artifact a1 = sampleArtifact()
+        adao.persist(a1)
+
+        /**
+         * Create sample promotionResult(s)
+         */
+        PromotionResult p1 = new PromotionResult("jenkins-smoke", Status.STARTED, null)
+        /**
+         * Create deployment
+         */
+        Deployment d1 = sampleDeployment(a1, "pre-prod", Status."${deploymentState}")
+        d1.addPromotionResult(p1)
+
+        /* Create a flow */
+        Flow f = new Flow(a1, "faas", "0xdead")
+        f.addDeployment(d1)
+
+        /**
+         * Save flow in DB, which will save the deployments & promotionResults as well
+         */
+        FlowDAO fdao = new FlowDAO(sessionFactory)
+        fdao.persist(f)
     }
 }
