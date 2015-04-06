@@ -4,14 +4,7 @@ this.metaClass.mixin(cucumber.api.groovy.EN)
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import deploydb.ModelLoader
-import deploydb.Status
-import deploydb.dao.ArtifactDAO
-import deploydb.dao.FlowDAO
-import deploydb.models.Artifact
-import deploydb.models.Deployment
 import deploydb.models.Environment
-import deploydb.models.Flow
-import deploydb.models.PromotionResult
 import deploydb.models.Webhook.Webhook
 import deploydb.registry.ModelRegistry
 import org.joda.time.DateTime
@@ -130,46 +123,7 @@ Then(~/^the webhook ([1-9][0-9]*) should be invoked with the JSON:$/) { int webh
     }
 }
 
-When(~/I trigger deployment PATCH with:$/) { String path ->
-    response = postJsonToPath(path, requestBody, false)
-}
 
-And(~/there is a deployment in "(.*?)" state$/) { String deploymentState ->
-
-    withSession {
-
-        /**
-         * Create sample artifact
-         */
-        ArtifactDAO adao = new ArtifactDAO(sessionFactory)
-        Artifact a1 = sampleArtifact()
-        adao.persist(a1)
-
-        /**
-         * Create sample promotionResult(s)
-         */
-        PromotionResult p1 = new PromotionResult("jenkins-smoke", Status.STARTED, null)
-        /**
-         * Create deployment
-         */
-        Deployment d1 = new Deployment(a1,
-                "pre-prod",
-                "faas",
-                Status."${deploymentState}")
-        d1.addPromotionResult(p1)
-
-        /* Create a flow */
-        Flow f = new Flow(a1, "faas")
-        f.addDeployment(d1)
-
-        /**
-         * Save flow in DB, which will save the deployments & promotionResults as well
-         */
-        FlowDAO fdao = new FlowDAO(sessionFactory)
-        fdao.persist(f)
-    }
-
-}
 
 And (~/the webhook should have the headers:$/){ DataTable headers ->
 

@@ -17,12 +17,12 @@ Given(~/^there is a flow$/) { ->
         FlowDAO fdao = new FlowDAO(sessionFactory)
 
         Artifact a = sampleArtifact()
-        Deployment d = new Deployment(adao.persist(a), "pre-production", "bluffdale", Status.STARTED)
-        Deployment d1 = new Deployment(adao.persist(a), "production", "bluffdale", Status.STARTED)
+        Deployment d = sampleDeployment(adao.persist(a), "pre-production", Status.STARTED)
+        Deployment d1 = sampleDeployment(adao.persist(a), "production", Status.STARTED)
 
         Flow f = new Flow()
         f.setArtifact(a)
-        f.setService("bluffdale")
+        f.setService("faas")
         d.setFlow(f)
         d1.setFlow(f)
 
