@@ -1,0 +1,25 @@
+database:
+  driverClass: com.mysql.jdbc.Driver
+  user: travis
+  url: "jdbc:mysql://localhost:3306/deploydb"
+
+# DeployDB base configuration directory (cannonical path)
+# YAML configuration files for models - services, environments, pipelines,
+# webhooks and promotions - should be stored in respective sub-directories
+#configDirectory: config
+
+whoas:
+  queue:
+    type: "com.github.lookout.whoas.InMemoryQueue"
+  runnerType: "com.github.lookout.whoas.SequentialHookRunner"
+
+logging:
+  level: INFO
+  loggers:
+    org.hibernate.SQL: ALL
+  appenders:
+    - type: file
+      currentLogFilename: ./logs/deploydb-cucumber.log
+      threshold: ALL
+      archive: false
+      timeZone: UTC

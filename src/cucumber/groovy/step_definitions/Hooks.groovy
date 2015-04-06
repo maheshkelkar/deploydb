@@ -7,7 +7,9 @@ import org.joda.time.DateTimeUtils
 this.metaClass.mixin(cucumber.api.groovy.Hooks)
 
 Before {
-    startAppWithConfiguration('deploydb.cucumber.yml')
+    def env = System.getenv()
+    databaseProv = env['DB'] == null ? "h2" : env['DB']
+    startAppWithConfiguration("deploydb.${databaseProv}.cucumber.yml")
     startWebhookTestServerWithConfiguration('webhookTestServer.example.yml')
 }
 
