@@ -57,7 +57,7 @@ Given(~/^an (.*?) environment webhook "(.*?)" configuration named "(.*?)":$/) {S
     ModelLoader<Environment> environmentLoader = new ModelLoader<>(Environment.class)
     Environment a = environmentLoader.loadFromString(configBody)
 
-    List<String> paths = getUrlPathFromWebhook(a.webhooks, configBody, eventType)
+    List<String> paths = getUrlPathFromWebhook(a.webhook, configBody, eventType)
 
     /*
      * Save the configured webhook uri(s) in requestWebhookObject. These paths will be compared

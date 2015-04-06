@@ -9,7 +9,7 @@ Feature: Environment READ APIs
     Given an environment configuration named "integ":
     """
     description: "DeployDB Primary Integration"
-    webhooks:
+    webhook:
       deployment:
         created:
           - http://jenkins.example.com/job/integ-deploy-created/build
@@ -23,7 +23,7 @@ Feature: Environment READ APIs
       [{
         "ident" : "integ",
         "description" : "DeployDB Primary Integration",
-        "webhooks" : {
+        "webhook" : {
           "deployment" : {
               "started" : null,
               "created" : ["http://jenkins.example.com/job/integ-deploy-created/build"],
@@ -41,7 +41,7 @@ Feature: Environment READ APIs
     Given an environment configuration named "integ":
     """
     description: "DeployDB Primary Integration"
-    webhooks:
+    webhook:
       deployment:
         created:
           - http://jenkins.example.com/job/integ-deploy-created/build
@@ -55,7 +55,7 @@ Feature: Environment READ APIs
       {
         "ident" : "integ",
         "description" : "DeployDB Primary Integration",
-        "webhooks" : {
+        "webhook" : {
           "deployment" : {
               "started" : null,
               "created" : ["http://jenkins.example.com/job/integ-deploy-created/build"],

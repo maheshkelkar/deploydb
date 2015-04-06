@@ -375,7 +375,7 @@ public class WorkFlow {
          * Get the environment based webhooks for this deployment
          */
         models.Webhook.Webhook environmentWebhook =
-                this.environmentRegistry.get(deployment.environmentIdent).webhooks
+                this.environmentRegistry.get(deployment.environmentIdent).webhook
 
         /*
          * Use webhook manager to send the webhook
@@ -411,7 +411,7 @@ public class WorkFlow {
          */
         models.Webhook.Webhook environmentWebhook =
                 this.environmentRegistry.get(deployment.environmentIdent)?
-                    this.environmentRegistry.get(deployment.environmentIdent).webhooks : null
+                    this.environmentRegistry.get(deployment.environmentIdent).webhook : null
 
         /*
          * Use webhook manager to send the webhook
@@ -450,7 +450,7 @@ public class WorkFlow {
          */
         models.Webhook.Webhook environmentWebhook =
                 this.environmentRegistry.get(deployment.environmentIdent)?
-                    this.environmentRegistry.get(deployment.environmentIdent).webhooks : null
+                    this.environmentRegistry.get(deployment.environmentIdent).webhook : null
 
         /*
          * Use webhook manager to send the webhook
@@ -502,7 +502,7 @@ public class WorkFlow {
          */
         models.Webhook.Webhook environmentWebhook =
                 this.environmentRegistry.get(deployment.environmentIdent)?
-                    this.environmentRegistry.get(deployment.environmentIdent).webhooks : null
+                    this.environmentRegistry.get(deployment.environmentIdent).webhook : null
 
         /*
          * Use webhook manager to send the webhook
@@ -554,7 +554,7 @@ public class WorkFlow {
          */
         models.Webhook.Webhook environmentWebhook =
                 this.environmentRegistry.get(deployment.environmentIdent)?
-                    this.environmentRegistry.get(deployment.environmentIdent).webhooks : null
+                    this.environmentRegistry.get(deployment.environmentIdent).webhook : null
 
         /*
          * Use webhook manager to send the webhook

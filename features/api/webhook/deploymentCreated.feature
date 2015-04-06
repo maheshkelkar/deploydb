@@ -41,7 +41,7 @@ Feature: Webhook invocation  when deployment is created
     Given an deployment environment webhook "created" configuration named "integ":
     """
     description: "DeployDB Primary Integration"
-    webhooks:
+    webhook:
       deployment:
         created:
           - http://localhost:10000/job/notify-deployment-started/build

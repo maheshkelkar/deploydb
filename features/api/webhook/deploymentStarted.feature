@@ -42,7 +42,7 @@ Feature: Webhook invocation  when deployment is started
     Given an deployment environment webhook "started" configuration named "pre-prod":
     """
     description: "DeployDB Primary Integration"
-    webhooks:
+    webhook:
       deployment:
         started:
           - http://localhost:10000/job/notify-deployment-started/build

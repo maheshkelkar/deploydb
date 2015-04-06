@@ -55,7 +55,7 @@ description: "Basic Smoke test for the Basic Service"
     def createEnvironmentConfigFile() {
         String fileContents = """
 description: "Basic Environment"
-webhooks:
+webhook:
   deployment:
     created:
       - http://jenkins.example.com/job/basicEnv-deploy-created/build

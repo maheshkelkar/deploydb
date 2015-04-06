@@ -40,7 +40,7 @@ Feature: Webhook invocation  when deployment is completed
     Given an deployment environment webhook "completed" configuration named "pre-prod":
     """
     description: "DeployDB Primary Integration"
-    webhooks:
+    webhook:
       deployment:
         completed:
           - http://localhost:10000/job/notify-deployment-started/build

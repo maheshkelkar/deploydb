@@ -52,7 +52,7 @@ Feature: Webhook invocation when promotion is completed with failed state
     Given an promotion environment webhook "completed" configuration named "pre-prod":
     """
     description: "DeployDB Primary Integration"
-    webhooks:
+    webhook:
       promotion:
         completed:
           - http://localhost:10000/job/notify-promotion-completed/build
