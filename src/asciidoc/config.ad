@@ -7,7 +7,7 @@
 .. The YAML file is passed at the command line (Ref: <<running.ad#To run the server,Running the Server>>)
 
 [source,yaml,indent=4]
-.deploydb.example.yml
+.deploydb.launch.yml
 ----
 # Database specifics
 database:

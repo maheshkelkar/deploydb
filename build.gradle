@@ -81,6 +81,7 @@ repositories {
 
 codenarc {
     sourceSets = [sourceSets.main, sourceSets.cucumber]
+    configFile = file('gradle/codenarc/codenarc.xml')
 }
 
 cucumber {
@@ -123,7 +124,7 @@ test {
 }
 
 run {
-    args 'server', 'deploydb.example.yml'
+    args 'server', 'example/deploydb.launch.yml'
 }
 
 shadowJar {
