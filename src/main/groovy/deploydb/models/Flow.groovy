@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import deploydb.Status
 import javax.persistence.Column
-import javax.persistence.CascadeType;
+import javax.persistence.CascadeType
 import javax.persistence.Entity
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
@@ -34,8 +34,13 @@ class Flow extends AbstractModel {
     Set<Deployment> deployments = new HashSet<Deployment>()
 
     @Column(name="service")
-    @JsonProperty
-    String service
+    @JsonProperty(value = "service")
+    String serviceIdent
+
+    /** Checksum of configuration of all the Models */
+    @Column(name="checksum")
+    @JsonIgnore
+    String configChecksum
 
     @Column(name="status")
     @Enumerated(EnumType.ORDINAL)
@@ -51,9 +56,10 @@ class Flow extends AbstractModel {
      * Default constructor to create a valid Flow object to save in
      * the database
      */
-    Flow(Artifact deployedArtifact, String service) {
+    Flow(Artifact deployedArtifact, String serviceIdent, String configChecksum) {
         this.artifact = deployedArtifact
-        this.service = service
+        this.serviceIdent = serviceIdent
+        this.configChecksum = configChecksum
     }
 
     /**
@@ -71,7 +77,7 @@ class Flow extends AbstractModel {
      * @return True if the objects are equal otherwise false
      */
     @Override
-    public boolean equals(Object o) {
+    boolean equals(Object o) {
         /* First object identity */
         if (this.is(o)) {
             return true
@@ -86,7 +92,8 @@ class Flow extends AbstractModel {
         return Objects.equals(this.id, that.id) &&
                 Objects.equals(this.artifact, that.artifact) &&
                 Objects.equals(this.deployments, that.deployments) &&
-                Objects.equals(this.service, that.service)
+                Objects.equals(this.serviceIdent, that.serviceIdent) &&
+                Objects.equals(this.configChecksum, that.configChecksum)
     }
 
     /**
@@ -96,7 +103,8 @@ class Flow extends AbstractModel {
      */
     @Override
     int hashCode() {
-        return Objects.hash(this.id, this.artifact, this.deployments, this.service)
+        return Objects.hash(this.id, this.artifact, this.deployments,
+                this.serviceIdent, this.configChecksum)
     }
 
     /**
@@ -106,7 +114,8 @@ class Flow extends AbstractModel {
      */
     @Override
     String toString() {
-        return "id = ${id}, artifact: ${artifact}, deployments: ${deployments}, service: ${service}"
+        return "id = ${id}, artifact: ${artifact}, deployments: ${deployments}, " +
+                "serviceIdent: ${serviceIdent}, configChecksum: ${configChecksum}"
     }
 
 }

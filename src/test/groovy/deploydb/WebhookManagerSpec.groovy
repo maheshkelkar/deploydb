@@ -31,7 +31,7 @@ class WebhookManagerSpec extends Specification {
         WebhookManager m = new WebhookManager()
 
         expect:
-        m.sendDeploymentWebhook("created", null, null) == true
+        m.sendDeploymentWebhook("created", null, null, null) == true
     }
 
     def "sendDeploymentWebhook() should push correct hook requests when global webhooks are configured"() {
@@ -43,7 +43,7 @@ class WebhookManagerSpec extends Specification {
                         [], [])
         WebhookManager m = new WebhookManager()
         m.queue = new InMemoryQueue()
-        m.webhook = new deploydb.models.Webhook.Webhook(webhookDeployment, null)
+        models.Webhook.Webhook gwh = new models.Webhook.Webhook(webhookDeployment, null)
 
         // mock the queue push
         int counter = 0
@@ -53,7 +53,7 @@ class WebhookManagerSpec extends Specification {
         }
 
         when:
-        m.sendDeploymentWebhook("created", null, new DeploymentWebhookMapper())
+        m.sendDeploymentWebhook("created", gwh, null, new DeploymentWebhookMapper())
 
         then:
         counter == 2
@@ -68,7 +68,7 @@ class WebhookManagerSpec extends Specification {
                         null, null)
         WebhookManager m = new WebhookManager()
         m.queue = new InMemoryQueue()
-        deploydb.models.Webhook.Webhook ewh = new deploydb.models.Webhook.Webhook(webhookDeployment, null)
+        models.Webhook.Webhook ewh = new models.Webhook.Webhook(webhookDeployment, null)
 
         // mock the queue push
         int counter = 0
@@ -78,7 +78,7 @@ class WebhookManagerSpec extends Specification {
         }
 
         when:
-        m.sendDeploymentWebhook("created", ewh, new DeploymentWebhookMapper())
+        m.sendDeploymentWebhook("created", null, ewh, new DeploymentWebhookMapper())
 
         then:
         counter == 2
@@ -93,8 +93,8 @@ class WebhookManagerSpec extends Specification {
                         null, null)
         WebhookManager m = new WebhookManager()
         m.queue = new InMemoryQueue()
-        m.webhook = new deploydb.models.Webhook.Webhook(webhookDeployment, null)
-        deploydb.models.Webhook.Webhook ewh = new deploydb.models.Webhook.Webhook(webhookDeployment, null)
+        models.Webhook.Webhook gwh = new models.Webhook.Webhook(webhookDeployment, null)
+        models.Webhook.Webhook ewh = new models.Webhook.Webhook(webhookDeployment, null)
 
         // mock the queue push
         int counter = 0
@@ -104,7 +104,7 @@ class WebhookManagerSpec extends Specification {
         }
 
         when:
-        m.sendDeploymentWebhook("created", ewh, new DeploymentWebhookMapper())
+        m.sendDeploymentWebhook("created", gwh, ewh, new DeploymentWebhookMapper())
 
         then:
         counter == 4
@@ -126,8 +126,8 @@ class WebhookManagerSpec extends Specification {
                         ["http://www.localhost.com/test-build", "http://www.localhost.com/test1-build"],
                         null,
                         null, null)
-        m.webhook = new deploydb.models.Webhook.Webhook(webhookDeployment, null)
-        deploydb.models.Webhook.Webhook ewh = new deploydb.models.Webhook.Webhook(environWebhookDeployment, null)
+        models.Webhook.Webhook gwh = new models.Webhook.Webhook(webhookDeployment, null)
+        models.Webhook.Webhook ewh = new models.Webhook.Webhook(environWebhookDeployment, null)
 
         // mock the queue push
         int counter = 0
@@ -137,7 +137,7 @@ class WebhookManagerSpec extends Specification {
         }
 
         when:
-        m.sendDeploymentWebhook("created", ewh, new DeploymentWebhookMapper())
+        m.sendDeploymentWebhook("created", gwh, ewh, new DeploymentWebhookMapper())
 
         then:
         counter == 2
@@ -160,8 +160,8 @@ class WebhookManagerSpec extends Specification {
                         ["http://www.localhost.com/test-build", "http://www.localhost.com/test1-build"],
                         null, null)
 
-        m.webhook = new deploydb.models.Webhook.Webhook(webhookDeployment, null)
-        deploydb.models.Webhook.Webhook ewh = new deploydb.models.Webhook.Webhook(environWebhookDeployment, null)
+        models.Webhook.Webhook gwh = new models.Webhook.Webhook(webhookDeployment, null)
+        models.Webhook.Webhook ewh = new models.Webhook.Webhook(environWebhookDeployment, null)
 
         // mock the queue push
         int counter = 0
@@ -171,7 +171,7 @@ class WebhookManagerSpec extends Specification {
         }
 
         when:
-        m.sendDeploymentWebhook("created", ewh, new DeploymentWebhookMapper())
+        m.sendDeploymentWebhook("created", gwh, ewh, new DeploymentWebhookMapper())
 
         then:
         counter == 2
@@ -182,7 +182,7 @@ class WebhookManagerSpec extends Specification {
         WebhookManager m = new WebhookManager()
 
         expect:
-        m.sendPromotionWebhook("completed", null, null) == true
+        m.sendPromotionWebhook("completed", null, null, null) == true
     }
 
     def "sendPromotiontWebhook() should push correct hook requests when global webhooks are configured"() {
@@ -193,7 +193,7 @@ class WebhookManagerSpec extends Specification {
                         ["http://www.localhost.com/test-build", "http://www.localhost.com/test1-build"])
         WebhookManager m = new WebhookManager()
         m.queue = new InMemoryQueue()
-        m.webhook = new deploydb.models.Webhook.Webhook(null, webhookPromotion)
+        models.Webhook.Webhook gwh = new models.Webhook.Webhook(null, webhookPromotion)
 
         // mock the queue push
         int counter = 0
@@ -203,7 +203,7 @@ class WebhookManagerSpec extends Specification {
         }
 
         when:
-        m.sendPromotionWebhook("completed", null, new DeploymentWebhookMapper())
+        m.sendPromotionWebhook("completed", gwh, null, new DeploymentWebhookMapper())
 
         then:
         counter == 2
@@ -218,7 +218,7 @@ class WebhookManagerSpec extends Specification {
 
         WebhookManager m = new WebhookManager()
         m.queue = new InMemoryQueue()
-        deploydb.models.Webhook.Webhook ewh = new deploydb.models.Webhook.Webhook(null, webhookPromotion)
+        models.Webhook.Webhook ewh = new models.Webhook.Webhook(null, webhookPromotion)
 
         // mock the queue push
         int counter = 0
@@ -228,7 +228,7 @@ class WebhookManagerSpec extends Specification {
         }
 
         when:
-        m.sendPromotionWebhook("completed", ewh, new DeploymentWebhookMapper())
+        m.sendPromotionWebhook("completed", null, ewh, new DeploymentWebhookMapper())
 
         then:
         counter == 2
@@ -243,8 +243,8 @@ class WebhookManagerSpec extends Specification {
 
         WebhookManager m = new WebhookManager()
         m.queue = new InMemoryQueue()
-        m.webhook = new deploydb.models.Webhook.Webhook(null, webhookPromotion)
-        deploydb.models.Webhook.Webhook ewh = new deploydb.models.Webhook.Webhook(null, webhookPromotion)
+        models.Webhook.Webhook gwh = new models.Webhook.Webhook(null, webhookPromotion)
+        models.Webhook.Webhook ewh = new models.Webhook.Webhook(null, webhookPromotion)
 
         // mock the queue push
         int counter = 0
@@ -254,7 +254,7 @@ class WebhookManagerSpec extends Specification {
         }
 
         when:
-        m.sendPromotionWebhook("completed", ewh, new DeploymentWebhookMapper())
+        m.sendPromotionWebhook("completed", gwh, ewh, new DeploymentWebhookMapper())
 
         then:
         counter == 4
