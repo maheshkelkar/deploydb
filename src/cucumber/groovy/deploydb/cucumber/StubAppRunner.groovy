@@ -4,8 +4,7 @@ import deploydb.WebhookManager
 import io.dropwizard.Application
 import io.dropwizard.Configuration
 import io.dropwizard.cli.ServerCommand
-import io.dropwizard.db.DataSourceFactory
-import io.dropwizard.flyway.FlywayFactory
+
 import io.dropwizard.lifecycle.ServerLifecycleListener
 import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
@@ -20,7 +19,6 @@ import org.flywaydb.core.Flyway
 import org.hibernate.SessionFactory
 
 import javax.annotation.Nullable
-import java.util.Enumeration
 
 import deploydb.registry.ModelRegistry
 

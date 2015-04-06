@@ -211,7 +211,8 @@ public class WorkFlow {
                 throw new BreakLoopException()
             }
         } catch (BreakLoopException e) {
-            /* Nothing to do here */
+            /* Neeed the log to make codenarc happy */
+            logger.debug("Done with webhook load")
         }
 
         /**

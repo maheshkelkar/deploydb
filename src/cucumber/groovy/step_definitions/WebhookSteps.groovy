@@ -1,7 +1,6 @@
 this.metaClass.mixin(cucumber.api.groovy.EN)
 
 
-import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import deploydb.ModelLoader
