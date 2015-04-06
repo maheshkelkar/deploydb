@@ -6,7 +6,7 @@ Feature: DeployDB config APIs
 
   Scenario: When the system is idle, reloading the shall succeed
 
-    Given Models configuration directory path is "./config"
+    Given Models configuration directory path is "./example/modelConfig"
     When I POST to "/tasks/configReload" from the admin app
     Then the response should be 200
     And the response body should be:
@@ -20,7 +20,7 @@ Feature: DeployDB config APIs
             does not have value of SUCCESS or FAILED
 
     Given there is a deployment
-    And Models configuration directory path is "./config"
+    And Models configuration directory path is "./example/modelConfig"
     When I POST to "/tasks/configReload" from the admin app
     Then the response should be 200
     And the response body should be:
@@ -49,7 +49,7 @@ Feature: DeployDB config APIs
           - http://localhost:10000/job/another-old-notify-deployment-started/build
     """
     And there is a deployment in "CREATED" state
-    And Models configuration is reloaded from directory path "./config"
+    And Models configuration is reloaded from directory path "./example/modelConfig"
     When I PATCH "/api/deployments/1" with:
     """
       {

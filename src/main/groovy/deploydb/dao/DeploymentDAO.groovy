@@ -5,6 +5,7 @@ import io.dropwizard.hibernate.AbstractDAO
 
 import deploydb.models.Deployment
 import org.hibernate.criterion.Order
+import org.hibernate.criterion.Restrictions
 
 /**
  * Deployment Data access object
@@ -42,5 +43,19 @@ class DeploymentDAO extends AbstractDAO<Deployment> {
         }
         return null
 
+    }
+
+    /**
+     * Find deployments for an artifact using id
+     *
+     * @param artifactId id of the artifact
+     * @return deployments
+     */
+    List<Deployment> getByArtifactId(long artifactId) {
+        List<Deployment> deployments = criteria()
+                                         .add(Restrictions.eq('artifact.id', artifactId))
+                                         .addOrder(Order.desc('createdAt'))
+                                         .list()
+        return deployments
     }
 }

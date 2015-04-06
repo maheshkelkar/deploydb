@@ -1,23 +1,61 @@
-== Running The Application
+== Running the deploydb from bintray
 
-To test the example application on localhost run the following commands.
+* Download the deploydb-*tar from bintray
+* Uncompress the tar file
 
-* To package the example run.
+* Create deploydb model configuration. Check the following directory link for configuration template
+files for the deploydb models.
+Make sure all the model configuration files are *_stored in a single_* directory
+----
+https://github.com/lookout/deploydb/tree/master/example/modelConfig
+----
+
+* Create deploydb application configuration. Check the following link for template of this
+configuration
+----
+https://github.com/lookout/deploydb/blob/master/example/deploydb.launch.yml
+----
+
+* Update the model configuration directory parameter in the application configuration
+----
+configDirectory: <model-directory-name/path>
+----
+
+* Setup the database before starting the deploydb. Use the created application configuration from the
+above section
+----
+./bin/deploydb db migrate <application-configuration>.yml
+----
+
+* Start the deploydb using following command
+----
+./bin/deploydb server <application-configuration>.yml
+----
+
+=== Running the  deploydb from github repo
+
+To run the application on localhost run the following commands.
+
+* Package the deploydb from source using following command
 
 ----
   gradlew shadowJar
 ----
 
-* To setup the h2 database run (stored in current directory as deploydb.example.db).
+* Setup the database using following command. Default database is H2 and db file is stored in
+current directory as deploydb.example.db.
 
 ----
-  java -jar build/libs/deploydb-0.1.0-all.jar db migrate deploydb.example.yml
+  java -jar build/libs/deploydb-*-all.jar db migrate example/deploydb.launch.yml
 ----
 
-* To run the server (it reads configuration from config/ directory).
+* Run the deploydb using following command. The last argument of the command below is the application
+configuration file of the deploydb. Please check and update this file as required. An example model
+configuration for webhooks, service and environment etc is present in example/modelConfig directory.
+Change the content of these model configuration files to the required values.
 
 ----
-  java -jar build/libs/deploydb-0.1.0-all.jar server example.yml
+  java -jar build/libs/deploydb-*-all.jar server example/deploydb.launch.yml
 ----
 
 * To create artifact (That triggers deployment create)

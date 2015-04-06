@@ -4,6 +4,9 @@ import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableMap
 import io.dropwizard.Application
 import io.dropwizard.assets.AssetsBundle
+import io.dropwizard.cli.CheckCommand
+import io.dropwizard.cli.Cli
+import io.dropwizard.cli.ServerCommand
 import io.dropwizard.db.DataSourceFactory
 import io.dropwizard.flyway.FlywayBundle
 import io.dropwizard.flyway.FlywayFactory
@@ -11,6 +14,7 @@ import io.dropwizard.hibernate.HibernateBundle
 import io.dropwizard.hibernate.SessionFactoryFactory
 import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
+import io.dropwizard.util.JarLocation
 import io.dropwizard.views.ViewBundle
 import org.hibernate.Session
 import org.hibernate.SessionFactory
@@ -96,8 +100,33 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
                 bootstrap.validatorFactory.validator)
     }
 
+    /** Validate the arguments */
     @Override
-    void run(DeployDBConfiguration configuration,
+    public void run(String... arguments) throws Exception {
+        try {
+            final Bootstrap<DeployDBConfiguration> bootstrap = new Bootstrap<>(this);
+            bootstrap.addCommand(new ServerCommand<>(this));
+            bootstrap.addCommand(new CheckCommand<>(this));
+            initialize(bootstrap);
+            final Cli cli = new Cli(new JarLocation(getClass()), bootstrap, System.out, System.err);
+            if (!cli.run(arguments)) {
+                println("\n\nExample usage to run: deploydb server config/deploydb.launch.yml")
+                println("Example usage to do database migration: deploydb db migrate config/deploydb.launch.yml\n\n")
+                // only exit if there's an error running the command
+                System.exit(1);
+            }
+        } catch(Exception e) {
+            println(e.getMessage())
+            println("\n\nExample usage to run: deploydb server config/deploydb.launch.yml")
+            println("Example usage to do database migration: deploydb db migrate config/deploydb.launch.yml\n\n")
+            // only exit if there's an error running the command
+            System.exit(1);
+        }
+    }
+
+    /** DeployDB is up and running */
+    @Override
+    public void run(DeployDBConfiguration configuration,
                     Environment environment) {
         /*
          * Create webhook manager based on configuration
@@ -152,7 +181,7 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
         environment.jersey().register(new resources.ServiceResource(workFlow.serviceRegistry))
     }
 
-    /** Execute DB operations */
+    /** Execute DB operations wiht a session */
     void withHibernateSession(Closure c) {
         Session session = this.getSessionFactory().openSession()
         Transaction transaction

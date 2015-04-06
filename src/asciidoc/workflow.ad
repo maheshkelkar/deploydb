@@ -5,7 +5,7 @@
 * Artifacts - A1, A2
 * Deployments - D1, D2, D3
 * Flow - F1
-* Enviroments - E1, E2, E3
+* Environments - E1, E2, E3
 * Pipelines - PL2 = (E1, E2, E3)
 * Promotions - P1, P2
 * PromotionResults = PR1, PR2
@@ -18,13 +18,14 @@
 . Find Service (S1) affected by this Artifact for the given artifact (group-name:artifact-name)
 .. If multiple services are affected (S1 & S2), then repeat the following steps (i.e. create multiple Flows - F1, F2)
 . For each Environment (E1, E2, E3) in the Pipeline (PL1) in Service (S1)
-.. Create deployments with State=not-started [D1, D2, D3]
+.. Create deployments with Status=NOT_STARTED [D1, D2, D3]
 .. Deployment (D1) contains (E1, Promotions [P1, P2]), etc 
 . Create Flow (F1)
 .. Store Artifact (A1’), Service (S1), Deployments [D1, D2, D3]
-.. ArtifactId and ServiceId would be unique for the flow (key)
-.. Set Flow State=inProgress
-. Get next Deployment D1 from the list (w/ state=notStarted)
+.. ArtifactId and ServiceId would be unique for the flow
+.. Set Flow Status=CREATED
+. Get next Deployment D1 from the list (w/ Status=NOT_STARTED)
+.. Update Deployment (D1) Status=CREATED
 .. For each webhook for Deployment-created:
 ... For each action in the webhook create HookRequest (HR)
 ... Payload for all deployment HookRequests: A1', D1, S1, E1
@@ -32,7 +33,7 @@
 == Trigger: Deployment started:
 
 . Lookup Deployment (D1) from the Id received in the trigger
-. Update State=started
+. Update Deployment (D1) Status=STARTED
 . For each webhook for Deployment-started
 .. For each action in the webhook create HookRequest (HR)
 .. Payload for all deployment HookRequests: A1', D1, S1, E1
@@ -40,7 +41,7 @@
 == Trigger: Deployment completed:
 
 . Lookup Deployment (D1) from the Id received in the trigger
-. Update deployment (D1) State=completed
+. Update Deployment (D1) Status=COMPLETED
 . For each webhook for Deployment-completed
 .. For each action in the webhook create HookRequest (HR)
 .. Payload for all deployment HookRequests: A1', D1, S1, E1
@@ -49,21 +50,22 @@
 
 . Lookup Deployment (D1) from the Id received in the trigger
 . Lookup Promotion (P1) from the Id received in the trigger
-.. If P1 resultStatus=failed in the PromotionResults in the trigger
-... Update Depolyment (D1) with Promotion-state=failed
+.. If P1 resultStatus=FAILED in the PromotionResults in the trigger
+... Update Deployment (D1) with Promotion-Status=FAILED
 ... From Service (S1) find failureStrategy (STOP to begin with)
-... Update Deployment State=failed
-... Update Flow State=failed
-.. If resultStatus=passed in the PromotionResults in the trigger
-... Update Depolyment (D1) with Promotion's (P1) State=success
+... Update Deployment (D1) Status=FAILED
+... Update Flow (F1) Status=FAILED
+.. If resultStatus=SUCCESS in the PromotionResults in the trigger
+... Update Deployment (D1) with Promotion's (P1) Status=SUCCESS
 .For each webhook for Promotion-completed:
 .. For each action in the webhook create HookRequest (HR)
 .. Payload for all promotion hookRequests: A1', D1, S1, PR1
 . If all promotions (i.e. P1 & P2) for this deployment (D1) are completed 
-.. Update Deployment State=success
-.. Get next deployment (D2) from the list (w/ state=notStarted)
+.. Update Deployment (D1) Status=SUCCESS
+.. Get next deployment (D2) from the list (w/ Status=NOT_STARTED)
 ... For each webhook for Deployment-created:
+.. Update Deployment (D2) Status=CREATED
 .... For each action in the webhook create HookRequest (HR)
 .... Payload for all deployment HookRequests: A1, D1, S1, E1
-.. If no deployments in the list with State=notStarted, 
-... Update Flow State=Success
+.. If no deployments in the list with Status=NOT_STARTED,
+... Update Flow (F1) Status=SUCCESS

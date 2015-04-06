@@ -65,7 +65,7 @@ public class DeploymentResource {
     }
 
     /**
-     * Returns a Deployment object
+     * Returns a Deployment object using id
      */
     @GET
     @Path("{id}")
@@ -218,4 +218,23 @@ public class DeploymentResource {
 
         return promotionResult
     }
+
+    /**
+     * Returns the deployments using artifact id
+     *
+     * @param artifactId id of the artifact
+     * @return deployments
+     */
+    @GET
+    @Path("/by-artifact/{id}")
+    @UnitOfWork
+    @Timed(name = "get-requests")
+    List<Deployment> byArtifactId(@PathParam("id") LongParam artifactId) {
+        List<Deployment> deploymentList = this.workFlow.deploymentDAO.getByArtifactId(artifactId.get())
+        if (deploymentList == null || deploymentList.isEmpty()) {
+            throw new WebApplicationException(Response.Status.NOT_FOUND)
+        }
+        return deploymentList
+    }
+
 }

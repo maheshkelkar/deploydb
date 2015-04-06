@@ -88,3 +88,27 @@ Given(~/^there are deployments$/) { ->
         dao.persist(d2)
     }
 }
+
+Given(~/^there are deployments for artifacts$/) { ->
+    withSession {
+
+        /**
+         * Create sample artifact
+         */
+        ArtifactDAO adao = new ArtifactDAO(sessionFactory)
+        Artifact a1 = sampleArtifact()
+        Artifact a2 = sampleArtifactV2()
+        adao.persist(a1)
+        adao.persist(a2)
+
+        List<Deployment> deployments = []
+        [a1, a2].each { Artifact artifact ->
+            ['dev-integ', 'integ', 'pre-prod', 'prod'].each { String env ->
+                deployments << new Deployment(adao.persist(artifact), env, 'faas', Status.STARTED)
+            }
+        }
+
+        DeploymentDAO dao = new DeploymentDAO(sessionFactory)
+        deployments.each { dao.persist(it) }
+    }
+}
