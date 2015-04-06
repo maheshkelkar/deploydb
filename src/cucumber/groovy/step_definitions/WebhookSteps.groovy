@@ -4,33 +4,49 @@ this.metaClass.mixin(cucumber.api.groovy.EN)
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import deploydb.ModelLoader
+import deploydb.ModelType
+import deploydb.WorkFlow
+import deploydb.dao.ModelConfigDAO
 import deploydb.models.Environment
+import deploydb.models.ModelConfig
 import deploydb.models.Webhook.Webhook
 import deploydb.registry.ModelRegistry
 import org.joda.time.DateTime
 import cucumber.api.DataTable
-
-import deploydb.WebhookManager
 import webhookTestServer.models.RequestWebhookObject
+
 
 Given(~/^a (.*?) webhook "(.*?)" configuration:$/) { String webhookType,
                                                      String eventType, String configBody ->
 
     List<String> paths = getUrlPathFromWebhookConfigBody(configBody, eventType)
+    withWorkFlow { WorkFlow workFlow ->
+        /*
+         * Instantiate the webhook object from configuration
+        */
+        ModelLoader<Webhook> webhookLoader = new ModelLoader<>(Webhook.class)
+        workFlow.globalWebhook = webhookLoader.loadFromString(configBody)
 
-    withWebhookManager { WebhookManager webhookManager, RequestWebhookObject requestWebhookObject ->
+        /**
+         * Create ModelConfig. This feature allows us to remember the config in
+         * case of configReload
+         */
+        ModelConfig modelConfig = new ModelConfig(
+                workFlow.deployDBApp.configChecksum, configBody,
+                workFlow.defaultIdent, ModelType.WEBHOOK)
+
+        withSession {
+            ModelConfigDAO modelConfigDAO = new ModelConfigDAO(sessionFactory)
+            modelConfigDAO.persist(modelConfig)
+        }
+    }
+
+    withTestWebhookServer { RequestWebhookObject requestWebhookObject ->
         /*
          * Save the configured webhook uri(s) in requestWebhookObject. These paths will be compared
          * when deploydb invokes webhooks.
          */
         requestWebhookObject.addConfiguredUriPaths(paths)
-
-        /*
-         * Load the webhook configuration in webhookManager
-        */
-
-        ModelLoader<Webhook> webhookLoader = new ModelLoader<>(Webhook.class)
-        webhookManager.webhook = webhookLoader.loadFromString(configBody)
 
         /*
          * Set the content type from the webhook and the event type. The content type will be
@@ -55,7 +71,7 @@ Given(~/^an (.*?) environment webhook "(.*?)" configuration named "(.*?)":$/) {S
      * Save the configured webhook uri(s) in requestWebhookObject. These paths will be compared
      * when deploydb invokes webhooks.
      */
-    withWebhookManager { WebhookManager webhookManager, RequestWebhookObject requestWebhookObject ->
+    withTestWebhookServer { RequestWebhookObject requestWebhookObject ->
         requestWebhookObject.addConfiguredUriPaths(paths)
         /*
          * Set the content type from the webhook and the event type. The content type will be
@@ -71,6 +87,22 @@ Given(~/^an (.*?) environment webhook "(.*?)" configuration named "(.*?)":$/) {S
     withEnvironmentRegistry { ModelRegistry<Environment> environmentRegistry ->
         a.ident = envIdent
         environmentRegistry.put(envIdent, a)
+    }
+
+    /**
+     * Create ModelConfig. This feature allows us to remember the config in
+     * case of configReload
+     */
+    withWorkFlow { WorkFlow workFlow ->
+
+        ModelConfig modelConfig = new ModelConfig(
+                workFlow.deployDBApp.configChecksum, configBody,
+                envIdent, ModelType.ENVIRONMENT)
+
+        withSession {
+            ModelConfigDAO modelConfigDAO = new ModelConfigDAO(sessionFactory)
+            modelConfigDAO.persist(modelConfig)
+        }
     }
 }
 
@@ -122,8 +154,6 @@ Then(~/^the webhook ([1-9][0-9]*) should be invoked with the JSON:$/) { int webh
         assert expectedNode == requestNode
     }
 }
-
-
 
 And (~/the webhook should have the headers:$/){ DataTable headers ->
 

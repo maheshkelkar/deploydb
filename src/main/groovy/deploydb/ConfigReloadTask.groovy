@@ -3,9 +3,6 @@ package deploydb
 import com.codahale.metrics.annotation.Timed
 import com.google.common.collect.ImmutableMultimap
 import io.dropwizard.servlets.tasks.Task
-import org.hibernate.Session
-import org.hibernate.Transaction
-import org.hibernate.context.internal.ManagedSessionContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -31,23 +28,15 @@ class ConfigReloadTask extends Task {
     @Override
     void execute(ImmutableMultimap<String, String> parameters, PrintWriter output) throws Exception {
 
-        Session session = this.workFlow.deployDBApp.getSessionFactory().openSession()
-        try {
-            ManagedSessionContext.bind(session)
-            Transaction transaction = session.beginTransaction()
+        this.workFlow.deployDBApp.withHibernateSession() {
             try {
-                this.workFlow.loadConfigModels(true)
-                transaction.commit()
+                this.workFlow.loadConfigModels()
                 output.println("Done!")
+            } catch (Exception e) {
+                logger.error("failed to reload the config with an exception: ", e)
+                output.println("Failed: " + e.getMessage())
+                throw e
             }
-            catch (Exception e) {
-                transaction.rollback()
-                logger.error("failed to reload the config: " + e.getMessage())
-                output.println("Failed: Configuration reload is not allowed while deployments are in progress")
-            }
-        } finally {
-            session.close()
-            ManagedSessionContext.unbind(this.workFlow.deployDBApp.getSessionFactory())
         }
     }
 }

@@ -33,7 +33,7 @@ Given(~/^there is a deployment$/) { ->
         d1.addPromotionResult(p1)
 
         /* Create a flow */
-        Flow f = new Flow(a1, "faas")
+        Flow f = new Flow(a1, "faas", "0xdead")
         f.addDeployment(d1)
 
         /**
@@ -130,7 +130,7 @@ And(~/there is a deployment in "(.*?)" state$/) { String deploymentState ->
         d1.addPromotionResult(p1)
 
         /* Create a flow */
-        Flow f = new Flow(a1, "faas")
+        Flow f = new Flow(a1, "faas", "0xdead")
         f.addDeployment(d1)
 
         /**

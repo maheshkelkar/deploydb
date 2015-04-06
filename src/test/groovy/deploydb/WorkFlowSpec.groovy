@@ -1,6 +1,7 @@
 package deploydb
 
 import deploydb.dao.FlowDAO
+import deploydb.dao.ModelConfigDAO
 import deploydb.models.Flow
 import spock.lang.*
 
@@ -20,14 +21,16 @@ class workFlowWithArgsSpec extends Specification {
     private String baseCfgDirName = "./build/tmp/config"
     private DeployDBApp app = new DeployDBApp()
     private WorkFlow workFlow
-    private FlowDAO dao = Mock(FlowDAO)
+    private FlowDAO fdao = Mock(FlowDAO)
+    private ModelConfigDAO mdao = Mock(ModelConfigDAO)
 
     def setup() {
-        app.webhooksManager = new WebhookManager()
         app.configDirectory = baseCfgDirName
+        app.configChecksum = null
         workFlow = new WorkFlow(app)
         workFlow.initializeRegistry()
-        workFlow.flowDAO = dao
+        workFlow.flowDAO = fdao
+        workFlow.modelConfigDAO = mdao
     }
 
     def cleanup() {
@@ -49,6 +52,21 @@ description: "Basic Smoke test for the Basic Service"
         }
 
         File promotionFile = new File(promotionsDir, "basicPromo.yml")
+        promotionFile.write(fileContents)
+    }
+
+    def createAnotherPromotionConfigFile() {
+        String fileContents = """
+type:  AdvancedPromotion
+description: "Advanced Smoke test for the Basic Service"
+"""
+        /* Create temp file */
+        File promotionsDir = new File("${baseCfgDirName}/promotions")
+        if (!promotionsDir.exists()) {
+            promotionsDir.mkdirs()
+        }
+
+        File promotionFile = new File(promotionsDir, "advancedPromo.yml")
         promotionFile.write(fileContents)
     }
 
@@ -142,7 +160,8 @@ promotion:
         createPipelineConfigFile()
         createServiceConfigFile()
         createWebhookConfigFile()
-        workFlow.loadConfigModels(false)
+        workFlow.loadConfigModels()
+        mdao.persist(_) >> _
 
         expect:
         workFlow.promotionRegistry.getAll().size() == 1
@@ -153,14 +172,15 @@ promotion:
         workFlow.pipelineRegistry.get("basicPipe").ident == "basicPipe"
         workFlow.serviceRegistry.getAll().size() == 1
         workFlow.serviceRegistry.get("basicServ").ident == "basicServ"
-        workFlow.deployDBApp.webhooksManager != null
+        workFlow.globalWebhook != null
     }
 
     def "If promotion is missing, then loading pipeline in loadConfigModels throws an exception"() {
         when:
         createEnvironmentConfigFile()
         createPipelineConfigFile()
-        workFlow.loadConfigModels(false)
+        workFlow.loadConfigModels()
+        mdao.persist(_) >> _
 
         then:
         thrown(IllegalArgumentException)
@@ -170,7 +190,8 @@ promotion:
         when:
         createPromotionConfigFile()
         createPipelineConfigFile()
-        workFlow.loadConfigModels(false)
+        workFlow.loadConfigModels()
+        mdao.persist(_) >> _
 
         then:
         thrown(IllegalArgumentException)
@@ -181,47 +202,50 @@ promotion:
         createPromotionConfigFile()
         createEnvironmentConfigFile()
         createServiceConfigFile()
-        workFlow.loadConfigModels(false)
+        workFlow.loadConfigModels()
+        mdao.persist(_) >> _
 
         then:
         thrown(IllegalArgumentException)
     }
 
 
-    def "Reload entire config from a directory and make sure it passes"() {
+    def "Reload unchanged config from a directory and make sure its ignored"() {
         given:
         createPromotionConfigFile()
         createEnvironmentConfigFile()
         createPipelineConfigFile()
         createServiceConfigFile()
         createWebhookConfigFile()
-        workFlow.loadConfigModels(false)
-        1 * dao.getActiveFlowsCount() >> 0
+        workFlow.loadConfigModels()
+        String oldChecksum = app.configChecksum
+        mdao.persist(_) >> _
 
         when:
-        workFlow.loadConfigModels(true)
+        workFlow.loadConfigModels()
 
         then:
-        workFlow.promotionRegistry.getAll().size() == 1
-        workFlow.promotionRegistry.get("basicPromo").ident == "basicPromo"
-        workFlow.environmentRegistry.getAll().size() == 1
-        workFlow.environmentRegistry.get("basicEnv").ident == "basicEnv"
-        workFlow.pipelineRegistry.getAll().size() == 1
-        workFlow.pipelineRegistry.get("basicPipe").ident == "basicPipe"
-        workFlow.serviceRegistry.getAll().size() == 1
-        workFlow.serviceRegistry.get("basicServ").ident == "basicServ"
-        workFlow.deployDBApp.webhooksManager != null
+        app.configChecksum != null
+        oldChecksum == app.configChecksum
     }
 
-    def "Attempt to reload config with active flows throws an exception"() {
+    def "Reload changed config from a directory and make sure it passes"() {
         given:
-        //List<models.Flow> flows = [new models.Flow()]
-        1 * dao.getActiveFlowsCount() >> 1
+        createPromotionConfigFile()
+        createEnvironmentConfigFile()
+        createPipelineConfigFile()
+        createServiceConfigFile()
+        createWebhookConfigFile()
+        workFlow.loadConfigModels()
+        String oldChecksum = app.configChecksum
+        createAnotherPromotionConfigFile()
+        mdao.persist(_) >> _
 
         when:
-        workFlow.loadConfigModels(true)
+        workFlow.loadConfigModels()
 
         then:
-        thrown(Exception)
+        app.configChecksum != null
+        oldChecksum != app.configChecksum
     }
 }

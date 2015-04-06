@@ -3,6 +3,7 @@ package deploydb
 import groovy.io.FileType
 import javax.ws.rs.WebApplicationException
 import javax.ws.rs.core.Response
+import org.apache.commons.codec.digest.DigestUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -10,12 +11,13 @@ import org.slf4j.LoggerFactory
 /* Define a new exception to break out of loop */
 class BreakLoopException extends Exception{}
 
-public class WorkFlow {
+class WorkFlow {
     private final DeployDBApp deployDBApp
     private registry.ModelRegistry<models.Promotion> promotionRegistry
     private registry.ModelRegistry<models.Environment> environmentRegistry
     private registry.ModelRegistry<models.pipeline.Pipeline> pipelineRegistry
     private registry.ModelRegistry<models.Service> serviceRegistry
+    private models.Webhook.Webhook globalWebhook
     private ModelLoader<models.Promotion> promotionLoader
     private ModelLoader<models.Environment> environmentLoader
     private ModelLoader<models.pipeline.Pipeline> pipelineLoader
@@ -24,7 +26,9 @@ public class WorkFlow {
     private dao.ArtifactDAO artifactDAO
     private dao.DeploymentDAO deploymentDAO
     private dao.FlowDAO flowDAO
+    private dao.ModelConfigDAO modelConfigDAO
     private static final Logger logger = LoggerFactory.getLogger(WorkFlow.class)
+    private static final String defaultIdent = "default"
 
     WorkFlow(DeployDBApp app) {
         this.deployDBApp = app
@@ -37,6 +41,7 @@ public class WorkFlow {
         artifactDAO = new dao.ArtifactDAO(this.deployDBApp.getSessionFactory())
         deploymentDAO = new dao.DeploymentDAO(this.deployDBApp.getSessionFactory())
         flowDAO = new dao.FlowDAO(this.deployDBApp.getSessionFactory())
+        modelConfigDAO = new dao.ModelConfigDAO(this.deployDBApp.getSessionFactory())
     }
 
     void initializeRegistry() {
@@ -59,21 +64,61 @@ public class WorkFlow {
         webhookLoader = new ModelLoader<>(models.Webhook.Webhook.class)
     }
 
-    private void loadConfigModelsCommon(String modelDirName, Closure c) {
-        File modelDirectory = new File(modelDirName);
+    /** Helper for config loader */
+    private void loadConfigModelsCommon(String modelDirName,
+                                        ModelType modelType,
+                                        registry.ModelRegistry registry,
+                                        ModelLoader loader,
+                                        Vector<InputStream> inputStreams,
+                                        List<models.ModelConfig> modelConfigList,
+                                        Closure c) {
+        File modelDirectory = new File(modelDirName)
         if (modelDirectory.exists() && modelDirectory.isDirectory()) {
-            logger.debug("Loading model from directory: ${modelDirectory.getCanonicalPath()}");
+            logger.info("Loading models from directory: ${modelDirectory.getCanonicalPath()}")
 
-            /* Skip everything but yaml file */
-            modelDirectory.eachFileMatch(FileType.FILES, ~/^.*?\.yml/) { File modelFile ->
+            /**
+             * When walking thr the files from the directory:
+             * - Skip everything but yaml file.
+             * - Sort these files in order to ensure that checksum remains same regardless
+             *   the order in which files are read from the directory
+             */
+            List<String> filenames = []
+            modelDirectory.eachFileMatch(FileType.FILES, ~/^.*?\.yml/) { it -> filenames << it.name }
+            filenames.sort()
+            filenames.each() { String filename ->
+                File modelFile = new File(modelDirectory, filename)
                 try {
-                    c.call(modelFile)
+                    /** Read YAML file into model object */
+                    def model = loader.load(modelFile)
+
+                    /**
+                     * If registry is available, then insert model object into registry. In case
+                     * of singular models (webhook), it can be null, assume a "deafult" ident.
+                     */
+                    String ident = defaultIdent
+                    if (registry) {
+                        ident = model.ident = loader.getIdent(modelFile.name)
+                        registry.put(model.ident, model)
+                    }
+
+                    /* Add file stream to table for checksum calculations */
+                    FileInputStream fileInputStream = new FileInputStream(modelFile)
+                    inputStreams.add(fileInputStream)
+
+                    /* Create ModelConfig */
+                    models.ModelConfig modelConfig = new models.ModelConfig(null, modelFile.text,
+                            ident, modelType)
+                    modelConfigList.add(modelConfig)
+
+                    /** Execute the closure */
+                    c.call(model)
+
                 } catch (BreakLoopException e) {
                     throw e
                 } catch (IllegalArgumentException e) {
                     throw e /* Throw the exception again */
                 } catch (all) {
-                    logger.info("Failed to load model from ${modelFile.name}")
+                    logger.error("Failed to load model from ${modelFile.name}")
                 }
             }
         }
@@ -86,18 +131,10 @@ public class WorkFlow {
      *
      * @param baseConfigDirName
      */
-    void loadConfigModels(Boolean reloadConfig) {
-
-        /**
-         * Abort reloading the configuration (trigerred by REST API) in case we
-         * have active flows.
-         */
-        if (reloadConfig && this.flowDAO.getActiveFlowsCount() != 0) {
-            throw new Exception("Configuration reload is not allowed while deployments are in progress")
-        }
+    void loadConfigModels() {
 
         /** Validate base config directory */
-        File baseConfigDirectory = new File(this.deployDBApp.configDirectory);
+        File baseConfigDirectory = new File(this.deployDBApp.configDirectory)
         if (!baseConfigDirectory.exists() || !baseConfigDirectory.isDirectory()) {
             throw new Exception("No DeployDB configuration found. DeployDB would not function properly")
         }
@@ -118,30 +155,30 @@ public class WorkFlow {
         registry.ModelRegistry<models.Service> tmpServiceRegistry =
                 new registry.ModelRegistry<models.Service>()
         models.Webhook.Webhook tmpWebhook = null
+        Vector<InputStream> inputStreams = new Vector<>()
+        List<models.ModelConfig> modelConfigList = []
 
         /* Load promotions */
         String promotionsDirName = this.deployDBApp.configDirectory + "/promotions"
-        loadConfigModelsCommon(promotionsDirName) { File modelFile ->
-            models.Promotion promotion = this.promotionLoader.load(modelFile)
-            promotion.ident = this.promotionLoader.getIdent(modelFile.name)
-            tmpPromotionRegistry.put(promotion.ident, promotion)
+        loadConfigModelsCommon(promotionsDirName, ModelType.PROMOTION,
+                tmpPromotionRegistry, this.promotionLoader,
+                inputStreams, modelConfigList) { models.Promotion promotion ->
             logger.debug("Loaded promotions model: ${promotion.ident}")
         }
 
         /* Load environments */
         String environmentsDirName = this.deployDBApp.configDirectory + "/environments"
-        loadConfigModelsCommon(environmentsDirName) { File modelFile ->
-            models.Environment environment = this.environmentLoader.load(modelFile)
-            environment.ident = this.environmentLoader.getIdent(modelFile.name)
-            tmpEnvironmentRegistry.put(environment.ident, environment)
+        loadConfigModelsCommon(environmentsDirName, ModelType.ENVIRONMENT,
+                tmpEnvironmentRegistry, this.environmentLoader,
+                inputStreams, modelConfigList) { models.Environment environment ->
             logger.debug("Loaded environments model: ${environment.ident}")
         }
 
         /* Load pipelines */
         String pipelinesDirName = this.deployDBApp.configDirectory + "/pipelines"
-        loadConfigModelsCommon(pipelinesDirName) { File modelFile ->
-            models.pipeline.Pipeline pipeline = this.pipelineLoader.load(modelFile)
-            pipeline.ident = this.pipelineLoader.getIdent(modelFile.name)
+        loadConfigModelsCommon(pipelinesDirName, ModelType.PIPELINE,
+                tmpPipelineRegistry, this.pipelineLoader,
+                inputStreams, modelConfigList) { models.pipeline.Pipeline pipeline ->
 
             /* Validate */
             pipeline.environments.each() {
@@ -162,16 +199,14 @@ public class WorkFlow {
                     }
             }
 
-            /* Add to registry */
-            tmpPipelineRegistry.put(pipeline.ident, pipeline)
             logger.debug("Loaded pipelines model: ${pipeline.ident}")
         }
 
         /* Load services */
         String servicesDirName = this.deployDBApp.configDirectory + "/services"
-        loadConfigModelsCommon(servicesDirName) { File modelFile ->
-            models.Service service = this.serviceLoader.load(modelFile)
-            service.ident = this.serviceLoader.getIdent(modelFile.name)
+        loadConfigModelsCommon(servicesDirName, ModelType.SERVICE,
+                tmpServiceRegistry, this.serviceLoader,
+                inputStreams, modelConfigList) { models.Service service ->
 
             /* Validate */
             service.pipelines.each() { String pipelineIdent ->
@@ -189,30 +224,52 @@ public class WorkFlow {
                 }
             }
 
-            /* Add to registry */
-            tmpServiceRegistry.put(service.ident, service)
             logger.debug("Loaded services model: ${service.ident}")
         }
+
+        /* Load webhook */
+        String webhookDirName = this.deployDBApp.configDirectory + "/webhook"
+        try {
+            loadConfigModelsCommon(webhookDirName, ModelType.WEBHOOK,
+                null, this.webhookLoader,
+                inputStreams, modelConfigList) { models.Webhook.Webhook webhook ->
+
+                /* Store webhook */
+                tmpWebhook = webhook
+
+                logger.debug("Loaded webhook model")
+
+                /* Now that we have found a valid global webhook, we are done */
+                throw new BreakLoopException()
+            }
+        } catch (BreakLoopException e) {
+            /* Neeed the log to make codenarc happy */
+            logger.debug("Done with webhook load")
+        }
+
+        /* Compute a checksum for this iteration of Models configuration */
+        SequenceInputStream sequenceInputStream = new SequenceInputStream(inputStreams.elements())
+        String newConfigChecksum
+        try {
+            newConfigChecksum = DigestUtils.md5Hex(sequenceInputStream)
+        } finally {
+            sequenceInputStream.close()
+        }
+        if (this.deployDBApp.configChecksum == newConfigChecksum) {
+            logger.info("Ignoring as no change in DeployDB Model Configuration detected")
+            return
+        }
+        this.deployDBApp.configChecksum = newConfigChecksum
 
         /* At least one service MUST be configured for deployDb to function properly */
         if (tmpServiceRegistry.getAll().isEmpty()) {
             logger.info("NO SERVICES ARE CONFIGURED. DeployDB would not function properly")
         }
 
-        /* Load webhook */
-        String webhookDirName = this.deployDBApp.configDirectory + "/webhook"
-        try {
-            loadConfigModelsCommon(webhookDirName) { File modelFile ->
-
-                tmpWebhook = this.webhookLoader.load(modelFile)
-                logger.debug("Loaded webhooks model from: ${modelFile.name}")
-
-                /* Now that we have found a valid webhook, we are done */
-                throw new BreakLoopException()
-            }
-        } catch (BreakLoopException e) {
-            /* Neeed the log to make codenarc happy */
-            logger.debug("Done with webhook load")
+        /* Persist all ModelConfigs */
+        modelConfigList.each() { models.ModelConfig modelConfig ->
+            modelConfig.checksum = newConfigChecksum
+            this.modelConfigDAO.persist(modelConfig)
         }
 
         /**
@@ -222,7 +279,72 @@ public class WorkFlow {
         environmentRegistry = tmpEnvironmentRegistry
         pipelineRegistry = tmpPipelineRegistry
         serviceRegistry = tmpServiceRegistry
-        deployDBApp.webhooksManager.webhook = tmpWebhook
+        globalWebhook = tmpWebhook
+    }
+
+    /**
+     * Retrieve webhook either from memory or DB (if config has changed)
+     *
+     * @param deployment
+     * @return Webhook object
+     */
+    models.Webhook.Webhook retrieveWebhook(models.Deployment deployment) {
+
+        /**
+         * If configuration has changed since the flow creation, then retrieve and
+         * rebuild objects from DB
+         */
+        if (deployment.flow.configChecksum != this.deployDBApp.configChecksum) {
+            /* Load webhook from config */
+            models.ModelConfig webhookConfig =
+                    this.modelConfigDAO.findModelConfig(ModelType.WEBHOOK,
+                            defaultIdent, deployment.flow.configChecksum)
+            if (webhookConfig) {
+                models.Webhook.Webhook fetchedWebhook =
+                        this.webhookLoader.loadFromString(webhookConfig.contents)
+                return fetchedWebhook
+            } else {
+                logger.error("Failed to find webhook configuration for " +
+                        "deployment: ${deployment.id}, config-checksum: ${deployment.flow.configChecksum}")
+                return null
+            }
+        } else {
+            /* Load extant global webhook object */
+            return this.globalWebhook
+        }
+    }
+
+    /**
+     * Retrieve Environment either from memory or DB (if config has changed)
+     *
+     * @param deployment
+     * @return Environment
+     */
+    models.Environment retrieveEnvironment(models.Deployment deployment) {
+
+        /**
+         * If configuration is changed since the flow creation, then retrieve and
+         * rebuild objects from DB
+         */
+        if (deployment.flow.configChecksum != this.deployDBApp.configChecksum) {
+            /* Load environment from config */
+            models.ModelConfig environmentConfig =
+                    this.modelConfigDAO.findModelConfig(ModelType.ENVIRONMENT,
+                            deployment.environmentIdent, deployment.flow.configChecksum)
+            if (environmentConfig) {
+                models.Environment environment =
+                        this.environmentLoader.loadFromString(environmentConfig.contents)
+                return environment
+            } else {
+                logger.error("Failed to find Environment configuration for " +
+                        "deployment: ${deployment.id}, Environment: ${deployment.environmentIdent}, " +
+                        "config-checksum: ${deployment.flow.configChecksum}")
+                return null
+            }
+        } else {
+            /* Load from environment */
+            return this.environmentRegistry.get(deployment.environmentIdent)
+        }
     }
 
     /**
@@ -253,7 +375,8 @@ public class WorkFlow {
         services.flatten().each() { models.Service service ->
 
             /* Create a flow */
-            models.Flow flow = new models.Flow(artifact, service.ident)
+            models.Flow flow = new models.Flow(artifact, service.ident,
+                    this.deployDBApp.configChecksum)
 
             /* Get all pipelines */
             List<models.pipeline.Pipeline> pipelines = service.getPipelines().collect() { String pipelineIdent ->
@@ -373,16 +496,18 @@ public class WorkFlow {
                 new mappers.DeploymentWebhookMapper(deployment)
 
         /*
-         * Get the environment based webhooks for this deployment
+         * Get the global and environment based webhooks for this deployment
          */
+        models.Webhook.Webhook webhook = retrieveWebhook(deployment)
+        models.Environment environment = retrieveEnvironment(deployment)
         models.Webhook.Webhook environmentWebhook =
-                this.environmentRegistry.get(deployment.environmentIdent).webhook
+                environment ? environment.webhook : null
 
         /*
          * Use webhook manager to send the webhook
          */
-        if (deployDBApp.webhooksManager.sendDeploymentWebhook("created", environmentWebhook,
-                deploymentWebhookMapper) == false) {
+        if (deployDBApp.webhooksManager.sendDeploymentWebhook("created", webhook,
+                environmentWebhook, deploymentWebhookMapper) == false) {
             logger.info("Failed to send deployment started ${deployment.id}")
             throw new WebApplicationException(Response.Status.BAD_REQUEST)
         }
@@ -408,17 +533,18 @@ public class WorkFlow {
                 new mappers.DeploymentWebhookMapper(deployment)
 
         /*
-         * Get the environment based webhooks for this deployment
+         * Get the global and environment based webhooks for this deployment
          */
+        models.Webhook.Webhook webhook = retrieveWebhook(deployment)
+        models.Environment environment = retrieveEnvironment(deployment)
         models.Webhook.Webhook environmentWebhook =
-                this.environmentRegistry.get(deployment.environmentIdent)?
-                    this.environmentRegistry.get(deployment.environmentIdent).webhook : null
+                environment ? environment.webhook : null
 
         /*
          * Use webhook manager to send the webhook
          */
-        if (deployDBApp.webhooksManager.sendDeploymentWebhook("started", environmentWebhook,
-                deploymentWebhookMapper) == false) {
+        if (deployDBApp.webhooksManager.sendDeploymentWebhook("started", webhook,
+                environmentWebhook, deploymentWebhookMapper) == false) {
             logger.info("Failed to send deployment started ${deployment.id}")
             throw new WebApplicationException(Response.Status.BAD_REQUEST)
         }
@@ -447,17 +573,18 @@ public class WorkFlow {
                 new mappers.DeploymentWebhookMapper(deployment)
 
         /*
-         * Get the environment based webhooks for this deployment
+         * Get the global and environment based webhooks for this deployment
          */
+        models.Webhook.Webhook webhook = retrieveWebhook(deployment)
+        models.Environment environment = retrieveEnvironment(deployment)
         models.Webhook.Webhook environmentWebhook =
-                this.environmentRegistry.get(deployment.environmentIdent)?
-                    this.environmentRegistry.get(deployment.environmentIdent).webhook : null
+                environment ? environment.webhook : null
 
         /*
          * Use webhook manager to send the webhook
          */
-        if (deployDBApp.webhooksManager.sendDeploymentWebhook("completed", environmentWebhook,
-                deploymentWebhookMapper) == false) {
+        if (deployDBApp.webhooksManager.sendDeploymentWebhook("completed", webhook,
+                environmentWebhook, deploymentWebhookMapper) == false) {
             logger.info("Failed to send deployment completed ${deployment.id}")
             throw new WebApplicationException(Response.Status.BAD_REQUEST)
         }
@@ -499,17 +626,18 @@ public class WorkFlow {
                 new mappers.PromotionWebhookMapper(deployment, promotionResult)
 
         /*
-         * Get the environment based webhooks for this deployment
+         * Get the global and environment based webhooks for this deployment
          */
+        models.Webhook.Webhook webhook = retrieveWebhook(deployment)
+        models.Environment environment = retrieveEnvironment(deployment)
         models.Webhook.Webhook environmentWebhook =
-                this.environmentRegistry.get(deployment.environmentIdent)?
-                    this.environmentRegistry.get(deployment.environmentIdent).webhook : null
+                environment ? environment.webhook : null
 
         /*
          * Use webhook manager to send the webhook
          */
-        if (deployDBApp.webhooksManager.sendPromotionWebhook("completed", environmentWebhook,
-                                                       promotionWebhookMapper) == false) {
+        if (deployDBApp.webhooksManager.sendPromotionWebhook("completed", webhook,
+                environmentWebhook, promotionWebhookMapper) == false) {
             logger.info("Failed to send promotion success webhook for ${promotionResult.promotion}")
             throw new WebApplicationException(Response.Status.BAD_REQUEST)
         }
@@ -551,17 +679,18 @@ public class WorkFlow {
                 new mappers.PromotionWebhookMapper(deployment, promotionResult)
 
         /*
-         * Get the environment based webhooks for this deployment
+         * Get the global and environment based webhooks for this deployment
          */
+        models.Webhook.Webhook webhook = retrieveWebhook(deployment)
+        models.Environment environment = retrieveEnvironment(deployment)
         models.Webhook.Webhook environmentWebhook =
-                this.environmentRegistry.get(deployment.environmentIdent)?
-                    this.environmentRegistry.get(deployment.environmentIdent).webhook : null
+                environment ? environment.webhook : null
 
         /*
          * Use webhook manager to send the webhook
          */
-        if (deployDBApp.webhooksManager.sendPromotionWebhook("completed", environmentWebhook,
-                promotionWebhookMapper) == false) {
+        if (deployDBApp.webhooksManager.sendPromotionWebhook("completed", webhook,
+                environmentWebhook, promotionWebhookMapper) == false) {
             logger.info("Failed to send promotion failed webhook for ${promotionResult.promotion}")
             throw new WebApplicationException(Response.Status.BAD_REQUEST)
         }

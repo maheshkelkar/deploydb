@@ -37,13 +37,13 @@ class FlowSpecWithArgsSpec extends Specification {
 
         flow.artifact = artifact
         flow.deployments = deployments
-        flow.service = service
+        flow.serviceIdent = service
 
 
         expect:
         flow.artifact == artifact
         flow.deployments == deployments
-        flow.service == service
+        flow.serviceIdent == service
     }
 
     def "equality passes for same deployments"() {
@@ -139,8 +139,8 @@ class FlowSpecWithArgsSpec extends Specification {
         Flow firstFlow = new Flow()
         Flow secondFlow = new Flow()
 
-        firstFlow.service = service
-        secondFlow.service = service
+        firstFlow.serviceIdent = service
+        secondFlow.serviceIdent = service
 
         expect:
         firstFlow == secondFlow
@@ -152,8 +152,8 @@ class FlowSpecWithArgsSpec extends Specification {
         Flow firstFlow = new Flow()
         Flow secondFlow = new Flow()
 
-        firstFlow.service = firstService
-        secondFlow.service = secondService
+        firstFlow.serviceIdent = firstService
+        secondFlow.serviceIdent = secondService
 
         expect:
         firstFlow != secondFlow
@@ -251,8 +251,8 @@ class FlowSpecWithArgsSpec extends Specification {
         Flow firstFlow = new Flow()
         Flow secondFlow = new Flow()
 
-        firstFlow.service = service
-        secondFlow.service = service
+        firstFlow.serviceIdent = service
+        secondFlow.serviceIdent = service
 
         expect:
         firstFlow.hashCode() == secondFlow.hashCode()
@@ -264,8 +264,8 @@ class FlowSpecWithArgsSpec extends Specification {
         Flow firstFlow = new Flow()
         Flow secondFlow = new Flow()
 
-        firstFlow.service = firstService
-        secondFlow.service = secondService
+        firstFlow.serviceIdent = firstService
+        secondFlow.serviceIdent = secondService
 
         expect:
         firstFlow.hashCode() != secondFlow.hashCode()

@@ -1,26 +1,22 @@
 package deploydb.cucumber
 
+import com.google.common.base.Strings
+import com.google.common.collect.ImmutableMap
 import deploydb.WebhookManager
+import deploydb.WorkFlow
 import io.dropwizard.Application
 import io.dropwizard.Configuration
 import io.dropwizard.cli.ServerCommand
-
 import io.dropwizard.lifecycle.ServerLifecycleListener
 import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
 import io.dropwizard.testing.ConfigOverride
-
-import com.google.common.base.Strings
-import com.google.common.collect.ImmutableMap
+import javax.annotation.Nullable
 import net.sourceforge.argparse4j.inf.Namespace
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.ServerConnector
 import org.flywaydb.core.Flyway
 import org.hibernate.SessionFactory
-
-import javax.annotation.Nullable
-
-import deploydb.registry.ModelRegistry
 
 /**
  * Class for running the Dropwizard app
@@ -37,10 +33,7 @@ public class StubAppRunner<C extends Configuration> {
     private Environment environment
     private Server jettyServer
     private SessionFactory sessionFactory
-    private ModelRegistry<deploydb.models.Service> serviceRegistry
-    private ModelRegistry<deploydb.models.Environment> environmentRegistry
-    private ModelRegistry<deploydb.models.Promotion> promotionRegistry
-    private ModelRegistry<deploydb.models.pipeline.Pipeline> pipelineRegistry
+    private WorkFlow workFlow
     private WebhookManager webhookManager
 
     public StubAppRunner(Class<? extends Application<C>> applicationClass,
@@ -88,12 +81,14 @@ public class StubAppRunner<C extends Configuration> {
                             webhookManager = application.webhooksManager
 
                             /**
-                             * Get a ModelRegistry(s) from the application once it's up and running
+                             * Save workflow object
                              */
-                            serviceRegistry = application.workFlow.serviceRegistry
-                            environmentRegistry = application.workFlow.environmentRegistry
-                            promotionRegistry = application.workFlow.promotionRegistry
-                            pipelineRegistry = application.workFlow.pipelineRegistry
+                            workFlow = application.workFlow
+
+                            /**
+                             * Setup config checksum for tests
+                             */
+                            application.configChecksum = "0xdead"
 
                             /* We're running the DB migrations here to make sure we're running
                             * them in the same classloader environment as the DeployDB
@@ -101,7 +96,7 @@ public class StubAppRunner<C extends Configuration> {
                             * DeployDB won't be able to "see" the in-memory DB
                             */
                             Flyway flyway = configuration.flyway.build(
-                                    configuration.database.build(metricRegistry, "Flyway"));
+                                    configuration.database.build(metricRegistry, "Flyway"))
                             flyway.clean()
                             flyway.migrate()
                         }

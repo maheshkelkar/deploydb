@@ -20,9 +20,7 @@ Given(~/^there is a flow$/) { ->
         Deployment d = sampleDeployment(adao.persist(a), "pre-production", Status.STARTED)
         Deployment d1 = sampleDeployment(adao.persist(a), "production", Status.STARTED)
 
-        Flow f = new Flow()
-        f.setArtifact(a)
-        f.setService("faas")
+        Flow f = new Flow(a, "faas", "0xdead")
         d.setFlow(f)
         d1.setFlow(f)
 
@@ -31,7 +29,6 @@ Given(~/^there is a flow$/) { ->
         hashSet.add(ddao.persist(d1))
 
         f.setDeployments(hashSet)
-
 
         fdao.persist(f)
     }
