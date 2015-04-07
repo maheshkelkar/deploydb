@@ -28,6 +28,22 @@ class V8__create_configs_table extends DeployDBMigration {
         /*
          * Add modelConfigs table
          */
+        if (isPostgres(metadata.driverName)) {
+          commands += """
+            CREATE SEQUENCE model_configs_id_seq;
+            CREATE TABLE modelConfigs (
+                id BIGINT DEFAULT nextval('model_configs_id_seq'),
+                checksum VARCHAR(64) NOT NULL,
+                contents TEXT NOT NULL,
+                ident VARCHAR(8192),
+                modelType INT NOT NULL,
+                createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                deletedAt TIMESTAMP NULL,
+                PRIMARY KEY (id)
+            );
+        """
+        }
+        else {
         commands += """
             CREATE TABLE modelConfigs (
                 id BIGINT AUTO_INCREMENT,
@@ -40,6 +56,7 @@ class V8__create_configs_table extends DeployDBMigration {
                 PRIMARY KEY (id)
             );
         """
+        }
 
         /*
          * Add checksum column to flows table

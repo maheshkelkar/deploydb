@@ -28,6 +28,22 @@ class V5__create_flows_table extends DeployDBMigration {
         /*
          * Create flows table
          */
+        if (isPostgres(metadata.driverName)) {
+            commands += """
+            CREATE SEQUENCE flows_id_seq;
+            CREATE TABLE flows (
+                id BIGINT DEFAULT nextval('flows_id_seq'),
+
+                artifactId BIGINT NOT NULL,
+                service TEXT NOT NULL,
+
+                createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                deletedAt TIMESTAMP NULL,
+
+                PRIMARY KEY (id)
+            );
+        """
+        } else {
         commands += """
             CREATE TABLE flows (
                 id BIGINT AUTO_INCREMENT,
@@ -35,12 +51,13 @@ class V5__create_flows_table extends DeployDBMigration {
                 artifactId BIGINT NOT NULL,
                 service TEXT NOT NULL,
 
-                createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
+                createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 deletedAt TIMESTAMP NULL,
 
                 PRIMARY KEY (id)
             );
         """
+        }
 
         /* Add flowId to deployments table */
         commands += """

@@ -27,6 +27,10 @@ abstract class DeployDBMigration implements JdbcMigration, MigrationChecksumProv
         return driverName.matches("(?i).*H2.*")
     }
 
+    Boolean isPostgres(String driverName) {
+        return driverName.matches("(?i).*postgresql.*")
+    }
+
     /** Execute the commands after preparing all the statements */
     private void executeCommands(Connection connection, List<String> commands) {
         commands.each { String command ->

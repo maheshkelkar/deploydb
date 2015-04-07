@@ -32,7 +32,16 @@ class V2__artifacts_versions extends DeployDBMigration {
          *   requiring it just yet
          * - Timestamps for keeping track of data
          */
-        commands += """
+        if (isPostgres(metadata.driverName)) {
+            commands += """
+            ALTER TABLE artifacts
+                ADD COLUMN version VARCHAR(255) NOT NULL,
+                ADD COLUMN sourceUrl TEXT,
+                ADD COLUMN createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                ADD COLUMN deletedAt TIMESTAMP NULL
+        """
+        } else {
+            commands += """
             ALTER TABLE artifacts
                 ADD COLUMN (
                     version VARCHAR(255) NOT NULL,
@@ -41,7 +50,7 @@ class V2__artifacts_versions extends DeployDBMigration {
                     deletedAt TIMESTAMP NULL
                 );
         """
-
+        }
         /**
          * Create new version_index
          */
