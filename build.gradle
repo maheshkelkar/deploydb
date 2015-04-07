@@ -36,7 +36,7 @@ dependencies {
      'dropwizard-views-mustache',
      'dropwizard-testing',
      ].each {
-        compile withSources("io.dropwizard:${it}:0.8.0")
+        compile withSources("io.dropwizard:${it}:0.8.1")
     }
 
     /* Used instead of the default HTTP connector for the Jersey client to
