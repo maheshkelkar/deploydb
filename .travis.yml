@@ -16,3 +16,7 @@ env:
   - DB=h2
   - DB=mysql
   - DB=postgres
+
+before_script:
+  - mysql -e 'create database deploydb;'
+  - psql -c 'create database travis_ci_test;' -U postgres

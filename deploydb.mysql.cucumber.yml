@@ -1,7 +1,7 @@
 database:
   driverClass: com.mysql.jdbc.Driver
   user: travis
-  url: "jdbc:mysql://localhost:3306/deploydb"
+  url: "jdbc:mysql:deploydb"
 
 # DeployDB base configuration directory (cannonical path)
 # YAML configuration files for models - services, environments, pipelines,
