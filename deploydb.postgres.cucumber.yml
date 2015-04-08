@@ -2,7 +2,11 @@ database:
   driverClass: org.postgresql.Driver
   user: postgres
   url: "jdbc:postgresql:travis_ci_test"
+  # The following parameter are modifed to make connection pool
+  # work with cukes. validationQuery is more efficient than "select 1"
+  # postgresql
   validationQuery: "select version();"
+
 
 # DeployDB base configuration directory (cannonical path)
 # YAML configuration files for models - services, environments, pipelines,
