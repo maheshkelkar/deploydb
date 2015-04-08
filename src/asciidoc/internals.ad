@@ -204,6 +204,9 @@ artifacts:
 
 === Promotions
 
+NOTE: The "promotion" concepts described below are not final and really just
+brainstorming to flesh out how configuration of promotions as a concept *might*
+work.
 
 [source,yaml]
 .promotions/jenkins-smoke.yml
@@ -215,13 +218,8 @@ jobs:
   - end2end-smoke-test
 ----
 
-
 `JenkinsPromotion` as a typed concept would require a list of Jenkins job names
 that would be required to succeed in order to execute the promotion.
-
-NOTE: The "promotion" concepts described below are not final and really just
-brainstorming to flesh out how configuration of promotions as a concept *might*
-work.
 
 
 [source,yaml]
@@ -233,14 +231,24 @@ status: 200
 timeout: 15
 ----
 
-
 `WebhookPromotion` would be something that would make a HTTP GET request to the
 application and see if it's online before identifying it as "promoted." How
 this might work with a cluster of applications in one service, I'm not yet sure.
 
+[source,yaml]
+.promotions/manual-validate.yml
+----
+type: ManualPromotion
+approverGroupName: SuperImpGroup
+----
 
-`A *manual* promotion is a special case scenario where the UI for DeployDB is
-going to need to present a button to a user to click
+`ManualPromotion` is a special case scenario where the UI for DeployDB is
+going to need to present a button to a user to click.
+
+If approverGroupName is configured and <<auth.ad#LDAP Authentication,LDAP authentication>>
+is enabled, then the user of REST API will be authenticated against that group name. If LDAP
+authentication is NOT enabled, then the approverGroupName is ignored.
+
 
 === Flow Diagram
 
