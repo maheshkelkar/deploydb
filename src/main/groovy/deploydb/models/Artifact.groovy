@@ -86,7 +86,8 @@ class Artifact extends AbstractModel {
     @Override
     String toString() {
         return "id: ${id}, group: ${group}, name: ${name}, " +
-                "version: ${version}, sourceUrl: ${sourceUrl}"
+                "version: ${version}, sourceUrl: ${sourceUrl}" +
+                "createdAt: ${createdAt}"
 
     }
 }

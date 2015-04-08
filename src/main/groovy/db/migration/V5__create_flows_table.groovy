@@ -37,7 +37,7 @@ class V5__create_flows_table extends DeployDBMigration {
                 artifactId BIGINT NOT NULL,
                 service TEXT NOT NULL,
 
-                createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                createdAt TIMESTAMP,
                 deletedAt TIMESTAMP NULL,
 
                 PRIMARY KEY (id)
@@ -51,8 +51,8 @@ class V5__create_flows_table extends DeployDBMigration {
                 artifactId BIGINT NOT NULL,
                 service TEXT NOT NULL,
 
-                createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                deletedAt TIMESTAMP NULL,
+                createdAt TIMESTAMP(3),
+                deletedAt TIMESTAMP(3) NULL,
 
                 PRIMARY KEY (id)
             );

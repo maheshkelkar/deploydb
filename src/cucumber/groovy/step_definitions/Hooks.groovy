@@ -9,7 +9,6 @@ this.metaClass.mixin(cucumber.api.groovy.Hooks)
 Before {
     def env = System.getenv()
     databaseProv = env['DB'] == null ? "h2" : env['DB']
-    println("deploydb.${databaseProv}.cucumber.yml")
     startAppWithConfiguration("deploydb.${databaseProv}.cucumber.yml")
     startWebhookTestServerWithConfiguration('webhookTestServer.example.yml')
 }

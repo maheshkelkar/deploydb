@@ -2,6 +2,7 @@ database:
   driverClass: org.postgresql.Driver
   user: postgres
   url: "jdbc:postgresql:travis_ci_test"
+  validationQuery: "select version();"
 
 # DeployDB base configuration directory (cannonical path)
 # YAML configuration files for models - services, environments, pipelines,

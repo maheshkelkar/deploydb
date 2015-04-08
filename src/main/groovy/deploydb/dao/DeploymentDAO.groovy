@@ -24,7 +24,7 @@ class DeploymentDAO extends AbstractDAO<Deployment> {
         List<Deployment> deployments = criteria()
                 .setFirstResult(pageNumber)
                 .setMaxResults(perPageSize)
-                .addOrder(Order.desc('createdAt')).list()
+                .addOrder(Order.asc('id')).list()
         return deployments
     }
 
@@ -54,7 +54,7 @@ class DeploymentDAO extends AbstractDAO<Deployment> {
     List<Deployment> getByArtifactId(long artifactId) {
         List<Deployment> deployments = criteria()
                                          .add(Restrictions.eq('artifact.id', artifactId))
-                                         .addOrder(Order.desc('createdAt'))
+                                         .addOrder(Order.asc('id'))
                                          .list()
         return deployments
     }

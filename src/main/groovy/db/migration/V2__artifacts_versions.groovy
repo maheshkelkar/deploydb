@@ -37,7 +37,7 @@ class V2__artifacts_versions extends DeployDBMigration {
             ALTER TABLE artifacts
                 ADD COLUMN version VARCHAR(255) NOT NULL,
                 ADD COLUMN sourceUrl TEXT,
-                ADD COLUMN createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                ADD COLUMN createdAt TIMESTAMP,
                 ADD COLUMN deletedAt TIMESTAMP NULL
         """
         } else {
@@ -46,8 +46,8 @@ class V2__artifacts_versions extends DeployDBMigration {
                 ADD COLUMN (
                     version VARCHAR(255) NOT NULL,
                     sourceUrl TEXT,
-                    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
-                    deletedAt TIMESTAMP NULL
+                    createdAt TIMESTAMP(3),
+                    deletedAt TIMESTAMP(3) NULL
                 );
         """
         }

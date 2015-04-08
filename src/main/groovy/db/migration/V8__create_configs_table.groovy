@@ -37,7 +37,7 @@ class V8__create_configs_table extends DeployDBMigration {
                 contents TEXT NOT NULL,
                 ident VARCHAR(8192),
                 modelType INT NOT NULL,
-                createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                createdAt TIMESTAMP,
                 deletedAt TIMESTAMP NULL,
                 PRIMARY KEY (id)
             );
@@ -51,8 +51,8 @@ class V8__create_configs_table extends DeployDBMigration {
                 contents TEXT NOT NULL,
                 ident VARCHAR(8192),
                 modelType INT NOT NULL,
-                createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
-                deletedAt TIMESTAMP NULL,
+                createdAt TIMESTAMP(3),
+                deletedAt TIMESTAMP(3) NULL,
                 PRIMARY KEY (id)
             );
         """

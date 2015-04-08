@@ -25,7 +25,7 @@ class ArtifactDAO extends AbstractDAO<Artifact> {
                           .add(Restrictions.eq('name', name))
                           .setFirstResult(pageNumber)
                           .setMaxResults(perPageSize)
-                          .addOrder(Order.desc('createdAt')).list()
+                          .addOrder(Order.asc('id')).list()
         return artifacts
     }
 
@@ -62,7 +62,7 @@ class ArtifactDAO extends AbstractDAO<Artifact> {
                                                .add(Restrictions.like('name', value))
                                                .add(Restrictions.like('group', value))
                                                .add(Restrictions.like('version', value)))
-                                             .addOrder(Order.desc('createdAt'))
+                                             .addOrder(Order.asc('id'))
                                              .setFirstResult(pageNumber)
                                              .setMaxResults(perPageSize)
                                              .list()

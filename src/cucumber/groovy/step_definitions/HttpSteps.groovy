@@ -81,21 +81,7 @@ Then(~/^the response body should be:$/) { String expectedBody ->
 }
 
 Then(~/^the body should be JSON:$/) { String expectedBody ->
-
-    def comparator = { a, b ->
-        println("${a.get("id").intValue()} ${b.get("id").intValue()}")
-        if (a.get("id").intValue() < b.get("id").intValue()) {
-            return -1;
-        } else if (a.get("id").intValue() > b.get("id").intValue()) {
-            return 1;
-        } else {
-            return 0;
-        }
-        //a.get("id").intValue() <=> b.get("id").intValue()
-    }
-
     ObjectMapper mapper = new ObjectMapper()
-
     String body = response.readEntity(String.class)
     templateVariables = [
         'created_timestamp' : DateTime.now(),
@@ -104,9 +90,7 @@ Then(~/^the body should be JSON:$/) { String expectedBody ->
 
     JsonNode expectedNode = mapper.readTree(expectedBody)
     JsonNode bodyNode = mapper.readTree(body)
-    if (bodyNode.isArray()) {
-        bodyNode.sort(comparator)
-    }
+
     assert bodyNode == expectedNode
 }
 
