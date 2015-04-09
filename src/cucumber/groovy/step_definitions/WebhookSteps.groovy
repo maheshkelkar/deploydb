@@ -125,7 +125,7 @@ Then(~/^the webhook should be invoked with the JSON:$/) { String expectedMessage
         String requestMessageBody = requestWebhookObject.getRequestMessageBody()
 
         templateVariables = [
-                'created_timestamp' : DateTime.now(),
+                'created_timestamp' : DateTime.now().withMillisOfSecond(0),
         ]
         expectedMessageBody = processTemplate(expectedMessageBody, templateVariables)
 
@@ -144,7 +144,7 @@ Then(~/^the webhook ([1-9][0-9]*) should be invoked with the JSON:$/) { int webh
         String requestMessageBody = requestWebhookObject.getRequestMessageBodies()[webhookNumber -1]
 
         templateVariables = [
-                'created_timestamp' : DateTime.now(),
+                'created_timestamp' : DateTime.now().withMillisOfSecond(0),
         ]
         expectedMessageBody = processTemplate(expectedMessageBody, templateVariables)
 

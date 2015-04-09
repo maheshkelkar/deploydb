@@ -53,8 +53,8 @@ class V4__create_deployments_table extends DeployDBMigration {
                 environment VARCHAR(8192) NOT NULL,
                 status INT NOT NULL,
 
-                createdAt TIMESTAMP(3),
-                deletedAt TIMESTAMP(3) NULL,
+                createdAt TIMESTAMP,
+                deletedAt TIMESTAMP NULL,
 
                 PRIMARY KEY (id)
             );

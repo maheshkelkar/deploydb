@@ -57,8 +57,8 @@ class V6__create_promotion_results_table extends DeployDBMigration {
                 infoUrl TEXT,
                 deploymentId BIGINT NOT NULL,
 
-                createdAt TIMESTAMP(3),
-                deletedAt TIMESTAMP(3) NULL,
+                createdAt TIMESTAMP,
+                deletedAt TIMESTAMP NULL,
 
                 PRIMARY KEY (id),
                 FOREIGN KEY (deploymentId) REFERENCES deployments(id)
