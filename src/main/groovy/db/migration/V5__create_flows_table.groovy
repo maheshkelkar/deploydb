@@ -52,7 +52,7 @@ class V5__create_flows_table extends DeployDBMigration {
                 service TEXT NOT NULL,
 
                 createdAt TIMESTAMP(3),
-                deletedAt TIMESTAMP(3) NULL,
+                deletedAt TIMESTAMP NULL,
 
                 PRIMARY KEY (id)
             );
