@@ -47,7 +47,7 @@ class V2__artifacts_versions extends DeployDBMigration {
                     version VARCHAR(255) NOT NULL,
                     sourceUrl TEXT,
                     createdAt TIMESTAMP(3),
-                    deletedAt TIMESTAMP NULL
+                    deletedAt TIMESTAMP(3) NULL
                 );
         """
         }
