@@ -30,6 +30,10 @@ class V3__artifacts_unique_index extends DeployDBMigration {
             commands += """
                 ALTER TABLE artifacts ALTER COLUMN groupName VARCHAR(8192);
             """
+        } else if (isPostgres(metadata.driverName)) {
+            commands += """
+                ALTER TABLE artifacts ALTER COLUMN groupName TYPE VARCHAR(8192);
+            """
         } else {
             commands += """
                 ALTER TABLE artifacts MODIFY COLUMN groupName VARCHAR(8192);
@@ -41,6 +45,10 @@ class V3__artifacts_unique_index extends DeployDBMigration {
             commands += """
                 ALTER TABLE artifacts ALTER COLUMN name VARCHAR(8192);
             """
+        } else if (isPostgres(metadata.driverName)){
+            commands += """
+                ALTER TABLE artifacts ALTER COLUMN name TYPE VARCHAR(8192);
+            """
         } else {
             commands += """
                 ALTER TABLE artifacts MODIFY COLUMN name VARCHAR(8192);
@@ -48,7 +56,7 @@ class V3__artifacts_unique_index extends DeployDBMigration {
         }
 
         /* No need for this index anymore */
-        if (isH2(metadata.driverName)) {
+        if (isH2(metadata.driverName) || isPostgres(metadata.driverName)) {
             commands += """
                 DROP INDEX version_index;
             """
@@ -61,10 +69,10 @@ class V3__artifacts_unique_index extends DeployDBMigration {
         /**
          * Create unique index.
          *
-         * For non-h2 databases, limit size of the key to 150 characters. In general,
+         * For mysql database, limit size of the key to 150 characters. In general,
          * It has to be less than max-allowed/3; max-allowed for mysql is 767.
          **/
-        if (isH2(metadata.driverName)) {
+        if (isH2(metadata.driverName) || isPostgres(metadata.driverName)) {
             commands += """
                 CREATE UNIQUE INDEX artifact_version_index ON artifacts(groupName, name, version);
             """

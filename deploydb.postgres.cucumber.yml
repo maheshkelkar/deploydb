@@ -1,0 +1,30 @@
+database:
+  driverClass: org.postgresql.Driver
+  user: postgres
+  url: "jdbc:postgresql:travis_ci_test"
+  # The following parameter is modifed to make connection pool
+  # work with cukes. validationQuery is more efficient than "select 1"
+  # in postgresql
+  validationQuery: "select version();"
+
+
+# DeployDB base configuration directory (cannonical path)
+# YAML configuration files for models - services, environments, pipelines,
+# webhooks and promotions - should be stored in respective sub-directories
+#configDirectory: config
+
+whoas:
+  queue:
+    type: "com.github.lookout.whoas.InMemoryQueue"
+  runnerType: "com.github.lookout.whoas.SequentialHookRunner"
+
+logging:
+  level: INFO
+  loggers:
+    org.hibernate.SQL: ALL
+  appenders:
+    - type: file
+      currentLogFilename: ./logs/deploydb-cucumber.log
+      threshold: ALL
+      archive: false
+      timeZone: UTC

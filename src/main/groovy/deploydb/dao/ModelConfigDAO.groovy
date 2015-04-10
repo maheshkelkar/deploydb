@@ -30,6 +30,6 @@ class ModelConfigDAO extends AbstractDAO<ModelConfig> {
                 .add(Restrictions.eq('modelType', modelType))
                 .add(Restrictions.eq('ident', ident))
                 .add(Restrictions.eq('checksum', configChecksum))
-                .addOrder(Order.desc('createdAt')).uniqueResult()
+                .addOrder(Order.asc('id')).uniqueResult()
     }
 }

@@ -16,7 +16,7 @@ abstract class AbstractModel {
     Long id
 
     @Column(name='createdAt', nullable=false)
-    protected DateTime createdAt = DateTime.now()
+    protected DateTime createdAt = DateTime.now().withMillisOfSecond(0)
 
     @Column(name='deletedAt')
     protected DateTime deletedAt

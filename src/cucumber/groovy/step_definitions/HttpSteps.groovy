@@ -81,10 +81,12 @@ Then(~/^the response body should be:$/) { String expectedBody ->
 }
 
 Then(~/^the body should be JSON:$/) { String expectedBody ->
+
+
     ObjectMapper mapper = new ObjectMapper()
     String body = response.readEntity(String.class)
     templateVariables = [
-        'created_timestamp' : DateTime.now(),
+        'created_timestamp' : DateTime.now().withMillisOfSecond(0),
     ]
     expectedBody = processTemplate(expectedBody, templateVariables)
 

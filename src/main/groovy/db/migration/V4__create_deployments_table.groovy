@@ -28,7 +28,24 @@ class V4__create_deployments_table extends DeployDBMigration {
         /*
          * Create deployments table
          */
-        commands += """
+        if (isPostgres(metadata.driverName)) {
+            commands += """
+            CREATE SEQUENCE deployments_id_seq;
+            CREATE TABLE deployments (
+                id BIGINT DEFAULT nextval('deployments_id_seq'),
+
+                artifactId BIGINT NOT NULL,
+                environment VARCHAR(8192) NOT NULL,
+                status INT NOT NULL,
+
+                createdAt TIMESTAMP,
+                deletedAt TIMESTAMP NULL,
+
+                PRIMARY KEY (id)
+            );
+        """
+        } else {
+            commands += """
             CREATE TABLE deployments (
                 id BIGINT AUTO_INCREMENT,
 
@@ -36,13 +53,13 @@ class V4__create_deployments_table extends DeployDBMigration {
                 environment VARCHAR(8192) NOT NULL,
                 status INT NOT NULL,
 
-                createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
+                createdAt TIMESTAMP,
                 deletedAt TIMESTAMP NULL,
 
                 PRIMARY KEY (id)
             );
         """
-
+        }
         /* Create index on deployments table */
         commands += """
             CREATE INDEX deploys_by_artifact ON deployments(artifactId);

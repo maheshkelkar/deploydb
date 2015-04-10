@@ -23,7 +23,7 @@ class PromotionResultDAO extends AbstractDAO<PromotionResult> {
         List<PromotionResult> promotionResults = criteria()
                 .setFirstResult(pageNumber)
                 .setMaxResults(perPageSize)
-                .addOrder(Order.desc('createdAt')).list()
+                .addOrder(Order.asc('id')).list()
         return promotionResults
     }
 

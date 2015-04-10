@@ -244,7 +244,7 @@ Feature: Deployment READ APIs
       }
     """
 
-  @freezetime
+  @freezetime 
   Scenario: Fetching deployment based on artifact id
 
     Given there are deployments for artifacts

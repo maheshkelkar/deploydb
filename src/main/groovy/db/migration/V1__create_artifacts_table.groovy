@@ -28,7 +28,22 @@ class V1__create_artifacts_table extends DeployDBMigration {
         /*
          * Add artifacts table
          */
-        commands += """
+        /* Change groupName data type*/
+        if (isPostgres(metadata.driverName)) {
+            commands += """
+            CREATE SEQUENCE artifacts_id_seq;
+            CREATE TABLE artifacts (
+                id BIGINT DEFAULT nextval('artifacts_id_seq'),
+
+                groupName TEXT NOT NULL,
+
+                name TEXT NOT NULL,
+
+                PRIMARY KEY (id)
+            );
+        """
+        } else {
+            commands += """
             CREATE TABLE artifacts (
                 id BIGINT AUTO_INCREMENT,
 
@@ -39,7 +54,7 @@ class V1__create_artifacts_table extends DeployDBMigration {
                 PRIMARY KEY (id)
             );
         """
-
+        }
         return commands
     }
 }

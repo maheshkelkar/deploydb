@@ -28,6 +28,26 @@ class V6__create_promotion_results_table extends DeployDBMigration {
         /*
          * Create promotionResults table
          */
+        if (isPostgres(metadata.driverName)) {
+            commands += """
+            CREATE SEQUENCE promotion_results_id_seq;
+            CREATE TABLE promotionResults (
+                id BIGINT DEFAULT nextval('promotion_results_id_seq'),
+
+                promotion VARCHAR(8192) NOT NULL,
+                status INT NOT NULL,
+                infoUrl TEXT,
+                deploymentId BIGINT NOT NULL,
+
+                createdAt TIMESTAMP,
+                deletedAt TIMESTAMP NULL,
+
+                PRIMARY KEY (id),
+                FOREIGN KEY (deploymentId) REFERENCES deployments(id)
+            );
+        """
+
+        } else {
         commands += """
             CREATE TABLE promotionResults (
                 id BIGINT AUTO_INCREMENT,
@@ -37,13 +57,14 @@ class V6__create_promotion_results_table extends DeployDBMigration {
                 infoUrl TEXT,
                 deploymentId BIGINT NOT NULL,
 
-                createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
+                createdAt TIMESTAMP,
                 deletedAt TIMESTAMP NULL,
 
                 PRIMARY KEY (id),
                 FOREIGN KEY (deploymentId) REFERENCES deployments(id)
             );
         """
+        }
 
         /* Create index on deployments table */
         commands += """
