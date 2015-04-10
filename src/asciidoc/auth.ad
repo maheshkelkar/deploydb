@@ -1,21 +1,8 @@
 = #DeployDB Authentication
 
-== Types of REST API Authentication:
-
-=== No Authentication
-* Authentication is NOT performed for the REST APIs
-* The credentials passed with the REST API are ignored
-* This is a default setting
-
-[source,yaml]
-.deploydb.launch.yml
-----
-authentication:
-  type: none
-----
-
-=== Basic Authentication for Administrator
-* This can be only enabled for REST APIs over the admin port
+== Basic Authentication for Administrator
+* Following configuration enables basic authentication for REST APIs available
+  over the admin port.
 
 [source,yaml]
 .deploydb.launch.yml
@@ -25,65 +12,32 @@ http:
   adminPassword: password1234
 ----
 
-=== Basic Authentication
-* This can be enabled for Admin and/or User level REST APIs
+== LDAP Authentication
+* LDAP Authentication can be enabled on REST APIs using following
+  https://github.com/yammer/dropwizard-auth-ldap/blob/master/README.md#configuration[configuration]
+* The cache-policy should be configured to improve application's performance.
 
 [source,yaml]
 .deploydb.launch.yml
 ----
-authentication
-  type: basic
-  admin:
-    admin_user1 : admin_password1
-    admin_user2 : admin_password2
-  user:
-    user1 : password1
-    user2 : password2
+ldap:
+  uri: ldaps://myldap.com:636
+  # Cache 10000 credentials for at least 10 minutes
+  cachePolicy: maximumSize=10000, expireAfterWrite=10m
+  userFilter: ou=people,dc=yourcompany,dc=com
+  groupFilter: ou=groups,dc=yourcompany,dc=com
+  userNameAttribute: cn
+  groupNameAttribute: cn
+  groupMembershipAttribute: memberUid
+  groupClassName: posixGroup
+  # Restrict groups to the following
+  restrictToGroups:
+    - user
+    - admin
+    - bots
+  connectTimeout: 500ms
+  readTimeout: 500ms
 ----
-
-=== LDAP Authentication
-* This is configured in conjunction with
-  https://github.com/yammer/dropwizard-auth-ldap/blob/master/README.md#configuration[ldap configuration]
-* The adminGroupName can be provided to validate the user against it.
-* The cache-policy should be configured to improve our application's performance.
-
-[source,yaml]
-.deploydb.launch.yml
-----
-authentication
-  type: ldap
-  adminGroupName: adminGroupLevel
-
-  ldap:
-    uri: ldaps://myldap.com:636
-    # Cache 10000 credentials for at least 10 minutes
-    cachePolicy: maximumSize=10000, expireAfterWrite=10m
-    userFilter: ou=people,dc=yourcompany,dc=com
-    groupFilter: ou=groups,dc=yourcompany,dc=com
-    userNameAttribute: cn
-    groupNameAttribute: cn
-    groupMembershipAttribute: memberUid
-    groupClassName: posixGroup
-    restrictToGroups:
-        - user
-        - admin
-        - bots
-    connectTimeout: 500ms
-    readTimeout: 500ms
-----
-
-
-=== Credentials for outbound REST calls
-* These credentials are used for all the REST calls initiated by DeployDB.
-
-[source,yaml]
-.deploydb.launch.yml
-----
-authentication:
-  outbound:
-    username1 : password1
-----
-
 
 == Security
 * The http://www.dropwizard.io/manual/configuration.html#https[https] can be enabled
