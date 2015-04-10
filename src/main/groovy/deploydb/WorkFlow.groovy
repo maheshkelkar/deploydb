@@ -357,6 +357,11 @@ class WorkFlow {
      */
     void triggerArtifactCreated(models.Artifact artifact) {
 
+        /* if artifacts already exists, send 409 back  */
+        if (artifactDAO.artifactExists(artifact.group, artifact.name, artifact.version)) {
+            throw new WebApplicationException(Response.Status.CONFLICT)
+        }
+
         /* Lookup Service(s) */
         List<models.Service> services = this.serviceRegistry.getAll().findAll() { models.Service service ->
             service.artifacts.find() { String artifactIdent ->

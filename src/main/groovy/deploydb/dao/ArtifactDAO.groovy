@@ -69,4 +69,9 @@ class ArtifactDAO extends AbstractDAO<Artifact> {
         return artifacts
     }
 
+    boolean artifactExists(String group, String name, String version) {
+        return criteria().add(Restrictions.eq('group', group))
+                  .add(Restrictions.eq('name', name))
+                  .add(Restrictions.eq('version', version)).uniqueResult() == null ? false: true
+    }
 }
