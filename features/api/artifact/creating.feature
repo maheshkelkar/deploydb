@@ -199,3 +199,18 @@ Feature: Artifact CREATE APIs
       }
     """
     Then the response should be 404
+
+    @error
+    Scenario: Creating an existing artifact should fail
+
+     Given there is an artifact
+     When I POST to "/api/artifacts" with:
+    """
+      {
+        "group" : "com.example.cucumber",
+        "name" : "cucumber-artifact",
+        "version" : "1.0.1",
+        "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar"
+      }
+    """
+    Then the response should be 409
