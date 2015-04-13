@@ -20,3 +20,10 @@ Given(~/^a pipeline is configured$/) { ->
         pipelineRegistry.put(a.ident, a)
     }
 }
+
+Given(~/^a multi environment pipeline is configured$/) { ->
+    withPipelineRegistry { ModelRegistry<Pipeline> pipelineRegistry ->
+        Pipeline a = samplePipeline2()
+        pipelineRegistry.put(a.ident, a)
+    }
+}

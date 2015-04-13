@@ -140,3 +140,41 @@ And(~/there is a deployment in "(.*?)" state$/) { String deploymentState ->
         fdao.persist(f)
     }
 }
+
+And(~/the first deployments is in "(.*?)" state$/) { String deploymentState ->
+
+    withSession {
+
+        /**
+         * Create sample artifact
+         */
+        ArtifactDAO adao = new ArtifactDAO(sessionFactory)
+        Artifact a1 = sampleArtifact()
+        adao.persist(a1)
+
+        /**
+         * Create sample promotionResult(s)
+         */
+        PromotionResult p1 = new PromotionResult("status-check", Status.STARTED, null)
+        PromotionResult p2 = new PromotionResult("jenkins-smoke", Status.STARTED, null)
+        /**
+         * Create deployments
+         */
+        Deployment d1 = sampleDeployment(a1, "integ", Status."${deploymentState}")
+        d1.addPromotionResult(p1)
+
+        Deployment d2 = sampleDeployment(a1, "prod", Status.NOT_STARTED)
+        d2.addPromotionResult(p2)
+
+        /* Create a flow */
+        Flow f = new Flow(a1, "faas", "0xdead")
+        f.addDeployment(d1)
+        f.addDeployment(d2)
+
+        /**
+         * Save flow in DB, which will save the deployments & promotionResults as well
+         */
+        FlowDAO fdao = new FlowDAO(sessionFactory)
+        fdao.persist(f)
+    }
+}

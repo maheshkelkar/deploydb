@@ -68,6 +68,19 @@ class ModelHelper {
     }
 
 
+    /**
+     * Creates a sample environment object
+     */
+    deploydb.models.Environment sampleEnvironment2() {
+        Webhook webhook = new Webhook()
+        deploydb.models.Environment environment =
+                new deploydb.models.Environment('prod',
+                        'DeployDB Primary Integration',
+                        webhook)
+
+        return environment
+    }
+
 
     /**
      * Creates a sample pipeline object
@@ -75,12 +88,30 @@ class ModelHelper {
     Pipeline samplePipeline1() {
          deploydb.models.pipeline.Environment  environment =
                  new deploydb.models.pipeline.Environment(["status-check"])
+
          Pipeline pipeline = new Pipeline('devtoprod',
                 'Development to Production',
                 ["integ" : environment ])
 
         return pipeline
     }
+
+    /**
+     * Creates a multi environment pipeline object
+     */
+    Pipeline samplePipeline2() {
+        deploydb.models.pipeline.Environment  environment =
+                new deploydb.models.pipeline.Environment(["status-check"])
+        deploydb.models.pipeline.Environment  environment1 =
+                new deploydb.models.pipeline.Environment(["jenkins-smoke"])
+
+        Pipeline pipeline = new Pipeline('devtoprod',
+                'Development to Production',
+                ["integ" : environment, "prod": environment1 ])
+
+        return pipeline
+    }
+
 
     Deployment sampleDeployment(Artifact a, String env, deploydb.Status s) {
         deploydb.models.Deployment deployment = new deploydb.models.Deployment(a,
