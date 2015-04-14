@@ -1,0 +1,45 @@
+= #DeployDB Authentication
+
+== Basic Authentication for Administrator
+* Following configuration enables basic authentication for REST APIs available
+  over the admin port.
+
+[source,yaml]
+.deploydb.launch.yml
+----
+http:
+  adminUsername: admin1234
+  adminPassword: password1234
+----
+
+== LDAP Authentication
+* LDAP Authentication can be enabled on REST APIs using following
+  https://github.com/yammer/dropwizard-auth-ldap/blob/master/README.md#configuration[configuration]
+* The cache-policy should be configured to improve application's performance.
+
+[source,yaml]
+.deploydb.launch.yml
+----
+ldap:
+  uri: ldaps://myldap.com:636
+  # Cache 10000 credentials for at least 10 minutes
+  cachePolicy: maximumSize=10000, expireAfterWrite=10m
+  userFilter: ou=people,dc=yourcompany,dc=com
+  groupFilter: ou=groups,dc=yourcompany,dc=com
+  userNameAttribute: cn
+  groupNameAttribute: cn
+  groupMembershipAttribute: memberUid
+  groupClassName: posixGroup
+  # Restrict groups to the following
+  restrictToGroups:
+    - user
+    - admin
+    - bots
+  connectTimeout: 500ms
+  readTimeout: 500ms
+----
+
+== Security
+* The http://www.dropwizard.io/manual/configuration.html#https[https] can be enabled
+  in the launch config for end-to-end security
+* All of the REST APIs are available over HTTPS.

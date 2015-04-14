@@ -20,6 +20,7 @@ image:https://travis-ci.org/lookout/deploydb.svg?branch=master["Build Status", l
 * link:groovydoc/index.html[Groovydocs]
 * <<internals.ad#,Data model/Internals>>
 * <<config.ad#,Configuration>>
+* <<auth.ad#,Authentication>>
 * <<workflow.ad#,Workflow>>
 * <<webui.ad#,Web UI Design/concepts>>
 
