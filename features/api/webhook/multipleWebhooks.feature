@@ -565,3 +565,93 @@ Feature: Webhook invocation  when deployment is created with multiple webhooks
         }
       }
     """
+
+  @freezetime @webhook
+  Scenario: webhooks should be invoked for first environment in a pipeline
+    Given an deployment environment webhook "created" configuration named "integ":
+    """
+    description: "DeployDB Primary Integration"
+    webhook:
+      deployment:
+        created:
+          - http://localhost:10000/job/notify-deployment-started/build
+      promotion:
+        completed:
+          - http://localhost:10000/job/notify-promotion-completed/build
+    """
+    And an deployment environment webhook "created" configuration named "prod":
+    """
+    description: "DeployDB Primary Integration"
+    webhook:
+      deployment:
+        created:
+          - http://localhost:10000/job/prod-notify-deployment-started/build
+    """
+    And promotions are configured
+    And a multi environment pipeline is configured
+    And a service is configured
+    When I POST to "/api/artifacts" with an artifact
+    Then the webhook should be invoked with the JSON:
+    """
+      {
+        "id" : 1,
+        "artifact" : {
+          "id" : 1,
+          "group" : "com.example.cucumber",
+          "name" : "cukes",
+          "version" : "1.0.1",
+          "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar",
+          "createdAt" : "{{created_timestamp}}"
+        },
+        "status" : "CREATED",
+        "service" : "faas",
+        "environment" : "integ",
+        "createdAt" : "{{created_timestamp}}"
+      }
+    """
+
+  @freezetime @webhook
+  Scenario: webhooks should be invoked for second environment in a pipeline
+    Given an deployment environment webhook "created" configuration named "integ":
+    """
+    description: "DeployDB Primary Integration"
+    webhook:
+      deployment:
+        created:
+          - http://localhost:10000/job/notify-deployment-started/build
+    """
+    And an deployment environment webhook "created" configuration named "prod":
+    """
+    description: "DeployDB Primary Integration"
+    webhook:
+      deployment:
+        created:
+          - http://localhost:10000/job/prod-notify-deployment-started/build
+    """
+    And the first deployments is in "COMPLETED" state
+    When I POST to "/api/deployments/1/promotions" with:
+    """
+      {
+        "name"  : "status-check",
+        "status" : "SUCCESS",
+        "infoUrl" : "http://local.lookout.com/jenkins/job-id/2/results"
+      }
+    """
+    Then the webhook should be invoked with the JSON:
+    """
+      {
+        "id" : 2,
+        "artifact" : {
+          "id" : 1,
+          "group" : "com.example.cucumber",
+          "name" : "cucumber-artifact",
+          "version" : "1.0.1",
+          "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar",
+          "createdAt" : "{{created_timestamp}}"
+        },
+        "status" : "CREATED",
+        "service" : "faas",
+        "environment" : "prod",
+        "createdAt" : "{{created_timestamp}}"
+      }
+    """

@@ -13,6 +13,7 @@ import javax.persistence.JoinColumn
 import javax.persistence.OneToMany
 import javax.persistence.OneToOne
 import javax.persistence.Table
+//import java.util.LinkedHashSet
 
 
 /**
@@ -31,7 +32,7 @@ class Flow extends AbstractModel {
     @OneToMany(cascade = CascadeType.ALL, fetch=FetchType.EAGER, mappedBy = "flow")
     @JsonProperty
     @javax.persistence.OrderBy("id")
-    Set<Deployment> deployments = new HashSet<Deployment>()
+    Set<Deployment> deployments = new LinkedHashSet<Deployment>()
 
     @Column(name="service")
     @JsonProperty(value = "service")
