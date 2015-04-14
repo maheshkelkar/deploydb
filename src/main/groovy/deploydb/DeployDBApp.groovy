@@ -4,6 +4,10 @@ import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableMap
 import io.dropwizard.Application
 import io.dropwizard.assets.AssetsBundle
+import io.dropwizard.auth.AuthFactory
+import io.dropwizard.auth.basic.BasicAuthFactory
+import io.dropwizard.auth.basic.BasicCredentials
+import io.dropwizard.auth.CachingAuthenticator
 import io.dropwizard.cli.CheckCommand
 import io.dropwizard.cli.Cli
 import io.dropwizard.cli.ServerCommand
@@ -166,6 +170,17 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
 
         /** Add admin task for config reload */
         environment.admin().addTask(new ConfigReloadTask(workFlow))
+
+        /** Register Ldap Authentication */
+        auth.LdapConfiguration ldapConfiguration = configuration.getLdapConfiguration()
+        CachingAuthenticator<BasicCredentials, auth.User> authenticator = new CachingAuthenticator<>(
+                environment.metrics(),
+                new auth.LdapAuthenticator(ldapConfiguration),
+                ldapConfiguration.cachePolicy)
+        environment.jersey().register(
+                AuthFactory.binder(new BasicAuthFactory<auth.User>(authenticator,
+                        "Please enter the user credentials",
+                        auth.User.class)))
 
         /**
          * Instantiate Resources classes for Jersey handlers

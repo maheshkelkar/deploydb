@@ -13,6 +13,7 @@ import javax.ws.rs.client.Client
 import javax.ws.rs.client.ClientBuilder
 import org.glassfish.jersey.apache.connector.ApacheConnectorProvider
 import org.glassfish.jersey.client.JerseyInvocation
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature
 import javax.ws.rs.core.Response
 import javax.ws.rs.client.Entity
 
@@ -24,6 +25,7 @@ class AppHelper {
     private StubAppRunner runner = null
     private Client jerseyClient = null
     private WebhookTestServerAppRunner webhookRunner = null
+    private TestLdapServer testLdapServer = null
 
     SessionFactory getSessionFactory() {
         return this.runner.sessionFactory
@@ -122,7 +124,8 @@ class AppHelper {
 
     Client getClient() {
         if (this.jerseyClient == null) {
-            ClientConfig clientConfig = new ClientConfig()
+            HttpAuthenticationFeature feature = HttpAuthenticationFeature.basicBuilder().build();
+            ClientConfig clientConfig = new ClientConfig(feature)
             clientConfig.connectorProvider(new ApacheConnectorProvider())
             this.jerseyClient = ClientBuilder.newClient(clientConfig)
         }
@@ -145,9 +148,11 @@ class AppHelper {
     }
 
     JerseyInvocation makeRequestToPath(String path, String method, Entity entity, Boolean isAdmin) {
-        return client.target(urlWithPort(path, isAdmin))
+        return getClient().target(urlWithPort(path, isAdmin))
                      .request()
                      .build(method, entity)
+                     .property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_USERNAME, "peter")
+                     .property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_PASSWORD, "griffin")
     }
 
     /**
@@ -222,12 +227,17 @@ class AppHelper {
         }
         this.runner = new StubAppRunner(DeployDBApp.class, config)
         this.runner.start()
+        this.testLdapServer = new TestLdapServer()
+        this.testLdapServer.start()
     }
 
 
     void stopApp() {
         if (this.runner != null) {
             this.runner.stop()
+        }
+        if (this.testLdapServer != null) {
+            this.testLdapServer.stop()
         }
     }
 

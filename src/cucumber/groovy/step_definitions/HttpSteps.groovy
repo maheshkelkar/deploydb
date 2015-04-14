@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import deploydb.WorkFlow
 import org.glassfish.jersey.client.JerseyInvocation
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature
 import org.joda.time.DateTime
 
 // Add functions to register hooks and steps to this script.
@@ -67,7 +68,10 @@ When(~/^I GET "(.*?)" with custom headers:$/) { String path, DataTable headers -
         builder.header(row[0] as String, row[1] as Object)
     }
 
-    response = builder.build('GET', null).invoke()
+    response = builder.build('GET', null)
+            .property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_USERNAME, "peter")
+            .property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_PASSWORD, "griffin")
+            .invoke()
 }
 
 

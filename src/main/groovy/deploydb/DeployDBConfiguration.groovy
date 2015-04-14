@@ -1,14 +1,14 @@
 package deploydb
 
+import com.github.lookout.whoas.WhoasFactory
+import com.google.common.collect.ImmutableMap
+import com.fasterxml.jackson.annotation.JsonProperty
 import io.dropwizard.Configuration
 import io.dropwizard.db.DataSourceFactory
 import io.dropwizard.flyway.FlywayFactory
-import com.github.lookout.whoas.WhoasFactory
-
-import com.google.common.collect.ImmutableMap
-import com.fasterxml.jackson.annotation.JsonProperty
 import javax.validation.Valid
 import javax.validation.constraints.NotNull
+
 
 class DeployDBConfiguration extends Configuration {
     @Valid
@@ -24,6 +24,9 @@ class DeployDBConfiguration extends Configuration {
     @Valid
     @NotNull
     private String configDirectory = ""
+
+    @Valid
+    private auth.LdapConfiguration ldapConfiguration = new auth.LdapConfiguration()
 
     private ImmutableMap<String, ImmutableMap<String, String>> \
                             viewRendererConfiguration = ImmutableMap.of()
@@ -66,6 +69,16 @@ class DeployDBConfiguration extends Configuration {
     @JsonProperty("whoas")
     void setWhoasFactory(WhoasFactory whoasFactory) {
         this.whoasFactory = whoasFactory
+    }
+
+    @JsonProperty("ldap")
+    auth.LdapConfiguration getLdapConfiguration() {
+        return ldapConfiguration
+    }
+
+    @JsonProperty("ldap")
+    void setLdapConfiguration(auth.LdapConfiguration ldapConfiguration) {
+        this.ldapConfiguration = ldapConfiguration;
     }
 
     ImmutableMap<String, ImmutableMap<String, String>> getViewRendererConfiguration() {

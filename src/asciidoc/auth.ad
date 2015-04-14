@@ -1,6 +1,6 @@
 = #DeployDB Authentication
 
-== Basic Authentication for Administrator
+== Basic HTTP Authentication for Administrator
 * Following configuration enables basic authentication for REST APIs available
   over the admin port.
 
@@ -12,29 +12,27 @@ http:
   adminPassword: password1234
 ----
 
-== LDAP Authentication
-* LDAP Authentication can be enabled on REST APIs using following
-  https://github.com/yammer/dropwizard-auth-ldap/blob/master/README.md#configuration[configuration]
-* The cache-policy should be configured to improve application's performance.
+== LDAP Authentication for Users
+* LDAP Authentication can be enabled on REST APIs using following configuration
+* The cache-policy should be configured to improve application's performance. More details can be found at
+  http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/cache/CacheBuilderSpec.html
+  [CacheBuilderSpec]
 
 [source,yaml]
 .deploydb.launch.yml
 ----
 ldap:
-  uri: ldaps://myldap.com:636
+  uri: ldap://server.lookout.com:10389
   # Cache 10000 credentials for at least 10 minutes
   cachePolicy: maximumSize=10000, expireAfterWrite=10m
   userFilter: ou=people,dc=yourcompany,dc=com
   groupFilter: ou=groups,dc=yourcompany,dc=com
   userNameAttribute: cn
   groupNameAttribute: cn
+  # Attribute that defines the association
   groupMembershipAttribute: memberUid
+  # Filter groups by ObjectClass associated with group
   groupClassName: posixGroup
-  # Restrict groups to the following
-  restrictToGroups:
-    - user
-    - admin
-    - bots
   connectTimeout: 500ms
   readTimeout: 500ms
 ----

@@ -1,20 +1,18 @@
 package deploydb.resources
 
 import com.codahale.metrics.annotation.Timed
-
 import deploydb.Status
 import deploydb.WorkFlow
+import deploydb.auth.User
 import deploydb.mappers.PromotionResultAddMapper
 import deploydb.models.Deployment
 import deploydb.models.PromotionResult
 import deploydb.mappers.DeploymentUpdateMapper
-
+import io.dropwizard.auth.Auth
 import io.dropwizard.jersey.params.IntParam
 import io.dropwizard.jersey.params.LongParam
 import io.dropwizard.jersey.PATCH
 import io.dropwizard.hibernate.UnitOfWork
-import org.apache.commons.lang3.tuple.Pair
-
 import javax.servlet.http.HttpServletRequest
 import javax.validation.Valid
 import javax.ws.rs.Consumes
@@ -29,6 +27,7 @@ import javax.ws.rs.WebApplicationException
 import javax.ws.rs.core.Context
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
+import org.apache.commons.lang3.tuple.Pair
 
 
 @Path("/api/deployments")
@@ -47,11 +46,10 @@ public class DeploymentResource {
     @GET
     @UnitOfWork
     @Timed(name = "get-requests")
-    List<Deployment> getAll(
+    List<Deployment> getAll(@Auth User user,
             @QueryParam("pageNumber") @DefaultValue("0") IntParam pageNumber,
             @QueryParam("perPageSize") @DefaultValue("20") deploydb.ModelPageSizeParam
                     perPageSize) {
-
         /**
          * Fetch deployment by page
          */
