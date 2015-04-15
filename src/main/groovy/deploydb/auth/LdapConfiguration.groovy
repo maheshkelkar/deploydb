@@ -3,13 +3,12 @@ package deploydb.auth
 import com.google.common.cache.CacheBuilderSpec
 import io.dropwizard.util.Duration
 import javax.validation.Valid
-import javax.validation.constraints.NotNull
 
 
 class LdapConfiguration {
-    @NotNull
+
     @Valid
-    private URI uri = URI.create("ldap://hackers.lookout.com:636")
+    private URI uri = null
 
     @Valid
     private CacheBuilderSpec cachePolicy = CacheBuilderSpec.disableCaching()
@@ -26,8 +25,10 @@ class LdapConfiguration {
 
     private String groupClassName = "posixGroup"
 
+    @Valid
     private Duration connectTimeout = Duration.milliseconds(500)
 
+    @Valid
     private Duration readTimeout = Duration.milliseconds(500)
 
     URI getUri() {

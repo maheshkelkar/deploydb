@@ -173,14 +173,16 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
 
         /** Register Ldap Authentication */
         auth.LdapConfiguration ldapConfiguration = configuration.getLdapConfiguration()
-        CachingAuthenticator<BasicCredentials, auth.User> authenticator = new CachingAuthenticator<>(
-                environment.metrics(),
-                new auth.LdapAuthenticator(ldapConfiguration),
-                ldapConfiguration.cachePolicy)
-        environment.jersey().register(
-                AuthFactory.binder(new BasicAuthFactory<auth.User>(authenticator,
-                        "Please enter the user credentials",
-                        auth.User.class)))
+        if (ldapConfiguration.uri != null) {
+            CachingAuthenticator<BasicCredentials, auth.User> authenticator = new CachingAuthenticator<>(
+                    environment.metrics(),
+                    new auth.LdapAuthenticator(ldapConfiguration),
+                    ldapConfiguration.cachePolicy)
+            environment.jersey().register(
+                    AuthFactory.binder(new BasicAuthFactory<auth.User>(authenticator,
+                            "Please enter the user credentials",
+                            auth.User.class)))
+        }
 
         /**
          * Instantiate Resources classes for Jersey handlers
