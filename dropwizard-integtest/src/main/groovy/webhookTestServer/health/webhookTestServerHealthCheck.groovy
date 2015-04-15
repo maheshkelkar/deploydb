@@ -1,4 +1,4 @@
-package webhookTestServer.health
+package dropwizardintegtest
 
 
 import com.codahale.metrics.health.HealthCheck

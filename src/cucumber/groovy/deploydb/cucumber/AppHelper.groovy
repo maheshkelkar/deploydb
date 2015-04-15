@@ -1,10 +1,6 @@
-package deploydb.cucumber
+package deploydb
 
-import deploydb.DeployDBApp
-import deploydb.ModelLoader
 import deploydb.models.Webhook.Webhook
-import webhookTestServer.webhookTestServerApp
-
 import com.github.mustachejava.DefaultMustacheFactory
 import com.github.mustachejava.Mustache
 
@@ -19,6 +15,8 @@ import javax.ws.rs.client.Entity
 import org.hibernate.Session
 import org.hibernate.SessionFactory
 import org.hibernate.context.internal.ManagedSessionContext
+import dropwizardintegtest.WebhookTestServerAppRunner
+import dropwizardintegtest.webhookTestServerApp
 
 class AppHelper {
     private StubAppRunner runner = null

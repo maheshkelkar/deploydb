@@ -59,6 +59,7 @@ dependencies {
     testCompile 'cglib:cglib-nodep:2.2.+'
 
     cucumberCompile 'info.cukes:cucumber-groovy:1.2.+'
+    cucumberCompile project(':dropwizard-integtest')
 
     codenarc(
             "org.codenarc:CodeNarc:0.22",

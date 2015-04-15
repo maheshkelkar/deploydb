@@ -1,4 +1,4 @@
-package deploydb.cucumber
+package dropwizardintegtest
 
 import com.google.common.base.Strings
 import com.google.common.collect.ImmutableMap
@@ -12,8 +12,6 @@ import io.dropwizard.testing.ConfigOverride
 import net.sourceforge.argparse4j.inf.Namespace
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.ServerConnector
-import webhookTestServer.models.RequestWebhookObject
-import webhookTestServer.models.ResponseWebhookObject
 
 import javax.annotation.Nullable
 

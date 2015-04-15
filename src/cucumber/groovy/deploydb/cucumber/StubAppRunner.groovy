@@ -1,9 +1,7 @@
-package deploydb.cucumber
+package deploydb
 
 import com.google.common.base.Strings
 import com.google.common.collect.ImmutableMap
-import deploydb.WebhookManager
-import deploydb.WorkFlow
 import io.dropwizard.Application
 import io.dropwizard.Configuration
 import io.dropwizard.cli.ServerCommand

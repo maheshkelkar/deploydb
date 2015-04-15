@@ -13,8 +13,8 @@ import deploydb.models.Webhook.Webhook
 import deploydb.registry.ModelRegistry
 import org.joda.time.DateTime
 import cucumber.api.DataTable
-import webhookTestServer.models.RequestWebhookObject
 
+import dropwizardintegtest.RequestWebhookObject
 
 Given(~/^a (.*?) webhook "(.*?)" configuration:$/) { String webhookType,
                                                      String eventType, String configBody ->
