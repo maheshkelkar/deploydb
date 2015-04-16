@@ -15,8 +15,10 @@ import javax.ws.rs.client.Entity
 import org.hibernate.Session
 import org.hibernate.SessionFactory
 import org.hibernate.context.internal.ManagedSessionContext
+import dropwizardintegtest.StubAppRunner
 import dropwizardintegtest.WebhookTestServerAppRunner
 import dropwizardintegtest.webhookTestServerApp
+
 
 class AppHelper {
     private StubAppRunner runner = null
@@ -50,7 +52,7 @@ class AppHelper {
      * @param c (required) Closure to execute
      */
     void withServiceRegistry(Closure c) {
-        c.call(this.runner.workFlow.serviceRegistry)
+        c.call(this.runner.getApplication().workFlow.serviceRegistry)
     }
 
     /**
@@ -59,7 +61,7 @@ class AppHelper {
      * @param c (required) Closure to execute
      */
     void withEnvironmentRegistry(Closure c) {
-        c.call(this.runner.workFlow.environmentRegistry)
+        c.call(this.runner.getApplication().workFlow.environmentRegistry)
     }
 
     /**
@@ -68,7 +70,7 @@ class AppHelper {
      * @param c (required) Closure to execute
      */
     void withPromotionRegistry(Closure c) {
-        c.call(this.runner.workFlow.promotionRegistry)
+        c.call(this.runner.getApplication().workFlow.promotionRegistry)
     }
 
    /**
@@ -77,7 +79,7 @@ class AppHelper {
     * @param c (required) Closure to execute
     */
     void withPipelineRegistry(Closure c) {
-        c.call(this.runner.workFlow.pipelineRegistry)
+        c.call(this.runner.getApplication().workFlow.pipelineRegistry)
     }
 
     /**
@@ -86,11 +88,11 @@ class AppHelper {
      * @param c (required) Closure to execute
      */
     void withWorkFlow(Closure c) {
-        c.call(this.runner.workFlow)
+        c.call(this.runner.getApplication().workFlow)
     }
 
     /**
-     *  Execute the {@link Closure} with a proper WebhookManager
+     *  Execute the {@link Closure} with a proper TestWebhookServer
      *
      * @param c (required) Closure to execute
      */
@@ -187,14 +189,16 @@ class AppHelper {
          * For a valid webhook configuration, deployment and promotion are valid objects
          */
         if (webhook != null && webhook.deployment != null) {
-            eventUrlList = this.runner.webhookManager.getMemberOfObject(webhook.deployment, eventType)
+            eventUrlList = this.runner.getApplication().webhooksManager.getMemberOfObject(
+                    webhook.deployment, eventType)
         }
         if (webhook != null && webhook.promotion != null) {
             /*
              * Only event type valid for promotion is "completed", ignore all other types
              */
             if (eventType == "completed") {
-                eventUrlList += this.runner.webhookManager.getMemberOfObject(webhook.promotion, eventType)
+                eventUrlList += this.runner.getApplication().webhooksManager.getMemberOfObject(
+                        webhook.promotion, eventType)
             }
         }
 

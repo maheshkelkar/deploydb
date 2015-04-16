@@ -1,4 +1,4 @@
-package deploydb
+package dropwizardintegtest
 
 import com.google.common.base.Strings
 import com.google.common.collect.ImmutableMap
@@ -31,8 +31,6 @@ public class StubAppRunner<C extends Configuration> {
     private Environment environment
     private Server jettyServer
     private SessionFactory sessionFactory
-    private WorkFlow workFlow
-    private WebhookManager webhookManager
 
     public StubAppRunner(Class<? extends Application<C>> applicationClass,
                         @Nullable String configPath,
@@ -76,12 +74,6 @@ public class StubAppRunner<C extends Configuration> {
                              * it's up and running
                              */
                             sessionFactory = application.sessionFactory
-                            webhookManager = application.webhooksManager
-
-                            /**
-                             * Save workflow object
-                             */
-                            workFlow = application.workFlow
 
                             /**
                              * Setup config checksum for tests
