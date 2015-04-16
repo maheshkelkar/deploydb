@@ -8,7 +8,7 @@ Feature: Deployment READ APIs
   Scenario: Fetching all deployments
 
     Given there is a deployment
-    When I GET "/api/deployments"
+    When I GET "/api/deployments" with "peter:griffin" as credentials
     Then the response should be 200
     And the body should be JSON:
     """
@@ -35,6 +35,13 @@ Feature: Deployment READ APIs
         "createdAt" : "{{created_timestamp}}"
       }]
     """
+
+  @error
+  Scenario: Fetching all deployments with invalid credentials fails with unauthorized code
+
+    Given there is a deployment
+    When I GET "/api/deployments" with "peter:familyguy" as credentials
+    Then the response should be 401
 
 
   @freezetime
@@ -115,7 +122,7 @@ Feature: Deployment READ APIs
   Scenario: Fetching an deployment by the pageNumber and perPageSize
 
     Given there are deployments
-    When I GET "/api/deployments?pageNumber=0&perPageSize=5"
+    When I GET "/api/deployments?pageNumber=0&perPageSize=5" with "peter:griffin" as credentials
     Then the response should be 200
     And the body should be JSON:
     """
@@ -169,14 +176,14 @@ Feature: Deployment READ APIs
   @error
   Scenario: Fetching an deployment with invalid page number
 
-    When I GET "/api/deployments?pageNumber=1&perPageSize=5"
+    When I GET "/api/deployments?pageNumber=1&perPageSize=5" with "peter:griffin" as credentials
     Then the response should be 404
 
 
   @error
   Scenario: Fetching an deployment with invalid data type for pageSize
 
-    When I GET "/api/deployments?pageNumber=-1&perPageSize=0xdeadbeef"
+    When I GET "/api/deployments?pageNumber=-1&perPageSize=0xdeadbeef" with "peter:griffin" as credentials
     Then the response should be 400
 
 
@@ -329,7 +336,7 @@ Feature: Deployment READ APIs
   Scenario: Fetching an deployment by pageNumber=0 and perPageSize=0 returns 0 deployments
 
     Given there are deployments
-    When I GET "/api/deployments?pageNumber=0&perPageSize=0"
+    When I GET "/api/deployments?pageNumber=0&perPageSize=0" with "peter:griffin" as credentials
     Then the response should be 400
 
 

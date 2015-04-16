@@ -1,123 +1,81 @@
 package deploydb.auth
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.google.common.cache.CacheBuilderSpec
 import io.dropwizard.util.Duration
 import javax.validation.Valid
+import org.hibernate.validator.constraints.NotEmpty
 
 
+/**
+ * LdapConfiguration
+ *
+ * Contains LDAP specific configuration
+ *
+ * - All the attributes have defaults, hence none of these (except uri) can be null
+ * - @Valid on certain attributes ensures that contents are properly formatted
+ * - @NotEmpty ensures that user cannot skip configuring them
+ */
 class LdapConfiguration {
 
+    /**
+     * Uri to LDAP Server
+     *
+     * - Valid format: ldap://<hostname>:<optional port number>
+     * - "uri" can be null only if we are using default setting. In that case
+     *   no authentication is performed.
+     * - if "uri" is empty or invalid, then deploydb will attempt to connect and
+     *   authentication will fail
+     */
     @Valid
+    @JsonProperty
     private URI uri = null
 
-    @Valid
+    /** Cache policy cannot be null, but it can be empty i.e. no caching */
+    @JsonProperty
     private CacheBuilderSpec cachePolicy = CacheBuilderSpec.disableCaching()
 
+    @NotEmpty
+    @JsonProperty
     private String userFilter = "ou=people,dc=example,dc=com"
 
+    @NotEmpty
+    @JsonProperty
     private String groupFilter = "ou=groups,dc=example,dc=com"
 
+    @NotEmpty
+    @JsonProperty
     private String userNameAttribute = "cn"
 
+    @NotEmpty
+    @JsonProperty
     private String groupNameAttribute = "cn"
 
+    @NotEmpty
+    @JsonProperty
     private String groupMembershipAttribute = "memberUid"
 
+    @NotEmpty
+    @JsonProperty
     private String groupClassName = "posixGroup"
 
     @Valid
+    @JsonProperty
     private Duration connectTimeout = Duration.milliseconds(500)
 
     @Valid
+    @JsonProperty
     private Duration readTimeout = Duration.milliseconds(500)
 
-    URI getUri() {
-        return uri
-    }
-
-    LdapConfiguration setUri(URI uri) {
-        this.uri = uri
-        return this
-    }
-
-    CacheBuilderSpec getCachePolicy() {
-        return cachePolicy
-    }
-
-    LdapConfiguration setCachePolicy(CacheBuilderSpec cachePolicy) {
-        this.cachePolicy = cachePolicy
-        return this
-    }
-
-    String getUserFilter() {
-        return userFilter
-    }
-
-    LdapConfiguration setUserFilter(String userFilter) {
-        this.userFilter = userFilter
-        return this
-    }
-
-    String getGroupFilter() {
-        return groupFilter
-    }
-
-    LdapConfiguration setGroupFilter(String groupFilter) {
-        this.groupFilter = groupFilter
-        return this
-    }
-
-    String getUserNameAttribute() {
-        return userNameAttribute
-    }
-
-    LdapConfiguration setUserNameAttribute(String userNameAttribute) {
-        this.userNameAttribute = userNameAttribute
-        return this
-    }
-
-    String getGroupNameAttribute() {
-        return groupNameAttribute
-    }
-
-    LdapConfiguration setGroupNameAttribute(String groupNameAttribute) {
-        this.groupNameAttribute = groupNameAttribute
-        return this
-    }
-
-    String getGroupMembershipAttribute() {
-        return groupMembershipAttribute
-    }
-
-    LdapConfiguration setGroupMembershipAttribute(String groupMembershipAttribute) {
-        this.groupMembershipAttribute = groupMembershipAttribute
-        return this
-    }
-
-    String getGroupClassName() {
-        return groupClassName
-    }
-
-    LdapConfiguration setGroupClassName(String groupClassName) {
-        this.groupClassName = groupClassName
-        return this
-    }
-
-    Duration getConnectTimeout() {
-        return connectTimeout
-    }
-
-    LdapConfiguration setConnectTimeout(Duration connectTimeout) {
-        this.connectTimeout = connectTimeout
-        return this
-    }
-
-    Duration getReadTimeout() {
-        return readTimeout
-    }
-
-    LdapConfiguration setReadTimeout(Duration readTimeout) {
-        this.readTimeout = readTimeout
-        return this
+    /** Validate uri */
+    boolean isValidLdapUri() {
+        println "uri = ${uri.toString()}"
+        try {
+            URI u = URI.create(uri.toString());
+            return "ldap".equals(u.getScheme())
+        } catch (Exception ex) {
+            println "$uri - validation failed: " + ex.getMessage()
+        }
+        return false
     }
 }

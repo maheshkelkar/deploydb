@@ -63,7 +63,7 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
             new HibernateBundle<DeployDBConfiguration>(models, new SessionFactoryFactory()) {
                 @Override
                 DataSourceFactory getDataSourceFactory(DeployDBConfiguration config) {
-                    return config.getDataSourceFactory()
+                    return config.database
                 }
             }
 
@@ -91,12 +91,12 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
         bootstrap.addBundle(new FlywayBundle<DeployDBConfiguration>() {
             @Override
             DataSourceFactory getDataSourceFactory(DeployDBConfiguration config) {
-                return config.getDataSourceFactory()
+                return config.database
             }
 
             @Override
             FlywayFactory getFlywayFactory(DeployDBConfiguration config) {
-                return config.getFlywayFactory()
+                return config.flyway
             }
         })
 
@@ -172,12 +172,11 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
         environment.admin().addTask(new ConfigReloadTask(workFlow))
 
         /** Register Ldap Authentication */
-        auth.LdapConfiguration ldapConfiguration = configuration.getLdapConfiguration()
-        if (ldapConfiguration.uri != null) {
+        if (configuration.ldapConfiguration.uri) {
             CachingAuthenticator<BasicCredentials, auth.User> authenticator = new CachingAuthenticator<>(
                     environment.metrics(),
-                    new auth.LdapAuthenticator(ldapConfiguration),
-                    ldapConfiguration.cachePolicy)
+                    new auth.LdapAuthenticator(configuration.ldapConfiguration),
+                    configuration.ldapConfiguration.cachePolicy)
             environment.jersey().register(
                     AuthFactory.binder(new BasicAuthFactory<auth.User>(authenticator,
                             "Please enter the user credentials",

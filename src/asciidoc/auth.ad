@@ -22,7 +22,7 @@ http:
 .deploydb.launch.yml
 ----
 ldap:
-  uri: ldap://server.lookout.com:10389
+  uri: ldap://server.example.com:10389
   # Cache 10000 credentials for at least 10 minutes
   cachePolicy: maximumSize=10000, expireAfterWrite=10m
   userFilter: ou=people,dc=yourcompany,dc=com
