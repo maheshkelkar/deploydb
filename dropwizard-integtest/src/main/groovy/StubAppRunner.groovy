@@ -75,22 +75,23 @@ public class StubAppRunner<C extends Configuration> {
                              */
                             sessionFactory = application.sessionFactory
 
-                            /**
-                             * Setup config checksum for tests
-                             */
-                            application.configChecksum = "0xdead"
-
-                            /* We're running the DB migrations here to make sure we're running
-                            * them in the same classloader environment as the DeployDB
-                            * application, otherwise the Hibernate code running inside of
-                            * DeployDB won't be able to "see" the in-memory DB
-                            */
-                            Flyway flyway = configuration.flyway.build(
-                                    configuration.database.build(metricRegistry, "Flyway"))
-                            flyway.clean()
-                            flyway.migrate()
                         }
                     })
+
+                    /**
+                     * Setup config checksum for tests
+                     */
+                    application.configChecksum = "0xdead"
+
+                    /* We're running the DB migrations here to make sure we're running
+                    * them in the same classloader environment as the DeployDB
+                    * application, otherwise the Hibernate code running inside of
+                    * DeployDB won't be able to "see" the in-memory DB
+                    */
+                    Flyway flyway = configuration.flyway.build(
+                            configuration.database.build(metricRegistry, "Flyway"))
+                    flyway.clean()
+                    flyway.migrate()
 
                     StubAppRunner.this.configuration = configuration
                     StubAppRunner.this.environment = environment
