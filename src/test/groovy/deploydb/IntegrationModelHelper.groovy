@@ -9,6 +9,7 @@ class IntegrationModelHelper {
         integrationTestAppHelper = integTestAppHelper
     }
     boolean sendCreateArtifact() {
+        String path = "/api/artifacts"
         String messageBody = """
       {
         "group" : "basic.group.1",
@@ -17,8 +18,29 @@ class IntegrationModelHelper {
         "sourceUrl" : "http://example.com/cucumber.jar"
       }
     """
-        String path = "/api/artifacts"
         return (integrationTestAppHelper.postJsonToPath(path, messageBody, false)).status == 201
 
     }
+
+    boolean sendDeploymentStartedTrigger() {
+        String path = "/api/deployments/1"
+        String messageBody = """
+      {
+        "status" : "STARTED"
+      }
+     """
+        return (integrationTestAppHelper.patchJsonToPath(path, messageBody)).status == 200
+    }
+
+    boolean sendDeploymentCompletedTrigger() {
+        println("calling sendDeploymentCompletedTrigger")
+        String path = "/api/deployments/1"
+        String messageBody = """
+      {
+        "status" : "COMPLETED"
+      }
+     """
+        return (integrationTestAppHelper.patchJsonToPath(path, messageBody)).status == 200
+    }
+
 }
