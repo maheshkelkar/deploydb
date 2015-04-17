@@ -36,7 +36,7 @@ Feature: Deployment READ APIs
       }]
     """
 
-  @error
+  @error @wip
   Scenario: Fetching all deployments with invalid credentials fails with unauthorized code
 
     Given there is a deployment
