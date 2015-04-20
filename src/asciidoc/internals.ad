@@ -260,11 +260,7 @@ The corresponding implementation is defined as follows:
 
 [source,groovy]
 ----
-class BasicPromotionImpl extends class PromotionImpl {
-    boolean validateCredentials(User user, Map attributes) { true }
-    boolean onStarted(Map attributes) { true }
-    boolean onCompleted(Map attributes) { true }
-}
+include::src/main/groovy/deploydb/models/Promotion/PromotionImpl.groovy[]
 ----
 
 ==== Manual Promotion
@@ -292,6 +288,11 @@ The ManualPromotionImpl is defined as follows:
 
 [source,groovy]
 ----
+include::src/main/groovy/deploydb/models/Promotion/ManualPromotionImpl.groovy[]
+----
+
+Test
+----
 class ManualPromotionImpl extends class PromotionImpl {
     /* invoked on REST API */
     boolean validate(User user, Map attributes) {
@@ -302,61 +303,6 @@ class ManualPromotionImpl extends class PromotionImpl {
     /* invoked on Status transition to COMPLETED */
     boolean onCompleted() {  true }
 }
-----
-
-==== Webhook Promotion
-
-NOTE: work-in-progress
-
-`Webhook Promotion` is an example of self-sufficient Promotion that would make a
-HTTP GET request to the application and see if it's online before identifying
-it as "promoted." The yaml for such promotion may look as follows:
-
-[source,yaml]
-.promotions/status-check.yml
-----
-type: deploydb.models.Promotion.WebhookPromotionImpl
-description: Example of Webhook Promotion
-attributes:
-    url: /healhcheck
-    status: 200
-    timeout: 15
-----
-
-The corresponding implementation can be defined as follows:
-
-[source,groovy]
-----
-class WebhookPromotionImpl extends class PromotionImpl {
-    /* invoked on REST API */
-    boolean validateCredentials(User user, Map attributes) { true }
-    /* invoked on Status transition to STARTED */
-    boolean onStarted(Map attributes) {
-        /* do a GET on url specified in the attributes */
-        /* queue a HookRequest to self with the response from GET */
-    }
-    /* invoked on Status transition to COMPLETED */
-    boolean onCompleted() {  true }
-}
-----
-
-==== Jenkins Promotion
-
-NOTE: work-in-progress
-
-`Jenkins Promotion` as a typed concept would require a list of Jenkins job names
-that would be required to succeed in order to execute the promotion.
-
-[source,yaml]
-.promotions/jenkins-smoke.yml
-----
-type: deploydb.models.Promotion.JenkinsPromotionImpl
-description: Jenkins smoke
-attributes:
-    jobs :
-        - basic-smokes-test
-        - basic-perf-test
-        - end2end-smoke-test
 ----
 
 === Flow Diagram

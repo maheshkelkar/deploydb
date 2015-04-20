@@ -33,10 +33,9 @@ description: Basic Promotion Smoke Test
         promotionRegistry.put(promotion.ident, promotion)
 
         expect:
-        promotion.ident == "basic"
         promotion.type == 'deploydb.models.Promotion.BasicPromotion'
         promotion.description == "Basic Promotion Smoke Test"
-        //promotion.attributes.size() == 0
+        promotion.attributes.size() == 0
         promotionRegistry.get("basic") == promotion
         promotionRegistry.getAll()== [promotion]
         //User user = new User("foo", new HashSet())
@@ -56,11 +55,10 @@ attributes:
         promotionRegistry.put(promotion.ident, promotion)
 
         expect:
-        promotion.ident == "manualldap"
         promotion.type == 'deploydb.models.Promotion.ManualLDAPPromotion'
         promotion.description == "Manual LDAP Promotion Smoke Test"
-        //promotion.attributes.size() == 1
-        //promotion.attributes["allowedGroup"] == "fooGroup"
+        promotion.attributes.size() == 1
+        promotion.attributes["allowedGroup"] == "fooGroup"
         promotionRegistry.get("manualldap") == promotion
         promotionRegistry.getAll()== [promotion]
         //User user = new User("foo", [ "fooGroup" ] as Set)
@@ -76,17 +74,10 @@ description: Manual LDAP Promotion Smoke Test
 attributes:
   allowedGroup : "fooGroup"
 """)
-        promotion.ident = "manualldap"
-        promotionRegistry.put(promotion.ident, promotion)
-
         expect:
-        promotion.ident == "manualldap"
         promotion.type == 'deploydb.models.Promotion.ManualLDAPPromotion'
-        promotion.description == "Manual LDAP Promotion Smoke Test"
-        //promotion.attributes.size() == 1
-        //promotion.attributes["allowedGroup"] == "fooGroup"
-        promotionRegistry.get("manualldap") == promotion
-        promotionRegistry.getAll()== [promotion]
+        promotion.attributes.size() == 1
+        promotion.attributes["allowedGroup"] == "fooGroup"
         //User user = new User("foo", [ "barGroup" ] as Set)
         //promotion.validate(user) == false
     }
@@ -98,22 +89,16 @@ attributes:
 type: deploydb.models.Promotion.ManualLDAPPromotion
 description: Manual LDAP Promotion Smoke Test
 """)
-        promotion.ident = "manualldap"
-        promotionRegistry.put(promotion.ident, promotion)
 
         expect:
-        promotion.ident == "manualldap"
         promotion.type == 'deploydb.models.Promotion.ManualLDAPPromotion'
-        promotion.description == "Manual LDAP Promotion Smoke Test"
-        //promotion.attributes.size() == 0
-        promotionRegistry.get("manualldap") == promotion
-        promotionRegistry.getAll()== [promotion]
+        promotion.attributes.size() == 0
         //User user = new User("foo", [ "fooGroup" ] as Set)
         //promotion.validate(user) == false
     }
 
     @Ignore
-    def "Loading Manual ldap promotion config with multiple allowedGroup fails"() {
+    def "If multiple allowedGroup(s) are configured, last entry overwrites the value and fails"() {
         given:
         Promotion promotion = promotionLoader.loadFromString("""
 type: deploydb.models.Promotion.ManualLDAPPromotion
@@ -122,19 +107,47 @@ attributes:
   allowedGroup : "fooGroup"
   allowedGroup : "barGroup"
 """)
-        promotion.ident = "manualldap"
-        promotionRegistry.put(promotion.ident, promotion)
 
         expect:
-        promotion.ident == "manualldap"
         promotion.type == 'deploydb.models.Promotion.ManualLDAPPromotion'
-        promotion.description == "Manual LDAP Promotion Smoke Test"
-        //promotion.attributes.size() == 1
-        //promotion.attributes["allowedGroup"] == "barGroup"
-        promotionRegistry.get("manualldap") == promotion
-        promotionRegistry.getAll()== [promotion]
+        promotion.attributes.size() == 1
+        promotion.attributes["allowedGroup"] == "barGroup"
         //User user = new User("foo", [ "fooGroup" ] as Set)
         //promotion.validate(user) == false
+    }
+
+    @Ignore
+    def "The allowedGroup is configured, but authentication is not, hence validate fails"() {
+        given:
+        Promotion promotion = promotionLoader.loadFromString("""
+type: deploydb.models.Promotion.ManualLDAPPromotion
+description: Manual LDAP Promotion Smoke Test
+attributes:
+  allowedGroup : "fooGroup"
+""")
+
+        expect:
+        promotion.type == 'deploydb.models.Promotion.ManualLDAPPromotion'
+        promotion.attributes.size() == 1
+        promotion.attributes["allowedGroup"] == "barGroup"
+
+        //User user = null
+        //promotion.validate(user) == false
+    }
+
+    @Ignore
+    def "Neither allowedGroup, nor authentication is configured, hence validate passes"() {
+        given:
+        Promotion promotion = promotionLoader.loadFromString("""
+type: deploydb.models.Promotion.ManualLDAPPromotion
+description: Manual LDAP Promotion Smoke Test
+""")
+
+        expect:
+        promotion.type == 'deploydb.models.Promotion.ManualLDAPPromotion'
+        promotion.attributes.size() == 0
+        //User user = null
+        //promotion.validate(user) == true
     }
 
     def "Loading of empty model promotion throws a parsing exception"(){
