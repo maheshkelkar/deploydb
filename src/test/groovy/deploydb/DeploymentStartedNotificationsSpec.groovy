@@ -6,12 +6,15 @@ class DeploymentStartedNotificationsSpec extends Specification {
 
     IntegrationTestAppHelper integAppHelper = new IntegrationTestAppHelper()
     IntegrationModelHelper integModelHelper = new  IntegrationModelHelper(integAppHelper)
-    private ModelConfigHelper mcfgHelper = new ModelConfigHelper()
+    private WebhooksModelConfigHelper mcfgHelper = new WebhooksModelConfigHelper()
 
     def setup() {
         mcfgHelper.setup()
         integAppHelper.startAppWithConfiguration('deploydb.spock.yml')
         integAppHelper.startWebhookTestServerWithConfiguration('webhookTestServer.example.yml')
+        integAppHelper.runner.getApplication().configDirectory = mcfgHelper.baseCfgDirName
+        integAppHelper.webhookRunner.requestWebhookObject.contentTypeParam =
+                "application/vnd.deploydb.deploymentstarted.v1+json"
     }
 
     def cleanup() {
@@ -27,7 +30,6 @@ class DeploymentStartedNotificationsSpec extends Specification {
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
         // load up the configuration
-        integAppHelper.runner.getApplication().configDirectory = mcfgHelper.baseCfgDirName
         integAppHelper.runner.getApplication().loadModelConfiguration()
         integModelHelper.sendCreateArtifact()
 
@@ -48,7 +50,6 @@ class DeploymentStartedNotificationsSpec extends Specification {
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
         // load up the configuration
-        integAppHelper.runner.getApplication().configDirectory = mcfgHelper.baseCfgDirName
         integAppHelper.runner.getApplication().loadModelConfiguration()
 
         /* set the webhookTestServer's requestWebhookObject. This data will be compare once deploydb
@@ -56,9 +57,8 @@ class DeploymentStartedNotificationsSpec extends Specification {
          */
         integAppHelper.webhookRunner.requestWebhookObject.configuredUriPaths =
                 ["/job/notify-deployment-started/build"]
-        integAppHelper.webhookRunner.requestWebhookObject.contentTypeParam =
-                "application/vnd.deploydb.deploymentstarted.v1+json"
 
+        // setup the deployment for started trigger
         integModelHelper.sendCreateArtifact()
 
         when:
@@ -77,7 +77,6 @@ class DeploymentStartedNotificationsSpec extends Specification {
         mcfgHelper.createDeploymentStartedEnvironmentWebhookConfigFile()
 
         // load up the configuration
-        integAppHelper.runner.getApplication().configDirectory = mcfgHelper.baseCfgDirName
         integAppHelper.runner.getApplication().loadModelConfiguration()
 
         /* set the webhookTestServer's requestWebhookObject. This data will be compare once deploydb
@@ -85,9 +84,8 @@ class DeploymentStartedNotificationsSpec extends Specification {
          */
         integAppHelper.webhookRunner.requestWebhookObject.configuredUriPaths =
                 ["/job/basicEnv-deploy-started/build"]
-        integAppHelper.webhookRunner.requestWebhookObject.contentTypeParam =
-                "application/vnd.deploydb.deploymentstarted.v1+json"
 
+        // setup the deployment for started trigger
         integModelHelper.sendCreateArtifact()
 
         when:
@@ -107,7 +105,6 @@ class DeploymentStartedNotificationsSpec extends Specification {
         mcfgHelper.createDeploymentStartedEnvironmentWebhookConfigFile()
 
         // load up the configuration
-        integAppHelper.runner.getApplication().configDirectory = mcfgHelper.baseCfgDirName
         integAppHelper.runner.getApplication().loadModelConfiguration()
 
         /* set the webhookTestServer's requestWebhookObject. This data will be compare once deploydb
@@ -115,9 +112,8 @@ class DeploymentStartedNotificationsSpec extends Specification {
          */
         integAppHelper.webhookRunner.requestWebhookObject.configuredUriPaths =
                 ["/job/notify-deployment-started/build","/job/basicEnv-deploy-started/build"]
-        integAppHelper.webhookRunner.requestWebhookObject.contentTypeParam =
-                "application/vnd.deploydb.deploymentstarted.v1+json"
 
+        // setup the deployment for started trigger
         integModelHelper.sendCreateArtifact()
 
         when:
@@ -137,7 +133,6 @@ class DeploymentStartedNotificationsSpec extends Specification {
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
         // load up the configuration
-        integAppHelper.runner.getApplication().configDirectory = mcfgHelper.baseCfgDirName
         integAppHelper.runner.getApplication().loadModelConfiguration()
 
         /* set the webhookTestServer's requestWebhookObject. This data will be compare once deploydb
@@ -145,8 +140,6 @@ class DeploymentStartedNotificationsSpec extends Specification {
          */
         integAppHelper.webhookRunner.requestWebhookObject.configuredUriPaths =
                 ["/job/notify-deployment-started-1/build", "/job/notify-deployment-started-2/build"]
-        integAppHelper.webhookRunner.requestWebhookObject.contentTypeParam =
-                "application/vnd.deploydb.deploymentstarted.v1+json"
 
         integModelHelper.sendCreateArtifact()
 
@@ -166,17 +159,16 @@ class DeploymentStartedNotificationsSpec extends Specification {
         mcfgHelper.createMultipleDeploymentStartedEnvironmentWebhooksConfigFile()
 
         // load up the configuration
-        integAppHelper.runner.getApplication().configDirectory = mcfgHelper.baseCfgDirName
         integAppHelper.runner.getApplication().loadModelConfiguration()
 
         /* set the webhookTestServer's requestWebhookObject. This data will be compare once deploydb
          * sends the webhook to the webhookTestServer
          */
         integAppHelper.webhookRunner.requestWebhookObject.configuredUriPaths =
-                ["/job/basicEnv-deploy-started-1/build","/job/basicEnv-deploy-started-2/build"]
-        integAppHelper.webhookRunner.requestWebhookObject.contentTypeParam =
-                "application/vnd.deploydb.deploymentstarted.v1+json"
+                ["/job/basicEnv-deploy-started-1/build", "/job/basicEnv-deploy-started-2/build"]
 
+
+        // setup the deployment for started trigger
         integModelHelper.sendCreateArtifact()
 
         when:
@@ -196,7 +188,6 @@ class DeploymentStartedNotificationsSpec extends Specification {
         mcfgHelper.createMultipleDeploymentStartedEnvironmentWebhooksConfigFile()
 
         // load up the configuration
-        integAppHelper.runner.getApplication().configDirectory = mcfgHelper.baseCfgDirName
         integAppHelper.runner.getApplication().loadModelConfiguration()
 
         /* set the webhookTestServer's requestWebhookObject. This data will be compare once deploydb
@@ -205,9 +196,8 @@ class DeploymentStartedNotificationsSpec extends Specification {
         integAppHelper.webhookRunner.requestWebhookObject.configuredUriPaths =
                 ["/job/notify-deployment-started-1/build", "/job/notify-deployment-started-2/build",
                  "/job/basicEnv-deploy-started-1/build", "/job/basicEnv-deploy-started-2/build"]
-        integAppHelper.webhookRunner.requestWebhookObject.contentTypeParam =
-                "application/vnd.deploydb.deploymentstarted.v1+json"
 
+        // setup the deployment for started trigger
         integModelHelper.sendCreateArtifact()
 
         when:

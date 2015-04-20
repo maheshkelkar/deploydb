@@ -2,7 +2,7 @@ package deploydb
 
 import spock.lang.*
 
-class DeploymentCompletedNotificationsSpec extends Specification {
+class PromotionCompletedNotificationsSpec extends Specification {
 
     IntegrationTestAppHelper integAppHelper = new IntegrationTestAppHelper()
     IntegrationModelHelper integModelHelper = new  IntegrationModelHelper(integAppHelper)
@@ -12,9 +12,12 @@ class DeploymentCompletedNotificationsSpec extends Specification {
         mcfgHelper.setup()
         integAppHelper.startAppWithConfiguration('deploydb.spock.yml')
         integAppHelper.startWebhookTestServerWithConfiguration('webhookTestServer.example.yml')
+        // load up the configuration
         integAppHelper.runner.getApplication().configDirectory = mcfgHelper.baseCfgDirName
+
         integAppHelper.webhookRunner.requestWebhookObject.contentTypeParam =
-                "application/vnd.deploydb.deploymentcompleted.v1+json"
+                "application/vnd.deploydb.promotioncompleted.v1+json"
+        integAppHelper.startWebhookTestServerWithConfiguration('webhookTestServer.example.yml')
     }
 
     def cleanup() {
@@ -23,7 +26,15 @@ class DeploymentCompletedNotificationsSpec extends Specification {
         mcfgHelper.cleanup()
     }
 
-    def "no webhook should be called when you receive deployment completed trigger if there is no webhook config" () {
+    def setupDeploymentForPromotionTrigger(){
+
+
+        integModelHelper.sendCreateArtifact()
+        integModelHelper.sendDeploymentStartedTrigger()
+        integModelHelper.sendDeploymentCompletedTrigger()
+    }
+
+    def "no webhook should be called when you receive promotion completed trigger if there is no webhook config" () {
         given:
         // Create the required config
         mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
@@ -32,11 +43,11 @@ class DeploymentCompletedNotificationsSpec extends Specification {
         // load up the configuration
         integAppHelper.runner.getApplication().loadModelConfiguration()
 
-        // setup the deployment for completed trigger
-        integModelHelper.sendCreateArtifact()
+        // setup the deployment for promotion trigger
+        setupDeploymentForPromotionTrigger()
 
         when:
-        boolean success = integModelHelper.sendDeploymentCompletedTrigger()
+        boolean success = integModelHelper.sendPromotionCompletedTrigger()
 
         then:
         success == true
@@ -44,11 +55,11 @@ class DeploymentCompletedNotificationsSpec extends Specification {
         integAppHelper.webhookRunner.requestWebhookObject.requestMessageBodies.size() == 0
     }
 
-    def "webhook should be called when you receive deployment completed trigger" () {
+    def "webhook should be called when you receive promotion completed trigger" () {
         given:
         // Create the required config
         mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
-        mcfgHelper.createDeploymentCompletedWebhookConfigFile()
+        mcfgHelper.createPromotionCompletedWebhookConfigFile()
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
         // load up the configuration
@@ -58,13 +69,12 @@ class DeploymentCompletedNotificationsSpec extends Specification {
          * sends the webhook to the webhookTestServer
          */
         integAppHelper.webhookRunner.requestWebhookObject.configuredUriPaths =
-                ["/job/notify-deployment-completed/build"]
+                ["/job/notify-promotion-completed/build"]
 
-        // setup the deployment for completed trigger
-        integModelHelper.sendCreateArtifact()
+        setupDeploymentForPromotionTrigger()
 
         when:
-        boolean success = integModelHelper.sendDeploymentCompletedTrigger()
+        boolean success = integModelHelper.sendPromotionCompletedTrigger()
 
         then:
         success == true
@@ -72,11 +82,11 @@ class DeploymentCompletedNotificationsSpec extends Specification {
         integAppHelper.webhookRunner.requestWebhookObject.requestMessageBodies.size() == 1
     }
 
-    def "environment webhook should be called when you receive deployment completed trigger" () {
+    def "environment webhook should be called when you receive promotion completed trigger" () {
         given:
         // Create the required config
         mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
-        mcfgHelper.createDeploymentCompletedEnvironmentWebhookConfigFile()
+        mcfgHelper.createPromotionCompletedEnvironmentWebhookConfigFile()
 
         // load up the configuration
         integAppHelper.runner.getApplication().loadModelConfiguration()
@@ -85,13 +95,12 @@ class DeploymentCompletedNotificationsSpec extends Specification {
          * sends the webhook to the webhookTestServer
          */
         integAppHelper.webhookRunner.requestWebhookObject.configuredUriPaths =
-                ["/job/basicEnv-deploy-completed/build"]
+                ["/job/basicEnv-promotion-completed/build"]
 
-        // setup the deployment for completed trigger
-        integModelHelper.sendCreateArtifact()
+        setupDeploymentForPromotionTrigger()
 
         when:
-        boolean success = integModelHelper.sendDeploymentCompletedTrigger()
+        boolean success = integModelHelper.sendPromotionCompletedTrigger()
 
         then:
         success == true
@@ -99,12 +108,12 @@ class DeploymentCompletedNotificationsSpec extends Specification {
         integAppHelper.webhookRunner.requestWebhookObject.requestMessageBodies.size() == 1
     }
 
-    def "both global and environment webhooks should be called when you receive deployment completed trigger" () {
+    def "both global and environment webhooks should be called when you receive promotion completed trigger" () {
         given:
         // Create the required config
         mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
-        mcfgHelper.createDeploymentCompletedWebhookConfigFile()
-        mcfgHelper.createDeploymentCompletedEnvironmentWebhookConfigFile()
+        mcfgHelper.createPromotionCompletedWebhookConfigFile()
+        mcfgHelper.createPromotionCompletedEnvironmentWebhookConfigFile()
 
         // load up the configuration
         integAppHelper.runner.getApplication().loadModelConfiguration()
@@ -113,13 +122,12 @@ class DeploymentCompletedNotificationsSpec extends Specification {
          * sends the webhook to the webhookTestServer
          */
         integAppHelper.webhookRunner.requestWebhookObject.configuredUriPaths =
-                ["/job/notify-deployment-completed/build","/job/basicEnv-deploy-completed/build"]
+                ["/job/notify-promotion-completed/build","/job/basicEnv-promotion-completed/build"]
 
-        // setup the deployment for completed trigger
-        integModelHelper.sendCreateArtifact()
+        setupDeploymentForPromotionTrigger()
 
         when:
-        boolean success = integModelHelper.sendDeploymentCompletedTrigger()
+        boolean success = integModelHelper.sendPromotionCompletedTrigger()
 
         then:
         success == true
@@ -127,11 +135,11 @@ class DeploymentCompletedNotificationsSpec extends Specification {
         integAppHelper.webhookRunner.requestWebhookObject.requestMessageBodies.size() == 2
     }
 
-    def "multiple webhooks should be called when you receive deployment completed trigger" () {
+    def "multiple webhooks should be called when you receive promotion completed trigger" () {
         given:
         // Create the required config
         mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
-        mcfgHelper.createMultipleDeploymentCompletedWebhooksConfigFile()
+        mcfgHelper.createMultiplePromotionCompletedWebhookConfigFile()
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
         // load up the configuration
@@ -141,13 +149,12 @@ class DeploymentCompletedNotificationsSpec extends Specification {
          * sends the webhook to the webhookTestServer
          */
         integAppHelper.webhookRunner.requestWebhookObject.configuredUriPaths =
-                ["/job/notify-deployment-completed-1/build", "/job/notify-deployment-completed-2/build"]
+                ["/job/notify-promotion-completed-1/build", "/job/notify-promotion-completed-2/build"]
 
-        // setup the deployment for completed trigger
-        integModelHelper.sendCreateArtifact()
+        setupDeploymentForPromotionTrigger()
 
         when:
-        boolean success = integModelHelper.sendDeploymentCompletedTrigger()
+        boolean success = integModelHelper.sendPromotionCompletedTrigger()
 
         then:
         success == true
@@ -155,11 +162,11 @@ class DeploymentCompletedNotificationsSpec extends Specification {
         integAppHelper.webhookRunner.requestWebhookObject.requestMessageBodies.size() == 2
     }
 
-    def "multiple environments webhook should be called when you receive deployment completed trigger" () {
+    def "multiple environment webhooks should be called when you receive promotion completed trigger" () {
         given:
         // Create the required config
         mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
-        mcfgHelper.createMultipleDeploymentCompletedEnvironmentWebhooksConfigFile()
+        mcfgHelper.createMultiplePromotionCompletedEnvironmentWebhookConfigFile()
 
         // load up the configuration
         integAppHelper.runner.getApplication().loadModelConfiguration()
@@ -168,13 +175,12 @@ class DeploymentCompletedNotificationsSpec extends Specification {
          * sends the webhook to the webhookTestServer
          */
         integAppHelper.webhookRunner.requestWebhookObject.configuredUriPaths =
-                ["/job/basicEnv-deploy-completed-1/build","/job/basicEnv-deploy-completed-2/build"]
+                ["/job/basicEnv-promotion-completed-1/build", "/job/basicEnv-promotion-completed-2/build"]
 
-        // setup the deployment for completed trigger
-        integModelHelper.sendCreateArtifact()
+        setupDeploymentForPromotionTrigger()
 
         when:
-        boolean success = integModelHelper.sendDeploymentCompletedTrigger()
+        boolean success = integModelHelper.sendPromotionCompletedTrigger()
 
         then:
         success == true
@@ -182,12 +188,12 @@ class DeploymentCompletedNotificationsSpec extends Specification {
         integAppHelper.webhookRunner.requestWebhookObject.requestMessageBodies.size() == 2
     }
 
-    def "both multiple global and environment webhooks should be called when you receive deployment completed trigger" () {
+    def "both multiple global and environment webhooks should be called when you receive promotion completed trigger" () {
         given:
         // Create the required config
         mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
-        mcfgHelper.createMultipleDeploymentCompletedWebhooksConfigFile()
-        mcfgHelper.createMultipleDeploymentCompletedEnvironmentWebhooksConfigFile()
+        mcfgHelper.createMultiplePromotionCompletedEnvironmentWebhookConfigFile()
+        mcfgHelper.createMultiplePromotionCompletedWebhookConfigFile()
 
         // load up the configuration
         integAppHelper.runner.getApplication().loadModelConfiguration()
@@ -196,19 +202,17 @@ class DeploymentCompletedNotificationsSpec extends Specification {
          * sends the webhook to the webhookTestServer
          */
         integAppHelper.webhookRunner.requestWebhookObject.configuredUriPaths =
-                ["/job/notify-deployment-completed-1/build", "/job/notify-deployment-completed-2/build",
-                 "/job/basicEnv-deploy-completed-1/build", "/job/basicEnv-deploy-completed-2/build"]
+                ["/job/notify-promotion-completed-1/build", "/job/notify-promotion-completed-2/build",
+                        "/job/basicEnv-promotion-completed-1/build", "/job/basicEnv-promotion-completed-2/build"]
 
-        // setup the deployment for completed trigger
-        integModelHelper.sendCreateArtifact()
+        setupDeploymentForPromotionTrigger()
 
         when:
-        boolean success = integModelHelper.sendDeploymentCompletedTrigger()
+        boolean success = integModelHelper.sendPromotionCompletedTrigger()
 
         then:
         success == true
         sleep(1000)
         integAppHelper.webhookRunner.requestWebhookObject.requestMessageBodies.size() == 4
     }
-
 }

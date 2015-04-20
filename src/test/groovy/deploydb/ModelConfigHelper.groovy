@@ -2,7 +2,7 @@ package deploydb
 
 
 class ModelConfigHelper {
-    private String baseCfgDirName = "./build/tmp/config"
+    String baseCfgDirName = "./build/tmp/config"
 
     def setup() {
         File baseCfgDir = new File(baseCfgDirName)
@@ -18,14 +18,14 @@ class ModelConfigHelper {
         }
     }
 
-    def createBasicEnvironmentWebhookConfigFile(String fileContents) {
+    def createEnvironmentWebhookConfigFile(String fileContents, String name) {
         /* Create temp file */
         File environmentsDir = new File("${baseCfgDirName}/environments")
         if (!environmentsDir.exists()) {
             environmentsDir.mkdirs()
         }
 
-        File environmentFile = new File(environmentsDir, "basicEnv.yml")
+        File environmentFile = new File(environmentsDir, "${name}.yml")
         environmentFile.write(fileContents)
     }
 
@@ -80,14 +80,14 @@ webhook:
     completed:
       - http://localhost:10000/job/basicEnv-deploy-completed/build
 """
-        createBasicEnvironmentWebhookConfigFile(fileContents)
+        createEnvironmentWebhookConfigFile(fileContents, "basicEnv")
     }
 
     def createEnvironmentNoWebhooksConfigFile() {
         String fileContents = """
 description: "Basic Environment"
 """
-        createBasicEnvironmentWebhookConfigFile(fileContents)
+        createEnvironmentWebhookConfigFile(fileContents, "basicEnv")
     }
 
 
@@ -107,6 +107,22 @@ environments:
 
         File pipelineFile = new File(pipelinesDir, "basicPipe.yml")
         pipelineFile.write(fileContents)
+    }
+
+    def createWebhookConfigFile() {
+        String fileContents = """
+deployment:
+  created:
+     - http://localhost:10000/job/notify-deployment-created/build
+  started:
+     - http://localhost:10000/job/notify-deployment-started/build
+  completed:
+     - http://localhost:10000/job/notify-deployment-completed/build
+promotion:
+  completed:
+     - http://localhost:10000/job/notify-promotion-completed/build
+"""
+        createBasicWebhookConfigFile(fileContents)
     }
 
     def createServiceConfigFile() {
@@ -130,21 +146,44 @@ promotions:
         serviceFile.write(fileContents)
     }
 
-    def createWebhookConfigFile() {
+    def createProdEnvironmentConfigFile() {
         String fileContents = """
-deployment:
-  created:
-     - http://localhost:10000/job/notify-deployment-created/build
-  started:
-     - http://localhost:10000/job/notify-deployment-started/build
-  completed:
-     - http://localhost:10000/job/notify-deployment-completed/build
-promotion:
-  completed:
-     - http://localhost:10000/job/notify-promotion-completed/build
+description: "Production Environment"
+webhook:
+  deployment:
+    created:
+      - http://localhost:10000/job/prodEnv-deploy-created/build
+    completed:
+      - http://localhost:10000/job/prodEnv-deploy-completed/build
 """
-        createBasicWebhookConfigFile(fileContents)
+        createEnvironmentWebhookConfigFile(fileContents, "prodEnv")
     }
+
+    def createBasicProdPipelineConfigFile() {
+        String fileContents = """
+description: "Basic pipeline"
+environments:
+     basicEnv:
+       promotions:
+          - basicPromo
+     prodEnv:
+       promotions:
+          - basicPromo
+"""
+        /* Create temp file */
+        File pipelinesDir = new File("${baseCfgDirName}/pipelines")
+        if (!pipelinesDir.exists()) {
+            pipelinesDir.mkdirs()
+        }
+
+        File pipelineFile = new File(pipelinesDir, "basicPipe.yml")
+        pipelineFile.write(fileContents)
+    }
+
+}
+
+class WebhooksModelConfigHelper extends deploydb.ModelConfigHelper {
+
 
     def createMultipleWebhooksConfigFile() {
         String fileContents = """
@@ -177,7 +216,7 @@ webhook:
     completed:
       - http://localhost:10000/job/basicEnv-deploy-completed/build
 """
-        createBasicEnvironmentWebhookConfigFile(fileContents)
+        createEnvironmentWebhookConfigFile(fileContents, "basicEnv")
     }
 
     def createDeploymentStartedWebhookConfigFile() {
@@ -197,7 +236,7 @@ webhook:
     started:
       - http://localhost:10000/job/basicEnv-deploy-started/build
 """
-        createBasicEnvironmentWebhookConfigFile(fileContents)
+        createEnvironmentWebhookConfigFile(fileContents, "basicEnv")
     }
 
     def createMultipleDeploymentStartedWebhooksConfigFile() {
@@ -219,7 +258,7 @@ webhook:
       - http://localhost:10000/job/basicEnv-deploy-started-1/build
       - http://localhost:10000/job/basicEnv-deploy-started-2/build
 """
-        createBasicEnvironmentWebhookConfigFile(fileContents)
+        createEnvironmentWebhookConfigFile(fileContents, "basicEnv")
     }
 
     def createDeploymentCompletedWebhookConfigFile() {
@@ -239,7 +278,7 @@ webhook:
     completed:
       - http://localhost:10000/job/basicEnv-deploy-completed/build
 """
-        createBasicEnvironmentWebhookConfigFile(fileContents)
+        createEnvironmentWebhookConfigFile(fileContents, "basicEnv")
     }
 
     def createMultipleDeploymentCompletedWebhooksConfigFile() {
@@ -261,12 +300,62 @@ webhook:
       - http://localhost:10000/job/basicEnv-deploy-completed-1/build
       - http://localhost:10000/job/basicEnv-deploy-completed-2/build
 """
-        createBasicEnvironmentWebhookConfigFile(fileContents)
+        createEnvironmentWebhookConfigFile(fileContents, "basicEnv")
+    }
+
+    def createPromotionCompletedWebhookConfigFile() {
+        String fileContents = """
+promotion:
+  completed:
+     - http://localhost:10000/job/notify-promotion-completed/build
+"""
+        createBasicWebhookConfigFile(fileContents)
+    }
+
+    def createPromotionCompletedEnvironmentWebhookConfigFile() {
+        String fileContents = """
+description: "Basic Environment"
+webhook:
+  promotion:
+    completed:
+      - http://localhost:10000/job/basicEnv-promotion-completed/build
+"""
+        createEnvironmentWebhookConfigFile(fileContents, "basicEnv")
+    }
+
+    def createMultiplePromotionCompletedWebhookConfigFile() {
+        String fileContents = """
+promotion:
+  completed:
+     - http://localhost:10000/job/notify-promotion-completed-1/build
+     - http://localhost:10000/job/notify-promotion-completed-2/build
+"""
+        createBasicWebhookConfigFile(fileContents)
+    }
+
+    def createMultiplePromotionCompletedEnvironmentWebhookConfigFile() {
+        String fileContents = """
+description: "Basic Environment"
+webhook:
+  promotion:
+    completed:
+      - http://localhost:10000/job/basicEnv-promotion-completed-1/build
+      - http://localhost:10000/job/basicEnv-promotion-completed-2/build
+"""
+        createEnvironmentWebhookConfigFile(fileContents, "basicEnv")
     }
 
     def createServicePromoitionPipelineModelsConfigFiles() {
         createPromotionConfigFile()
         createPipelineConfigFile()
+        createServiceConfigFile()
+    }
+
+    def createBasicProdServicePromoitionPipelineModelsConfigFiles() {
+        createEnvironmentConfigFile()
+        createProdEnvironmentConfigFile()
+        createPromotionConfigFile()
+        createBasicProdPipelineConfigFile()
         createServiceConfigFile()
     }
 }

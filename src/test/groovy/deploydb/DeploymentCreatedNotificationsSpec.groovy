@@ -6,12 +6,15 @@ class DeploymentCreatedNotificationsSpec extends Specification {
 
     IntegrationTestAppHelper integAppHelper = new IntegrationTestAppHelper()
     IntegrationModelHelper integModelHelper = new  IntegrationModelHelper(integAppHelper)
-    private ModelConfigHelper mcfgHelper = new ModelConfigHelper()
+    private WebhooksModelConfigHelper mcfgHelper = new WebhooksModelConfigHelper()
 
     def setup() {
         mcfgHelper.setup()
         integAppHelper.startAppWithConfiguration('deploydb.spock.yml')
         integAppHelper.startWebhookTestServerWithConfiguration('webhookTestServer.example.yml')
+        integAppHelper.webhookRunner.requestWebhookObject.contentTypeParam =
+                "application/vnd.deploydb.deploymentcreated.v1+json"
+        integAppHelper.runner.getApplication().configDirectory = mcfgHelper.baseCfgDirName
     }
 
     def cleanup() {
@@ -28,7 +31,6 @@ class DeploymentCreatedNotificationsSpec extends Specification {
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
         // load up the configuration
-        integAppHelper.runner.getApplication().configDirectory = mcfgHelper.baseCfgDirName
         integAppHelper.runner.getApplication().loadModelConfiguration()
 
         when:
@@ -50,7 +52,6 @@ class DeploymentCreatedNotificationsSpec extends Specification {
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
         // load up the configuration
-        integAppHelper.runner.getApplication().configDirectory = mcfgHelper.baseCfgDirName
         integAppHelper.runner.getApplication().loadModelConfiguration()
 
         /* set the webhookTestServer's requestWebhookObject. This data will be compare once deploydb
@@ -58,8 +59,7 @@ class DeploymentCreatedNotificationsSpec extends Specification {
          */
         integAppHelper.webhookRunner.requestWebhookObject.configuredUriPaths =
                 ["/job/notify-deployment-created/build"]
-        integAppHelper.webhookRunner.requestWebhookObject.contentTypeParam =
-                "application/vnd.deploydb.deploymentcreated.v1+json"
+
 
         when:
         boolean success = integModelHelper.sendCreateArtifact()
@@ -78,7 +78,6 @@ class DeploymentCreatedNotificationsSpec extends Specification {
         mcfgHelper.createEnvironmentConfigFile()
 
         // load up the config
-        integAppHelper.runner.getApplication().configDirectory = mcfgHelper.baseCfgDirName
         integAppHelper.runner.getApplication().loadModelConfiguration()
 
         /* set the webhookTestServer's requestWebhookObject. This data will be compare once deploydb
@@ -86,8 +85,6 @@ class DeploymentCreatedNotificationsSpec extends Specification {
          */
         integAppHelper.webhookRunner.requestWebhookObject.configuredUriPaths =
                 ["/job/basicEnv-deploy-created/build"]
-        integAppHelper.webhookRunner.requestWebhookObject.contentTypeParam =
-                "application/vnd.deploydb.deploymentcreated.v1+json"
 
         when:
         boolean success = integModelHelper.sendCreateArtifact()
@@ -107,7 +104,6 @@ class DeploymentCreatedNotificationsSpec extends Specification {
         mcfgHelper.createEnvironmentConfigFile()
 
         // load up the config
-        integAppHelper.runner.getApplication().configDirectory = mcfgHelper.baseCfgDirName
         integAppHelper.runner.getApplication().loadModelConfiguration()
 
         /* set the webhookTestServer's requestWebhookObject. This data will be compare once deploydb
@@ -115,8 +111,6 @@ class DeploymentCreatedNotificationsSpec extends Specification {
          */
         integAppHelper.webhookRunner.requestWebhookObject.configuredUriPaths =
                 ["/job/notify-deployment-created/build", "/job/basicEnv-deploy-created/build"]
-        integAppHelper.webhookRunner.requestWebhookObject.contentTypeParam =
-                "application/vnd.deploydb.deploymentcreated.v1+json"
 
         when:
         boolean success = integModelHelper.sendCreateArtifact()
@@ -136,7 +130,6 @@ class DeploymentCreatedNotificationsSpec extends Specification {
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
         // load up the configuration
-        integAppHelper.runner.getApplication().configDirectory = mcfgHelper.baseCfgDirName
         integAppHelper.runner.getApplication().loadModelConfiguration()
 
         /* set the webhookTestServer's requestWebhookObject. This data will be compare once deploydb
@@ -144,8 +137,6 @@ class DeploymentCreatedNotificationsSpec extends Specification {
          */
         integAppHelper.webhookRunner.requestWebhookObject.configuredUriPaths =
                 ["/job/notify-deployment-created-1/build", "/job/notify-deployment-created-2/build"]
-        integAppHelper.webhookRunner.requestWebhookObject.contentTypeParam =
-                "application/vnd.deploydb.deploymentcreated.v1+json"
 
         when:
         boolean success = integModelHelper.sendCreateArtifact()
@@ -164,7 +155,6 @@ class DeploymentCreatedNotificationsSpec extends Specification {
         mcfgHelper.createMultipleWebhooksEnvironmentConfigFile()
 
         // load up the config
-        integAppHelper.runner.getApplication().configDirectory = mcfgHelper.baseCfgDirName
         integAppHelper.runner.getApplication().loadModelConfiguration()
 
         /* set the webhookTestServer's requestWebhookObject. This data will be compare once deploydb
@@ -172,8 +162,6 @@ class DeploymentCreatedNotificationsSpec extends Specification {
          */
         integAppHelper.webhookRunner.requestWebhookObject.configuredUriPaths =
                 ["/job/basicEnv-deploy-created-1/build", "/job/basicEnv-deploy-created-2/build"]
-        integAppHelper.webhookRunner.requestWebhookObject.contentTypeParam =
-                "application/vnd.deploydb.deploymentcreated.v1+json"
 
         when:
         boolean success = integModelHelper.sendCreateArtifact()
@@ -193,7 +181,6 @@ class DeploymentCreatedNotificationsSpec extends Specification {
         mcfgHelper.createMultipleWebhooksEnvironmentConfigFile()
 
         // load up the config
-        integAppHelper.runner.getApplication().configDirectory = mcfgHelper.baseCfgDirName
         integAppHelper.runner.getApplication().loadModelConfiguration()
 
         /* set the webhookTestServer's requestWebhookObject. This data will be compare once deploydb
@@ -202,8 +189,6 @@ class DeploymentCreatedNotificationsSpec extends Specification {
         integAppHelper.webhookRunner.requestWebhookObject.configuredUriPaths =
                 ["/job/notify-deployment-created-1/build", "/job/notify-deployment-created-2/build",
                  "/job/basicEnv-deploy-created-1/build", "/job/basicEnv-deploy-created-2/build"]
-        integAppHelper.webhookRunner.requestWebhookObject.contentTypeParam =
-                "application/vnd.deploydb.deploymentcreated.v1+json"
 
         when:
         boolean success = integModelHelper.sendCreateArtifact()

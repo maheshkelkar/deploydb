@@ -1,6 +1,7 @@
 package deploydb
 
 import deploydb.models.Artifact
+import javax.ws.rs.core.Response
 
 class IntegrationModelHelper {
 
@@ -29,18 +30,35 @@ class IntegrationModelHelper {
         "status" : "STARTED"
       }
      """
-        return (integrationTestAppHelper.patchJsonToPath(path, messageBody)).status == 200
+        Response response = integrationTestAppHelper.patchJsonToPath(path, messageBody)
+        response.close()
+        return response.status == 200
     }
 
     boolean sendDeploymentCompletedTrigger() {
-        println("calling sendDeploymentCompletedTrigger")
         String path = "/api/deployments/1"
         String messageBody = """
       {
         "status" : "COMPLETED"
       }
      """
-        return (integrationTestAppHelper.patchJsonToPath(path, messageBody)).status == 200
+        Response response = integrationTestAppHelper.patchJsonToPath(path, messageBody)
+        response.close()
+        return response.status == 200
     }
 
+    boolean sendPromotionCompletedTrigger() {
+        String path = "/api/deployments/1/promotions"
+        String messageBody = """
+      {
+        "name"  : "basicPromo",
+        "status" : "SUCCESS",
+        "infoUrl" : "http://local.lookout.com/jenkins/job-id/2/results"
+      }
+     """
+        Response response = integrationTestAppHelper.postJsonToPath(path, messageBody, false)
+        response.close()
+        return response.status == 201
+
+    }
 }
