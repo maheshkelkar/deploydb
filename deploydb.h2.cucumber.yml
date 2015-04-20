@@ -23,3 +23,15 @@ logging:
       threshold: ALL
       archive: false
       timeZone: UTC
+
+ldap:
+  uri: ldap://localhost:10389
+  cachePolicy: maximumSize=10000, expireAfterWrite=10m
+  userFilter: ou=people,dc=yourcompany,dc=com
+  groupFilter: ou=groups,dc=yourcompany,dc=com
+  userNameAttribute: cn
+  groupNameAttribute: cn
+  groupMembershipAttribute: memberUid
+  groupClassName: groupOfUniqueNames
+  connectTimeout: 500ms
+  readTimeout: 500ms

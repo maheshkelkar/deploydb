@@ -1,0 +1,57 @@
+dn: ou=people,dc=yourcompany,dc=com
+ou: people
+objectClass: organizationalUnit
+
+dn: ou=groups,dc=yourcompany,dc=com
+ou: groups
+objectClass: organizationalUnit
+
+dn: cn=fox,ou=groups,dc=yourcompany,dc=com
+cn: fox
+add: memberUid
+memberUid: bart
+memberUid: lisa
+memberUid: peter
+memberUid: lois
+objectClass: groupOfUniqueNames
+
+dn: cn=Simpsons,ou=groups,dc=yourcompany,dc=com
+cn: Simpsons
+memberUid: bart
+memberUid: lisa
+objectClass: groupOfUniqueNames
+
+dn: cn=FamilyGuy,ou=groups,dc=yourcompany,dc=com
+cn: FamilyGuy
+memberUid: peter
+memberUid: lois
+objectClass: groupOfUniqueNames
+
+dn: cn=bart,ou=people,dc=yourcompany,dc=com
+cn: Bart Simpson
+sn: Simpson
+givenName: Bart
+uid: bart
+objectClass: inetOrgPerson
+
+dn: cn=lisa,ou=people,dc=yourcompany,dc=com
+cn: Lisa Simpson
+sn: Simpson
+givenName: Lisa
+uid: lisa
+objectClass: inetOrgPerson
+
+dn: cn=peter,ou=people,dc=yourcompany,dc=com
+cn: Peter Griffin
+sn: Griffin
+givenName: Peter
+uid: peter
+objectClass: inetOrgPerson
+userpassword: griffin
+
+dn: cn=lois,ou=people,dc=yourcompany,dc=com
+cn: Lois Griffin
+sn: Griffin
+givenName: Lois
+uid: lois
+objectClass: inetOrgPerson

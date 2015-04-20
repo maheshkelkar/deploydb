@@ -105,7 +105,7 @@ Given(~/^there are deployments for artifacts$/) { ->
 }
 
 When(~/I trigger deployment PATCH with:$/) { String path ->
-    response = postJsonToPath(path, requestBody, false)
+    response = postJsonToPath(path, requestBody, false, null)
 }
 
 And(~/there is a deployment in "(.*?)" state$/) { String deploymentState ->

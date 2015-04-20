@@ -1,29 +1,30 @@
 package deploydb.cucumber
 
+import com.github.mustachejava.DefaultMustacheFactory
+import com.github.mustachejava.Mustache
 import deploydb.DeployDBApp
 import deploydb.ModelLoader
 import deploydb.models.Webhook.Webhook
-import webhookTestServer.webhookTestServerApp
-
-import com.github.mustachejava.DefaultMustacheFactory
-import com.github.mustachejava.Mustache
-
-import org.glassfish.jersey.client.ClientConfig
+import io.dropwizard.auth.basic.BasicCredentials
+import javax.ws.rs.core.Response
 import javax.ws.rs.client.Client
 import javax.ws.rs.client.ClientBuilder
-import org.glassfish.jersey.apache.connector.ApacheConnectorProvider
-import org.glassfish.jersey.client.JerseyInvocation
-import javax.ws.rs.core.Response
 import javax.ws.rs.client.Entity
-
 import org.hibernate.Session
 import org.hibernate.SessionFactory
 import org.hibernate.context.internal.ManagedSessionContext
+import org.glassfish.jersey.apache.connector.ApacheConnectorProvider
+import org.glassfish.jersey.client.ClientConfig
+import org.glassfish.jersey.client.JerseyInvocation
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature
+import webhookTestServer.webhookTestServerApp
+
 
 class AppHelper {
     private StubAppRunner runner = null
     private Client jerseyClient = null
     private WebhookTestServerAppRunner webhookRunner = null
+    private TestLdapServer testLdapServer = null
 
     SessionFactory getSessionFactory() {
         return this.runner.sessionFactory
@@ -120,9 +121,13 @@ class AppHelper {
         return writer.toString()
     }
 
-    Client getClient() {
+    Client getClient(BasicCredentials credentials) {
         if (this.jerseyClient == null) {
             ClientConfig clientConfig = new ClientConfig()
+            /** Register HTTP Authentication feature, if credentials are provided */
+            if (credentials) {
+                clientConfig.register(HttpAuthenticationFeature.basicBuilder().build())
+            }
             clientConfig.connectorProvider(new ApacheConnectorProvider())
             this.jerseyClient = ClientBuilder.newClient(clientConfig)
         }
@@ -139,33 +144,63 @@ class AppHelper {
         return String.format("http://localhost:%d${path}", port)
     }
 
-
-    JerseyInvocation makeRequestToPath(String path, String method, Entity entity) {
-        return this.makeRequestToPath(path, method, entity, false)
+    /**
+     * Prepare a HTTP request
+     *
+     * @param path
+     * @param isAdmin
+     * @param credentials
+     * @return
+     */
+    JerseyInvocation.Builder makeRequestToPath(String path,
+                                               Boolean isAdmin,
+                                               BasicCredentials credentials) {
+        return getClient(credentials)
+                .target(urlWithPort(path, isAdmin))
+                .request()
     }
 
-    JerseyInvocation makeRequestToPath(String path, String method, Entity entity, Boolean isAdmin) {
-        return client.target(urlWithPort(path, isAdmin))
-                     .request()
-                     .build(method, entity)
+    /**
+     * Build the request with parameters
+     *
+     * @param builder
+     * @param method
+     * @param entity
+     * @param credentials
+     * @return
+     */
+    JerseyInvocation buildRequest(JerseyInvocation.Builder builder, String method,
+                                  Entity entity, BasicCredentials credentials) {
+        JerseyInvocation invocation = builder.build(method, entity)
+        if (credentials) {
+            invocation.property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_USERNAME,
+                    credentials.username)
+                    .property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_PASSWORD,
+                    credentials.password)
+        }
+        return invocation
     }
 
     /**
      * Execute a POST to the test server for step definitions
      */
-    Response postJsonToPath(String path, String requestBody, Boolean isAdmin) {
-        return this.makeRequestToPath(path, 'POST', Entity.json(requestBody), isAdmin).invoke()
+    Response postJsonToPath(String path, String requestBody, Boolean isAdmin,
+                            BasicCredentials credentials) {
+        JerseyInvocation.Builder builder = this.makeRequestToPath(path, isAdmin, credentials)
+        return this.buildRequest(builder, 'POST', Entity.json(requestBody), credentials).invoke()
     }
 
     /**
      * Execute a PATCH to the test server for step definitions
      */
     Response patchJsonToPath(String path, String requestBody) {
-        return this.makeRequestToPath(path, 'PATCH', Entity.json(requestBody)).invoke()
+        JerseyInvocation.Builder builder = this.makeRequestToPath(path, false, null)
+        return this.buildRequest(builder, 'PATCH', Entity.json(requestBody), null).invoke()
     }
 
     Response deleteFromPath(String path) {
-        return this.makeRequestToPath(path, 'DELETE', null).invoke()
+        JerseyInvocation.Builder builder = this.makeRequestToPath(path, false, null)
+        return this.buildRequest(builder, 'DELETE', null, null).invoke()
     }
 
     /*
@@ -207,8 +242,9 @@ class AppHelper {
      * Minor convenience method to make sure we're dispatching GET requests to the
      * right port in our test application
      */
-    Response getFromPath(String path, boolean isAdmin) {
-        return this.makeRequestToPath(path, 'GET', null , isAdmin).invoke()
+    Response getFromPath(String path, boolean isAdmin, BasicCredentials credentials) {
+        JerseyInvocation.Builder builder = this.makeRequestToPath(path, isAdmin, credentials)
+        return this.buildRequest(builder, 'GET', null, credentials).invoke()
     }
 
     /** Set config directory */
@@ -222,12 +258,17 @@ class AppHelper {
         }
         this.runner = new StubAppRunner(DeployDBApp.class, config)
         this.runner.start()
+        this.testLdapServer = new TestLdapServer()
+        this.testLdapServer.start()
     }
 
 
     void stopApp() {
         if (this.runner != null) {
             this.runner.stop()
+        }
+        if (this.testLdapServer != null) {
+            this.testLdapServer.stop()
         }
     }
 

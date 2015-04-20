@@ -3,6 +3,7 @@ import cucumber.api.DataTable
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import deploydb.WorkFlow
+import io.dropwizard.auth.basic.BasicCredentials
 import org.glassfish.jersey.client.JerseyInvocation
 import org.joda.time.DateTime
 
@@ -11,11 +12,16 @@ this.metaClass.mixin(cucumber.api.groovy.Hooks)
 this.metaClass.mixin(cucumber.api.groovy.EN)
 
 When(~/^I GET "(.*?)" from the admin app$/) { String path ->
-    response = getFromPath(path, true)
+    response = getFromPath(path, true, null)
 }
 
 When(~/^I GET "(.*?)"$/) { String path ->
-    response = getFromPath(path, false)
+    response = getFromPath(path, false, null)
+}
+
+When(~/^I GET "(.*?)" with "(.*?):(.*?)" as credentials$/) {
+    String path, String username, String password ->
+        response = getFromPath(path, false, new BasicCredentials(username, password))
 }
 
 When(~/^I DELETE "(.*?)"$/) { String path ->
@@ -23,7 +29,12 @@ When(~/^I DELETE "(.*?)"$/) { String path ->
 }
 
 When(~/^I POST to "(.*?)" with:$/) { String path, String requestBody ->
-    response = postJsonToPath(path, requestBody, false)
+    response = postJsonToPath(path, requestBody, false, null)
+}
+
+When(~/^I POST to "(.*?)" with credentials "(.*?)","(.*?)" and:$/) {
+    String path, String username, String password, String requestBody ->
+    response = postJsonToPath(path, requestBody, false, new BasicCredentials(username, password))
 }
 
 When(~/^I POST to "(.*?)" with a (.*?) over ([1-9][0-9]*) characters$/) { String path, String var, int varSize ->
@@ -43,23 +54,23 @@ When(~/^I POST to "(.*?)" with a (.*?) over ([1-9][0-9]*) characters$/) { String
       }
     """
 
-    response = postJsonToPath(path, requestBody, false)
+    response = postJsonToPath(path, requestBody, false, null)
+}
+
+When(~/^I POST to "(.*?)"$/) { String path ->
+    response = postJsonToPath(path, null, false, null)
+}
+
+When(~/^I POST to "(.*?)" from the admin app$/) { String path ->
+    response = postJsonToPath(path, null, true, null)
 }
 
 When(~/^I PATCH "(.*?)" with:$/) { String path, String requestBody ->
     response = patchJsonToPath(path, requestBody)
 }
 
-When(~/^I POST to "(.*?)"$/) { String path ->
-    response = postJsonToPath(path, null, false)
-}
-
-When(~/^I POST to "(.*?)" from the admin app$/) { String path ->
-    response = postJsonToPath(path, null, true)
-}
-
 When(~/^I GET "(.*?)" with custom headers:$/) { String path, DataTable headers ->
-    JerseyInvocation.Builder builder = client.target(urlWithPort(path, false)).request()
+    JerseyInvocation.Builder builder = makeRequestToPath(path, false, null)
 
     List<List<String>> rawHeaders = headers.raw()
 
@@ -67,7 +78,7 @@ When(~/^I GET "(.*?)" with custom headers:$/) { String path, DataTable headers -
         builder.header(row[0] as String, row[1] as Object)
     }
 
-    response = builder.build('GET', null).invoke()
+    response = buildRequest(builder, 'GET', null, null).invoke()
 }
 
 
