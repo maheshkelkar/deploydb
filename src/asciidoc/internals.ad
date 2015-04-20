@@ -260,7 +260,7 @@ The corresponding implementation is defined as follows:
 
 [source,groovy]
 ----
-include::src/main/groovy/deploydb/models/Promotion/PromotionImpl.groovy[]
+src/main/groovy/deploydb/models/Promotion/PromotionImpl.groovy[]
 ----
 
 ==== Manual Promotion
@@ -288,7 +288,7 @@ The ManualPromotionImpl is defined as follows:
 
 [source,groovy]
 ----
-include::src/main/groovy/deploydb/models/Promotion/ManualPromotionImpl.groovy[]
+src/main/groovy/deploydb/models/Promotion/ManualPromotionImpl.groovy[]
 ----
 
 Test
