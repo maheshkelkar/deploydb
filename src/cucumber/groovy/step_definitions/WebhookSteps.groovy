@@ -114,7 +114,7 @@ When (~/^I POST to "(.*?)" with an artifact/) { String path ->
 "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar"
 }"""
 
-    response = postJsonToPath(path, requestBody, false)
+    response = postJsonToPath(path, requestBody, false, null)
 }
 
 Then(~/^the webhook should be invoked with the JSON:$/) { String expectedMessageBody ->

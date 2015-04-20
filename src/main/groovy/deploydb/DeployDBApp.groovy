@@ -4,6 +4,10 @@ import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableMap
 import io.dropwizard.Application
 import io.dropwizard.assets.AssetsBundle
+import io.dropwizard.auth.AuthFactory
+import io.dropwizard.auth.basic.BasicAuthFactory
+import io.dropwizard.auth.basic.BasicCredentials
+import io.dropwizard.auth.CachingAuthenticator
 import io.dropwizard.cli.CheckCommand
 import io.dropwizard.cli.Cli
 import io.dropwizard.cli.ServerCommand
@@ -59,7 +63,7 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
             new HibernateBundle<DeployDBConfiguration>(models, new SessionFactoryFactory()) {
                 @Override
                 DataSourceFactory getDataSourceFactory(DeployDBConfiguration config) {
-                    return config.getDataSourceFactory()
+                    return config.database
                 }
             }
 
@@ -87,12 +91,12 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
         bootstrap.addBundle(new FlywayBundle<DeployDBConfiguration>() {
             @Override
             DataSourceFactory getDataSourceFactory(DeployDBConfiguration config) {
-                return config.getDataSourceFactory()
+                return config.database
             }
 
             @Override
             FlywayFactory getFlywayFactory(DeployDBConfiguration config) {
-                return config.getFlywayFactory()
+                return config.flyway
             }
         })
 
@@ -166,6 +170,18 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
 
         /** Add admin task for config reload */
         environment.admin().addTask(new ConfigReloadTask(workFlow))
+
+        /** Register Ldap Authentication */
+        if (configuration.ldapConfiguration.uri) {
+            CachingAuthenticator<BasicCredentials, auth.User> authenticator = new CachingAuthenticator<>(
+                    environment.metrics(),
+                    new auth.LdapAuthenticator(configuration.ldapConfiguration),
+                    configuration.ldapConfiguration.cachePolicy)
+            environment.jersey().register(
+                    AuthFactory.binder(new BasicAuthFactory<auth.User>(authenticator,
+                            "Please enter the user credentials",
+                            auth.User.class)))
+        }
 
         /**
          * Instantiate Resources classes for Jersey handlers
