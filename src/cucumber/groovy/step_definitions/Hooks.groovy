@@ -1,5 +1,5 @@
-import deploydb.AppHelper
-import deploydb.ModelHelper
+import deploydb.cucumber.AppHelper
+import deploydb.cucumber.ModelHelper
 
 import org.joda.time.DateTime
 import org.joda.time.DateTimeUtils

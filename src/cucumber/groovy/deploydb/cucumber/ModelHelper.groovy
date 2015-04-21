@@ -1,4 +1,4 @@
-package deploydb
+package deploydb.cucumber
 
 import deploydb.models.Artifact
 import deploydb.models.Deployment

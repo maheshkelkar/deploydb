@@ -1,7 +1,8 @@
-package deploydb
+package deploydb.cucumber
 
-import deploydb.cucumber.TestLdapServer
 import deploydb.models.Webhook.Webhook
+import deploydb.ModelLoader
+import deploydb.DeployDBApp
 import com.github.mustachejava.DefaultMustacheFactory
 import com.github.mustachejava.Mustache
 
