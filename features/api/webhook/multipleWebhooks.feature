@@ -179,6 +179,7 @@ Feature: Webhook invocation  when deployment is created with multiple webhooks
           - http://localhost:10000/job/another-notify-promotion-completed/build
     """
     And there is a deployment in "COMPLETED" state
+    And promotions are configured
     When I POST to "/api/deployments/1/promotions" with:
     """
       {
@@ -427,6 +428,7 @@ Feature: Webhook invocation  when deployment is created with multiple webhooks
     description: "DeployDB Primary Integration"
     """
     And there is a deployment in "COMPLETED" state
+    And promotions are configured
     When I POST to "/api/deployments/1/promotions" with:
     """
       {
@@ -507,6 +509,7 @@ Feature: Webhook invocation  when deployment is created with multiple webhooks
 
     """
     And there is a deployment in "COMPLETED" state
+    And promotions are configured
     When I POST to "/api/deployments/1/promotions" with:
     """
       {
@@ -629,6 +632,7 @@ Feature: Webhook invocation  when deployment is created with multiple webhooks
           - http://localhost:10000/job/prod-notify-deployment-started/build
     """
     And the first deployments is in "COMPLETED" state
+    And promotions are configured
     When I POST to "/api/deployments/1/promotions" with:
     """
       {

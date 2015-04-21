@@ -42,7 +42,7 @@ class workFlowWithArgsSpec extends Specification {
 
     def createPromotionConfigFile() {
         String fileContents = """
-type:  BasicPromotion
+type:  deploydb.models.Promotion.BasicPromotionImpl
 description: "Basic Smoke test for the Basic Service"
 """
         /* Create temp file */
@@ -57,7 +57,7 @@ description: "Basic Smoke test for the Basic Service"
 
     def createAnotherPromotionConfigFile() {
         String fileContents = """
-type:  AdvancedPromotion
+type:  deploydb.models.Promotion.AdvancedPromotionImpl
 description: "Advanced Smoke test for the Basic Service"
 """
         /* Create temp file */

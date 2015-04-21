@@ -9,6 +9,7 @@ Feature: Webhook invocation when promotion is completed with success state
           - http://localhost:10000/job/notify-promotion-completed/build
     """
     And there is a deployment in "COMPLETED" state
+    And promotions are configured
     When I POST to "/api/deployments/1/promotions" with:
     """
       {
@@ -58,6 +59,7 @@ Feature: Webhook invocation when promotion is completed with success state
           - http://localhost:10000/job/notify-promotion-completed/build
     """
     And there is a deployment in "COMPLETED" state
+    And promotions are configured
     When I POST to "/api/deployments/1/promotions" with:
     """
       {

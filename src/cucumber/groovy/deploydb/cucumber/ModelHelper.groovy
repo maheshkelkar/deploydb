@@ -2,7 +2,7 @@ package deploydb.cucumber
 
 import deploydb.models.Artifact
 import deploydb.models.Deployment
-import deploydb.models.Promotion
+import deploydb.models.Promotion.Promotion
 import deploydb.models.Service
 import deploydb.models.Webhook.Webhook
 import deploydb.models.pipeline.Pipeline
@@ -42,15 +42,22 @@ class ModelHelper {
      * Creates a sample promotion object
      */
     Promotion samplePromotion1() {
-        Promotion promotion = new Promotion('status-check', 'BasicPromotion',
+        return new Promotion('status-check',
+                'deploydb.models.Promotion.BasicPromotionImpl',
                 'Status Check for Fun as a Service')
-
-        return promotion
     }
-    Promotion samplePromotion2() {
-        Promotion promotion = new Promotion('jenkins-smoke', 'BasicPromotion',
-                'jenkins-smoke for Fun as a Service')
 
+    Promotion samplePromotion2() {
+        return new Promotion('jenkins-smoke',
+                'deploydb.models.Promotion.BasicPromotionImpl',
+                'jenkins-smoke for Fun as a Service')
+    }
+
+    Promotion sampleManualLDAPPromotion() {
+        Promotion promotion = new Promotion("manual-promotion",
+                "deploydb.models.Promotion.ManualLDAPPromotionImpl",
+                "Manual Promotion smoke test")
+        promotion.attributes = ["allowedGroup":"fox"]
         return promotion
     }
 

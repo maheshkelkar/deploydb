@@ -66,16 +66,4 @@ class LdapConfiguration {
     @Valid
     @JsonProperty
     private Duration readTimeout = Duration.milliseconds(500)
-
-    /** Validate uri */
-    boolean isValidLdapUri() {
-        println "uri = ${uri.toString()}"
-        try {
-            URI u = URI.create(uri.toString());
-            return "ldap".equals(u.getScheme())
-        } catch (Exception ex) {
-            println "$uri - validation failed: " + ex.getMessage()
-        }
-        return false
-    }
 }

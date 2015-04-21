@@ -276,8 +276,8 @@ class LdapAuthenticatorWithArgsSpec extends Specification {
 
     /* Populate SearchResult */
     SearchResult populateSearchResult(String attribType, String attribValue) {
-        Attributes matchAttrs = new BasicAttributes(true);
-        matchAttrs.put(new BasicAttribute(attribType, attribValue));
+        Attributes matchAttrs = new BasicAttributes(true)
+        matchAttrs.put(new BasicAttribute(attribType, attribValue))
         return new SearchResult("faux_name", null, matchAttrs)
     }
 
