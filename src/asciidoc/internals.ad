@@ -231,16 +231,11 @@ attributes:
 Promotion offers a PromotionImpl Interface that can be extended to define
 promotion specific methods. The Interface looks as follows:
 
+:sourcedir: ../../src/main/groovy/deploydb/models
+
 [source,groovy]
 ----
-Interface PromotionImpl {
-    /* invoked on REST API */
-    boolean validate(User user, Map attributes)
-    /* invoked on Status transition to STARTED */
-    boolean onStarted(Map attributes)
-    /* invoked on Status transition to COMPLETED */
-    boolean onCompleted()
-}
+TBD(issue #162) include::{sourcedir}/Promotion/PromotionImpl.groovy[lines=5..7]
 ----
 
 ==== Basic Promotion
@@ -258,9 +253,10 @@ description: Example of Basic Promotion
 
 The corresponding implementation is defined as follows:
 
+
 [source,groovy]
 ----
-src/main/groovy/deploydb/models/Promotion/PromotionImpl.groovy[]
+TBD(issue #162) include::{sourcedir}/Promotion/BasicPromotionImpl.groovy[lines=6..11]
 ----
 
 ==== Manual Promotion
@@ -288,21 +284,7 @@ The ManualPromotionImpl is defined as follows:
 
 [source,groovy]
 ----
-src/main/groovy/deploydb/models/Promotion/ManualPromotionImpl.groovy[]
-----
-
-Test
-----
-class ManualPromotionImpl extends class PromotionImpl {
-    /* invoked on REST API */
-    boolean validate(User user, Map attributes) {
-       /* Validate that User is part of "allowedGroup" */
-    }
-    /* invoked on Status transition to STARTED */
-    boolean onStarted() { true }
-    /* invoked on Status transition to COMPLETED */
-    boolean onCompleted() {  true }
-}
+TBD(issue #162) - include::{sourcedir}/Promotion/ManualLDAPPromotionImpl.groovy[lines=6..17]
 ----
 
 === Flow Diagram
