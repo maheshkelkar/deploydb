@@ -30,8 +30,8 @@ Feature: Promotion Result APIs
     """
 
 
-  @freezetime
-  Scenario: Adding a result for a Manual LDAP Promotion associated with a Deployment succeeds
+  @freezetime @wip
+  Scenario: (issue 166) Adding a result for a Manual LDAP Promotion associated with a Deployment succeeds
 
     Given a manual LDAP promotion is configured
     And there is a deployment with manual LDAP promotion
