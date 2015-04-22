@@ -1,4 +1,4 @@
-package deploydb.cucumber
+package dropwizardintegtest
 
 import com.google.common.base.Strings
 import com.google.common.collect.ImmutableMap
@@ -9,18 +9,20 @@ import io.dropwizard.lifecycle.ServerLifecycleListener
 import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
 import io.dropwizard.testing.ConfigOverride
+import javax.annotation.Nullable
 import net.sourceforge.argparse4j.inf.Namespace
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.ServerConnector
-import webhookTestServer.models.RequestWebhookObject
-import webhookTestServer.models.ResponseWebhookObject
-
-import javax.annotation.Nullable
+import org.flywaydb.core.Flyway
+import org.hibernate.SessionFactory
 
 /**
+ * Class for running the Dropwizard app
  *
+ * Why not use DropwizardAppRule directly you might ask? Because it's an epic
+ * pain to get integrated into the Before\/After hooks inside of cucumber-jvm
  */
-public class WebhookTestServerAppRunner<C extends Configuration> {
+public class StubAppRunner<C extends Configuration> {
     private final Class<? extends Application<C>> applicationClass
     private final String configPath
 
@@ -28,12 +30,11 @@ public class WebhookTestServerAppRunner<C extends Configuration> {
     private Application<C> application
     private Environment environment
     private Server jettyServer
-    private RequestWebhookObject requestWebhookObject
-    private ResponseWebhookObject responseWebhookObject
+    private SessionFactory sessionFactory
 
-    public WebhookTestServerAppRunner(Class<? extends Application<C>> applicationClass,
-                         @Nullable String configPath,
-                         ConfigOverride... configOverrides) {
+    public StubAppRunner(Class<? extends Application<C>> applicationClass,
+                        @Nullable String configPath,
+                        ConfigOverride... configOverrides) {
         this.applicationClass = applicationClass
         this.configPath = configPath
 
@@ -61,25 +62,45 @@ public class WebhookTestServerAppRunner<C extends Configuration> {
             application = newApplication()
 
             final Bootstrap<C> bootstrap = new Bootstrap<C>(application) {
+
                 @Override
                 public void run(C configuration, Environment environment) throws Exception {
+
                     environment.lifecycle().addServerLifecycleListener(new ServerLifecycleListener() {
                         @Override
                         public void serverStarted(Server server) {
                             jettyServer = server
+                            /* Get a SessionFactory out of the application once
+                             * it's up and running
+                             */
+                            sessionFactory = application.sessionFactory
+
                         }
                     })
 
-                    WebhookTestServerAppRunner.this.configuration = configuration
-                    WebhookTestServerAppRunner.this.environment = environment
+                    /**
+                     * Setup config checksum for tests
+                     */
+                    application.configChecksum = "0xdead"
+
+                    /* We're running the DB migrations here to make sure we're running
+                    * them in the same classloader environment as the DeployDB
+                    * application, otherwise the Hibernate code running inside of
+                    * DeployDB won't be able to "see" the in-memory DB
+                    */
+                    Flyway flyway = configuration.flyway.build(
+                            configuration.database.build(metricRegistry, "Flyway"))
+                    flyway.clean()
+                    flyway.migrate()
+
+                    StubAppRunner.this.configuration = configuration
+                    StubAppRunner.this.environment = environment
                     super.run(configuration, environment)
                 }
             }
 
             application.initialize(bootstrap)
             final ServerCommand<C> command = new ServerCommand<>(application)
-            this.requestWebhookObject = application.requestWebhookObject
-            this.responseWebhookObject = application.responseWebhookObject
 
             ImmutableMap.Builder<String, Object> file = ImmutableMap.builder()
 
@@ -119,8 +140,7 @@ public class WebhookTestServerAppRunner<C extends Configuration> {
         return (A) application
     }
 
-    Environment getEnvironment() {
-        return environment
+    void setConfigDirectory(String configDirectory) {
+        application.configDirectory = configDirectory
     }
-
 }

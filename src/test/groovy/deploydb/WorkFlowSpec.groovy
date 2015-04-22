@@ -18,14 +18,15 @@ class WorkFlowSpec extends Specification {
 }
 
 class workFlowWithArgsSpec extends Specification {
-    private String baseCfgDirName = "./build/tmp/config"
+    private ModelConfigHelper modelConfigHelper = new ModelConfigHelper()
     private DeployDBApp app = new DeployDBApp()
     private WorkFlow workFlow
     private FlowDAO fdao = Mock(FlowDAO)
     private ModelConfigDAO mdao = Mock(ModelConfigDAO)
 
     def setup() {
-        app.configDirectory = baseCfgDirName
+        modelConfigHelper.setup()
+        app.configDirectory = modelConfigHelper.baseCfgDirName
         app.configChecksum = null
         workFlow = new WorkFlow(app)
         workFlow.initializeRegistry()
@@ -34,132 +35,16 @@ class workFlowWithArgsSpec extends Specification {
     }
 
     def cleanup() {
-        File baseCfgDir = new File(baseCfgDirName)
-        if (baseCfgDir.exists()) {
-            baseCfgDir.deleteDir()
-        }
-    }
-
-    def createPromotionConfigFile() {
-        String fileContents = """
-type:  deploydb.models.promotion.BasicPromotionImpl
-description: "Basic Smoke test for the Basic Service"
-"""
-        /* Create temp file */
-        File promotionsDir = new File("${baseCfgDirName}/promotions")
-        if (!promotionsDir.exists()) {
-            promotionsDir.mkdirs()
-        }
-
-        File promotionFile = new File(promotionsDir, "basicPromo.yml")
-        promotionFile.write(fileContents)
-    }
-
-    def createAnotherPromotionConfigFile() {
-        String fileContents = """
-type:  deploydb.models.promotion.ManualLDAPPromotionImpl
-description: "Manual LDAP Promotion"
-"""
-        /* Create temp file */
-        File promotionsDir = new File("${baseCfgDirName}/promotions")
-        if (!promotionsDir.exists()) {
-            promotionsDir.mkdirs()
-        }
-
-        File promotionFile = new File(promotionsDir, "advancedPromo.yml")
-        promotionFile.write(fileContents)
-    }
-
-    def createEnvironmentConfigFile() {
-        String fileContents = """
-description: "Basic Environment"
-webhook:
-  deployment:
-    created:
-      - http://jenkins.example.com/job/basicEnv-deploy-created/build
-    completed:
-      - http://jenkins.example.com/job/basicEnv-deploy-completed/build
-"""
-        /* Create temp file */
-        File environmentsDir = new File("${baseCfgDirName}/environments")
-        if (!environmentsDir.exists()) {
-            environmentsDir.mkdirs()
-        }
-
-        File environmentFile = new File(environmentsDir, "basicEnv.yml")
-        environmentFile.write(fileContents)
-    }
-
-    def createPipelineConfigFile() {
-        String fileContents = """
-description: "Basic pipeline"
-environments:
-     basicEnv:
-       promotions:
-          - basicPromo
-"""
-        /* Create temp file */
-        File pipelinesDir = new File("${baseCfgDirName}/pipelines")
-        if (!pipelinesDir.exists()) {
-            pipelinesDir.mkdirs()
-        }
-
-        File pipelineFile = new File(pipelinesDir, "basicPipe.yml")
-        pipelineFile.write(fileContents)
-    }
-
-    def createServiceConfigFile() {
-        String fileContents = """
-description: "Basic Service"
-artifacts:
-  - basic.group.1:bg1
-  - basic.group.2:bg2
-pipelines:
-  - basicPipe
-promotions:
-  - basicPromo
-"""
-        /* Create temp file */
-        File servicesDir = new File("${baseCfgDirName}/services")
-        if (!servicesDir.exists()) {
-            servicesDir.mkdirs()
-        }
-
-        File serviceFile = new File(servicesDir, "basicServ.yml")
-        serviceFile.write(fileContents)
-    }
-
-    def createWebhookConfigFile() {
-        String fileContents = """
-deployment:
-  created:
-     - http://localhost:10000/job/notify-deployment-created/build
-  started:
-     - http://localhost:10000/job/notify-deployment-started/build
-  completed:
-     - http://localhost:10000/job/notify-deployment-completed1/build
-     - http://localhost:10000/job/notify-deployment-completed2/build
-promotion:
-  completed:
-     - http://localhost:10000/job/notify-promotion-completed/build
-"""
-        /* Create temp file */
-        File webhookDir = new File("${baseCfgDirName}/webhook")
-        if (!webhookDir.exists()) {
-            webhookDir.mkdirs()
-        }
-
-        File webhookFile = new File(webhookDir, "basicWebhook.yml")
-        webhookFile.write(fileContents)
+        modelConfigHelper.cleanup()
     }
 
     def "Load entire config from a directory and make sure it passes"() {
         given:
-        createPromotionConfigFile()
-        createEnvironmentConfigFile()
-        createPipelineConfigFile()
-        createServiceConfigFile()
-        createWebhookConfigFile()
+        modelConfigHelper.createPromotionConfigFile()
+        modelConfigHelper.createEnvironmentConfigFile()
+        modelConfigHelper.createPipelineConfigFile()
+        modelConfigHelper.createServiceConfigFile()
+        modelConfigHelper.createWebhookConfigFile()
         workFlow.loadConfigModels()
         mdao.persist(_) >> _
 
@@ -177,8 +62,8 @@ promotion:
 
     def "If promotion is missing, then loading pipeline in loadConfigModels throws an exception"() {
         when:
-        createEnvironmentConfigFile()
-        createPipelineConfigFile()
+        modelConfigHelper.createEnvironmentConfigFile()
+        modelConfigHelper.createPipelineConfigFile()
         workFlow.loadConfigModels()
         mdao.persist(_) >> _
 
@@ -188,8 +73,8 @@ promotion:
 
     def "If environment is missing, then loading pipeline in loadConfigModels throws an exception"() {
         when:
-        createPromotionConfigFile()
-        createPipelineConfigFile()
+        modelConfigHelper.createPromotionConfigFile()
+        modelConfigHelper.createPipelineConfigFile()
         workFlow.loadConfigModels()
         mdao.persist(_) >> _
 
@@ -199,9 +84,9 @@ promotion:
 
     def "If pipeline is missing, then loading service in loadConfigModels throws an exception"() {
         when:
-        createPromotionConfigFile()
-        createEnvironmentConfigFile()
-        createServiceConfigFile()
+        modelConfigHelper.createPromotionConfigFile()
+        modelConfigHelper.createEnvironmentConfigFile()
+        modelConfigHelper.createServiceConfigFile()
         workFlow.loadConfigModels()
         mdao.persist(_) >> _
 
@@ -212,11 +97,11 @@ promotion:
 
     def "Reload unchanged config from a directory and make sure its ignored"() {
         given:
-        createPromotionConfigFile()
-        createEnvironmentConfigFile()
-        createPipelineConfigFile()
-        createServiceConfigFile()
-        createWebhookConfigFile()
+        modelConfigHelper.createPromotionConfigFile()
+        modelConfigHelper.createEnvironmentConfigFile()
+        modelConfigHelper.createPipelineConfigFile()
+        modelConfigHelper.createServiceConfigFile()
+        modelConfigHelper.createWebhookConfigFile()
         workFlow.loadConfigModels()
         String oldChecksum = app.configChecksum
         mdao.persist(_) >> _
@@ -231,14 +116,14 @@ promotion:
 
     def "Reload changed config from a directory and make sure it passes"() {
         given:
-        createPromotionConfigFile()
-        createEnvironmentConfigFile()
-        createPipelineConfigFile()
-        createServiceConfigFile()
-        createWebhookConfigFile()
+        modelConfigHelper.createPromotionConfigFile()
+        modelConfigHelper.createEnvironmentConfigFile()
+        modelConfigHelper.createPipelineConfigFile()
+        modelConfigHelper.createServiceConfigFile()
+        modelConfigHelper.createWebhookConfigFile()
         workFlow.loadConfigModels()
         String oldChecksum = app.configChecksum
-        createAnotherPromotionConfigFile()
+        modelConfigHelper.createAnotherPromotionConfigFile()
         mdao.persist(_) >> _
 
         when:

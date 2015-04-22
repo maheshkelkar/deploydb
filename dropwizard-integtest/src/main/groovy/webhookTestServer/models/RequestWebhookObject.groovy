@@ -1,4 +1,4 @@
-package webhookTestServer.models
+package dropwizardintegtest
 
 import com.google.common.collect.HashMultimap
 

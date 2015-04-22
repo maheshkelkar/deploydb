@@ -1,4 +1,4 @@
-package webhookTestServer
+package dropwizardintegtest
 
 import io.dropwizard.Configuration
 
