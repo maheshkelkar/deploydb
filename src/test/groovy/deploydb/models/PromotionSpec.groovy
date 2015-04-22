@@ -42,6 +42,7 @@ description: Basic Promotion Smoke Test
         promotion.validate(user) == true
     }
 
+
     def "When allowedGroup matches with User authorized groups, then validation succeeds"() {
         given:
         Promotion promotion = promotionLoader.loadFromString("""
@@ -64,6 +65,7 @@ attributes:
         promotion.validate(user) == true
     }
 
+
     def "When allowedGroup is NOT part of User authorized groups, then validation fails"() {
         given:
         Promotion promotion = promotionLoader.loadFromString("""
@@ -80,6 +82,7 @@ attributes:
         promotion.validate(user) == false
     }
 
+
     def "When no allowedGroup is configured, then validation fails"() {
         given:
         Promotion promotion = promotionLoader.loadFromString("""
@@ -92,6 +95,7 @@ description: Manual LDAP Promotion Smoke Test
         User user = new User("foo", [ "fooGroup" ] as Set)
         promotion.validate(user) == false
     }
+
 
     def "If multiple allowedGroup(s) are configured, last entry superscedes and validation fails"() {
         given:
@@ -110,6 +114,7 @@ attributes:
         promotion.validate(user) == false
     }
 
+
     def "The allowedGroup is configured, but authentication is not, hence validate fails"() {
         given:
         Promotion promotion = promotionLoader.loadFromString("""
@@ -125,6 +130,7 @@ attributes:
         User user = null
         promotion.validate(user) == false
     }
+
 
     def "Neither allowedGroup, nor authentication is configured, hence validate fails"() {
         given:
