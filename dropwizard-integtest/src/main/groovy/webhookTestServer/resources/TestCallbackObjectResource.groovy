@@ -1,10 +1,8 @@
-package webhookTestServer.resources
+package dropwizardintegtest
 
 import io.dropwizard.hibernate.UnitOfWork
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import webhookTestServer.models.RequestWebhookObject
-import webhookTestServer.models.ResponseWebhookObject
 
 import javax.servlet.http.HttpServletRequest
 import javax.ws.rs.POST

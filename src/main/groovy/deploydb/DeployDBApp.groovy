@@ -147,15 +147,7 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
          * Load configuration models
          */
         this.configDirectory = configuration.configDirectory
-        withHibernateSession() {
-            try {
-                workFlow.loadConfigModels()
-            } catch (Exception e) {
-                logger.error("failed to read config from directory: " +
-                        "${configDirectory} with an exception: ", e)
-                throw e
-            }
-        }
+        loadModelConfiguration()
 
         /**
          * webhooksManager
@@ -212,5 +204,21 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
             session.close()
             ManagedSessionContext.unbind(this.getSessionFactory())
         }
+    }
+
+    /**
+     * This function will load configuration with hibernate session.
+     */
+    void loadModelConfiguration(){
+        withHibernateSession() {
+            try {
+                workFlow.loadConfigModels()
+            } catch (Exception e) {
+                logger.error("failed to read config from directory: " +
+                        "${configDirectory} with an exception: ", e)
+                throw e
+            }
+        }
+
     }
 }

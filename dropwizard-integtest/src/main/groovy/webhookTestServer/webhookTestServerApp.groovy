@@ -1,9 +1,6 @@
-package webhookTestServer
+package dropwizardintegtest
 
 import io.dropwizard.setup.Bootstrap
-import webhookTestServer.models.RequestWebhookObject
-import webhookTestServer.models.ResponseWebhookObject
-import webhookTestServer.health.webhookTestServerHealthCheck
 
 import io.dropwizard.Application
 import io.dropwizard.setup.Environment
@@ -43,8 +40,8 @@ class webhookTestServerApp extends Application<webhookTestServerConfiguration>{
         responseWebhookObject.responseCode = "201"
         responseWebhookObject.delayBeforeResponseInSecs = 0
 
-        environment.jersey().register(new resources.RootResource())
-        environment.jersey().register(new resources.TestCallBackobjectResource(requestWebhookObject,
+        environment.jersey().register(new RootResource())
+        environment.jersey().register(new TestCallBackobjectResource(requestWebhookObject,
                 responseWebhookObject))
 
     }

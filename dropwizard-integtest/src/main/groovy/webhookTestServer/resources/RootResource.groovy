@@ -1,4 +1,4 @@
-package webhookTestServer.resources
+package dropwizardintegtest
 
 import com.codahale.metrics.annotation.Timed
 import com.google.common.base.Charsets

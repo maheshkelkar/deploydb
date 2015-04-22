@@ -2,6 +2,6 @@ description: "Basic Environment"
 webhook:
   deployment:
     created:
-      - http://jenkins.example.com/job/basicEnv-deploy-created/build
+      - http://localhost:10000/job/basicEnv-deploy-created/build
     completed:
-      - http://jenkins.example.com/job/basicEnv-deploy-completed/build
+      - http://localhost:10000/job/basicEnv-deploy-completed/build
