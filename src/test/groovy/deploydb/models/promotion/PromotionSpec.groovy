@@ -1,9 +1,10 @@
-package deploydb.models.Promotion
+package deploydb.models.promotion
 
 import deploydb.ModelLoader
 import deploydb.auth.User
 import deploydb.registry.ModelRegistry
 import io.dropwizard.configuration.ConfigurationParsingException
+import io.dropwizard.configuration.ConfigurationValidationException
 import spock.lang.Ignore
 import spock.lang.Specification
 
@@ -26,14 +27,14 @@ class PromotionWithArgsSpec extends Specification {
     def "Loading of valid basic promotion config content succeeds"() {
         given:
         Promotion promotion = promotionLoader.loadFromString("""
-type: deploydb.models.Promotion.BasicPromotionImpl
+type: deploydb.models.promotion.BasicPromotionImpl
 description: Basic Promotion Smoke Test
 """)
         promotion.ident = "basic"
         promotionRegistry.put(promotion.ident, promotion)
 
         expect:
-        promotion.type == 'deploydb.models.Promotion.BasicPromotionImpl'
+        promotion.type == 'deploydb.models.promotion.BasicPromotionImpl'
         promotion.description == "Basic Promotion Smoke Test"
         promotion.attributes == null
         promotionRegistry.get("basic") == promotion
@@ -42,11 +43,10 @@ description: Basic Promotion Smoke Test
         promotion.validate(user) == true
     }
 
-
     def "When allowedGroup matches with User authorized groups, then validation succeeds"() {
         given:
         Promotion promotion = promotionLoader.loadFromString("""
-type: deploydb.models.Promotion.ManualLDAPPromotionImpl
+type: deploydb.models.promotion.ManualLDAPPromotionImpl
 description: Manual LDAP Promotion Smoke Test
 attributes:
   allowedGroup : "fooGroup"
@@ -55,7 +55,7 @@ attributes:
         promotionRegistry.put(promotion.ident, promotion)
 
         expect:
-        promotion.type == 'deploydb.models.Promotion.ManualLDAPPromotionImpl'
+        promotion.type == 'deploydb.models.promotion.ManualLDAPPromotionImpl'
         promotion.description == "Manual LDAP Promotion Smoke Test"
         promotion.attributes.size() == 1
         promotion.attributes["allowedGroup"] == "fooGroup"
@@ -69,13 +69,13 @@ attributes:
     def "When allowedGroup is NOT part of User authorized groups, then validation fails"() {
         given:
         Promotion promotion = promotionLoader.loadFromString("""
-type: deploydb.models.Promotion.ManualLDAPPromotionImpl
+type: deploydb.models.promotion.ManualLDAPPromotionImpl
 description: Manual LDAP Promotion Smoke Test
 attributes:
   allowedGroup : "fooGroup"
 """)
         expect:
-        promotion.type == 'deploydb.models.Promotion.ManualLDAPPromotionImpl'
+        promotion.type == 'deploydb.models.promotion.ManualLDAPPromotionImpl'
         promotion.attributes.size() == 1
         promotion.attributes["allowedGroup"] == "fooGroup"
         User user = new User("foo", [ "barGroup" ] as Set)
@@ -86,11 +86,11 @@ attributes:
     def "When no allowedGroup is configured, then validation fails"() {
         given:
         Promotion promotion = promotionLoader.loadFromString("""
-type: deploydb.models.Promotion.ManualLDAPPromotionImpl
+type: deploydb.models.promotion.ManualLDAPPromotionImpl
 description: Manual LDAP Promotion Smoke Test
 """)
         expect:
-        promotion.type == 'deploydb.models.Promotion.ManualLDAPPromotionImpl'
+        promotion.type == 'deploydb.models.promotion.ManualLDAPPromotionImpl'
         promotion.attributes == null
         User user = new User("foo", [ "fooGroup" ] as Set)
         promotion.validate(user) == false
@@ -100,14 +100,14 @@ description: Manual LDAP Promotion Smoke Test
     def "If multiple allowedGroup(s) are configured, last entry superscedes and validation fails"() {
         given:
         Promotion promotion = promotionLoader.loadFromString("""
-type: deploydb.models.Promotion.ManualLDAPPromotionImpl
+type: deploydb.models.promotion.ManualLDAPPromotionImpl
 description: Manual LDAP Promotion Smoke Test
 attributes:
   allowedGroup : "fooGroup"
   allowedGroup : "barGroup"
 """)
         expect:
-        promotion.type == 'deploydb.models.Promotion.ManualLDAPPromotionImpl'
+        promotion.type == 'deploydb.models.promotion.ManualLDAPPromotionImpl'
         promotion.attributes.size() == 1
         promotion.attributes["allowedGroup"] == "barGroup"
         User user = new User("foo", [ "fooGroup" ] as Set)
@@ -118,13 +118,13 @@ attributes:
     def "The allowedGroup is configured, but authentication is not, hence validate fails"() {
         given:
         Promotion promotion = promotionLoader.loadFromString("""
-type: deploydb.models.Promotion.ManualLDAPPromotionImpl
+type: deploydb.models.promotion.ManualLDAPPromotionImpl
 description: Manual LDAP Promotion Smoke Test
 attributes:
   allowedGroup : "fooGroup"
 """)
         expect:
-        promotion.type == 'deploydb.models.Promotion.ManualLDAPPromotionImpl'
+        promotion.type == 'deploydb.models.promotion.ManualLDAPPromotionImpl'
         promotion.attributes.size() == 1
         promotion.attributes["allowedGroup"] == "fooGroup"
         User user = null
@@ -135,11 +135,11 @@ attributes:
     def "Neither allowedGroup, nor authentication is configured, hence validate fails"() {
         given:
         Promotion promotion = promotionLoader.loadFromString("""
-type: deploydb.models.Promotion.ManualLDAPPromotionImpl
+type: deploydb.models.promotion.ManualLDAPPromotionImpl
 description: Manual LDAP Promotion Smoke Test
 """)
         expect:
-        promotion.type == 'deploydb.models.Promotion.ManualLDAPPromotionImpl'
+        promotion.type == 'deploydb.models.promotion.ManualLDAPPromotionImpl'
         promotion.attributes == null
         User user = null
         promotion.validate(user) == false
@@ -161,14 +161,23 @@ description: Manual LDAP Promotion Smoke Test
         thrown(ConfigurationParsingException)
     }
 
-    def "Loading a empty model promotion config succeeds"(){
-        given:
+    def "Loading a empty model promotion config throws validation exception"(){
+        when:
         Promotion promotion = promotionLoader.loadFromString("type:\n"+
                   "description:\n")
 
-        expect:
-        promotion.type == ""
-        promotion.description == ""
+        then:
+        thrown(ConfigurationValidationException)
+    }
+
+    def "Loading a promotion config with invalid type throws a validation exception"() {
+        when:
+        Promotion promotion = promotionLoader.loadFromString("""
+type: deploydb.invalid.promotion.classname.BasicPromotionImpl
+description: Basic Promotion Smoke Test
+""")
+        then:
+        thrown(ConfigurationValidationException)
     }
 
 }

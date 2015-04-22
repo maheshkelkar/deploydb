@@ -6,7 +6,7 @@ import deploydb.WorkFlow
 import deploydb.auth.User
 import deploydb.mappers.PromotionResultAddMapper
 import deploydb.models.Deployment
-import deploydb.models.Promotion.Promotion
+import deploydb.models.promotion.Promotion
 import deploydb.models.PromotionResult
 import deploydb.mappers.DeploymentUpdateMapper
 import io.dropwizard.auth.Auth

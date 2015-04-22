@@ -1,4 +1,4 @@
-package deploydb.models.Promotion
+package deploydb.models.promotion
 
 import deploydb.auth.User
 

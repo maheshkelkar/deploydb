@@ -1,7 +1,9 @@
-package deploydb.models.Promotion
+package deploydb.models.promotion
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import deploydb.auth.User
+import io.dropwizard.validation.ValidationMethod
+import org.hibernate.validator.constraints.NotEmpty
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -23,11 +25,26 @@ class Promotion {
     String ident
 
     /**
-     * Type of the promotion
-     *
+     * Type (i.e.) full class name for the impl class
      */
+    @NotEmpty
     @JsonProperty
     String type
+
+    /**
+     * Validate contents of "type" using following annotation
+     *
+     * @return true if its a valid class name
+     */
+    @ValidationMethod(message = "Promotion does not have a valid class name in \"type\"")
+    boolean isType() {
+        try {
+            PromotionImpl impl = getPromotionImpl()
+        } catch (all) {
+            return false
+        }
+        return true
+    }
 
     /**
      * Description of this promotion
@@ -107,12 +124,10 @@ class Promotion {
                 Objects.equals(this.description, that.description)
     }
 
-
     @Override
     int hashCode() {
         return Objects.hash(this.ident, this.type, this.description)
     }
-
 
     /**
      * Stringy the promotion

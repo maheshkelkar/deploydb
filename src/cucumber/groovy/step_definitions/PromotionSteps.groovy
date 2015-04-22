@@ -1,7 +1,7 @@
 this.metaClass.mixin(cucumber.api.groovy.EN)
 
 import deploydb.ModelLoader
-import deploydb.models.Promotion.Promotion
+import deploydb.models.promotion.Promotion
 import deploydb.registry.ModelRegistry
 
 

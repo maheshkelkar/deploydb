@@ -8,7 +8,7 @@ Feature: Promotion READ APIs
 
     Given a promotion configuration name "basic":
     """
-    type:  deploydb.models.Promotion.BasicPromotionImpl
+    type:  deploydb.models.promotion.BasicPromotionImpl
     description: "Smoke test the Fun as a Service service"
     """
     When I GET "/api/promotions"
@@ -17,7 +17,7 @@ Feature: Promotion READ APIs
     """
       [{
         "ident" : "basic",
-        "type" : "deploydb.models.Promotion.BasicPromotionImpl",
+        "type" : "deploydb.models.promotion.BasicPromotionImpl",
         "description" : "Smoke test the Fun as a Service service",
         "attributes" : null
       }]
@@ -28,7 +28,7 @@ Feature: Promotion READ APIs
 
     Given a promotion configuration name "basic":
     """
-    type:  deploydb.models.Promotion.BasicPromotionImpl
+    type:  deploydb.models.promotion.BasicPromotionImpl
     description: "Smoke test the Fun as a Service service"
     """
     When I GET "/api/promotions/basic"
@@ -37,7 +37,7 @@ Feature: Promotion READ APIs
     """
       {
         "ident" : "basic",
-        "type" : "deploydb.models.Promotion.BasicPromotionImpl",
+        "type" : "deploydb.models.promotion.BasicPromotionImpl",
         "description" : "Smoke test the Fun as a Service service",
         "attributes" : null
       }
