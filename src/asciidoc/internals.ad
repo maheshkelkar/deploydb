@@ -80,7 +80,7 @@ information into a database. This should be abstracted through a JDBC connector.
 
 
 
-== Environments/Pipelines/Promotions
+== Models
 
 Current thinking: if pipelines are defined in "configuration" as are
 "environments" then the actual registration of an artifact probably shouldn't
@@ -189,6 +189,8 @@ version to successfully complete pipeline)
 
 ==== Service Defaults
 
+NOTE: work-in-progress
+
 DeployDB should support a special file called `_defaults.yml` which can contain
 default Artifacts which can be considered part of every Service.  This might
 include a `puppet-users` module, `logstash-agent` or other globally applicable
@@ -208,47 +210,82 @@ NOTE: The "promotion" concepts described below are not final and really just
 brainstorming to flesh out how configuration of promotions as a concept *might*
 work.
 
-[source,yaml]
-.promotions/jenkins-smoke.yml
-----
-type: JenkinsPromotion
-jobs:
-  - basic-smokes-test
-  - basic-perf-test
-  - end2end-smoke-test
-----
+The DeployDB makes it possible to define variety of Promotions. From a passive
+Promotion that simply records the data, to a self-sufficient Promotion that takes
+care of simple tasks and automate the transitions.
 
-`JenkinsPromotion` as a typed concept would require a list of Jenkins job names
-that would be required to succeed in order to execute the promotion.
-
+Promotion can be customized with attributes and methods. The attributes
+are passed to methods that are called on certain events or transitions.
+The generic yaml config looks as follows:
 
 [source,yaml]
-.promotions/status-check.yml
+.promotions/any-smoke.yml
 ----
-type: WebhookPromotion
-url: /healhcheck
-status: 200
-timeout: 15
+type: <full class name of derived Impl class>
+description: information about this promotion
+attributes:
+   attr1 : specific to this promotion
+   attr1 : specific to this promotion
 ----
 
-`WebhookPromotion` would be something that would make a HTTP GET request to the
-application and see if it's online before identifying it as "promoted." How
-this might work with a cluster of applications in one service, I'm not yet sure.
+Promotion offers a PromotionImpl Interface that can be extended to define
+promotion specific methods. The Interface looks as follows:
+
+:sourcedir: ../../src/main/groovy/deploydb/models
+
+[source,groovy]
+----
+TBD(issue #162) include::{sourcedir}/Promotion/PromotionImpl.groovy[lines=5..7]
+----
+
+==== Basic Promotion
+
+`Basic Promotion` is very passive form of promotion, which is mainly used for
+record keeping. All of the Status transitions are driven by external triggers.
+The yaml for such promotion may look as follows:
 
 [source,yaml]
-.promotions/manual-validate.yml
+.promotions/basic_smoke.yml
 ----
-type: ManualPromotion
-approverGroupName: SuperImpGroup
+type: deploydb.models.Promotion.BasicPromotionImpl
+description: Example of Basic Promotion
 ----
 
-`ManualPromotion` is a special case scenario where the UI for DeployDB is
-going to present a button to a user to click.
+The corresponding implementation is defined as follows:
 
-If approverGroupName is configured and <<auth.ad#LDAP Authentication,LDAP authentication>>
-is enabled, then the user of REST API will be authenticated against that group name. If LDAP
-authentication is NOT enabled, then the approverGroupName is ignored.
 
+[source,groovy]
+----
+TBD(issue #162) include::{sourcedir}/Promotion/BasicPromotionImpl.groovy[lines=6..11]
+----
+
+==== Manual Promotion
+
+`Manual Promotion` is a special case scenario where the UI for DeployDB is
+going to present a button to a user to click and approve the
+promotion. Such an approval can be protected by using LDAP authentication
+and authorization. The yaml config for such promotion may look as follows:
+
+[source,yaml]
+.promotions/storm-manual-validate.yml
+----
+type: deploydb.models.Promotion.ManualPromotionImpl
+description: Manual Promotion for Storm
+attributes:
+    allowedGroup: InfrastructureGroup
+----
+
+If allowedGroup is configured and <<auth.ad#LDAP Authentication,LDAP authentication>>
+is enabled, then it is ensured that user is part of the configured group. If allowedGroup
+is NOT configured, then authorization is skipped. In all other cases, user is denied
+the Promotion approval.
+
+The ManualPromotionImpl is defined as follows:
+
+[source,groovy]
+----
+TBD(issue #162) - include::{sourcedir}/Promotion/ManualLDAPPromotionImpl.groovy[lines=6..17]
+----
 
 === Flow Diagram
 
