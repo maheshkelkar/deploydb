@@ -34,6 +34,12 @@ class Promotion {
     /**
      * Validate contents of "type" using following annotation
      *
+     * - @ValidationMethod is a dropwizard annotation.
+     * - The format for the method name and signature is fixed: boolean "is<variable-name>"().
+     * - This method is called when model is validated.
+     * - When yaml config is parsed into this object, if this method returns false, the
+     *   parser throws ConfigurationValidationException
+     *
      * @return true if its a valid class name
      */
     @ValidationMethod(message = "Promotion does not have a valid class name in \"type\"")
