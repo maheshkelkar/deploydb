@@ -2,7 +2,7 @@ package deploydb.resources
 
 import com.codahale.metrics.annotation.Timed
 import com.sun.research.ws.wadl.Response
-import deploydb.models.Promotion
+import deploydb.models.promotion.Promotion
 import deploydb.registry.ModelRegistry
 import io.dropwizard.hibernate.UnitOfWork
 import org.slf4j.Logger

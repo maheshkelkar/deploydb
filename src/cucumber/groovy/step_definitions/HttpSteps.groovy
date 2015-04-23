@@ -19,11 +19,6 @@ When(~/^I GET "(.*?)"$/) { String path ->
     response = getFromPath(path, false, null)
 }
 
-When(~/^I GET "(.*?)" with "(.*?):(.*?)" as credentials$/) {
-    String path, String username, String password ->
-        response = getFromPath(path, false, new BasicCredentials(username, password))
-}
-
 When(~/^I DELETE "(.*?)"$/) { String path ->
     response = deleteFromPath(path)
 }
@@ -32,7 +27,7 @@ When(~/^I POST to "(.*?)" with:$/) { String path, String requestBody ->
     response = postJsonToPath(path, requestBody, false, null)
 }
 
-When(~/^I POST to "(.*?)" with credentials "(.*?)","(.*?)" and:$/) {
+When(~/^I POST to "(.*?)" with credentials "(.*?):(.*?)" and:$/) {
     String path, String username, String password, String requestBody ->
     response = postJsonToPath(path, requestBody, false, new BasicCredentials(username, password))
 }

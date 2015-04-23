@@ -17,4 +17,10 @@ class User {
         this.name = name
         this.groups = groups
     }
+
+    @Override
+    String toString() {
+        return "name: ${name}, groups: ${groups}"
+
+    }
 }

@@ -867,7 +867,9 @@ promotion specific methods. The Interface looks as follows:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="groovy">TBD(issue <span class="error">#</span><span class="integer">162</span>) <span class="key">include</span>::{sourcedir}/Promotion/PromotionImpl.groovy[lines=<span class="integer">5</span>..<span class="integer">7</span>]</code></pre>
+<pre class="CodeRay highlight"><code data-lang="groovy"><span class="type">interface</span> PromotionImpl {
+    <span class="type">boolean</span> validate(User user, <span class="predefined-type">Map</span>&lt;<span class="predefined-type">String</span>, <span class="predefined-type">Object</span>&gt; attributes)
+}</code></pre>
 </div>
 </div>
 <div class="sect3">
@@ -889,7 +891,12 @@ The yaml for such promotion may look as follows:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="groovy">TBD(issue <span class="error">#</span><span class="integer">162</span>) <span class="key">include</span>::{sourcedir}/Promotion/BasicPromotionImpl.groovy[lines=<span class="integer">6</span>..<span class="integer">11</span>]</code></pre>
+<pre class="CodeRay highlight"><code data-lang="groovy"><span class="type">class</span> <span class="class">BasicPromotionImpl</span> <span class="directive">implements</span> PromotionImpl {
+    BasicPromotionImpl() { }
+
+    <span class="comment">/** No validation required for basic */</span>
+    <span class="type">boolean</span> validate(User user, <span class="predefined-type">Map</span>&lt;<span class="predefined-type">String</span>, <span class="predefined-type">Object</span>&gt; attributes) { <span class="predefined-constant">true</span> }
+}</code></pre>
 </div>
 </div>
 </div>
@@ -921,7 +928,18 @@ the Promotion approval.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="groovy">TBD(issue <span class="error">#</span><span class="integer">162</span>) - <span class="key">include</span>::{sourcedir}/Promotion/ManualLDAPPromotionImpl.groovy[lines=<span class="integer">6</span>..<span class="integer">17</span>]</code></pre>
+<pre class="CodeRay highlight"><code data-lang="groovy"><span class="type">class</span> <span class="class">ManualLDAPPromotionImpl</span> <span class="directive">implements</span> PromotionImpl {
+
+    <span class="type">boolean</span> validate(User user, <span class="predefined-type">Map</span>&lt;<span class="predefined-type">String</span>, <span class="predefined-type">Object</span>&gt; attributes) {
+        <span class="comment">/**
+         * Validation succeeds if:
+         * - &quot;allowedGroup&quot; is configured and user belongs to the group
+         * Validation fails in all the remaining cases
+         */</span>
+        <span class="keyword">return</span> attributes &amp;&amp; attributes[<span class="string"><span class="delimiter">&quot;</span><span class="content">allowedGroup</span><span class="delimiter">&quot;</span></span>] &amp;&amp;
+                user &amp;&amp; user.groups.contains(attributes[<span class="string"><span class="delimiter">&quot;</span><span class="content">allowedGroup</span><span class="delimiter">&quot;</span></span>])
+    }
+}</code></pre>
 </div>
 </div>
 </div>
@@ -987,7 +1005,7 @@ ns = notStarted</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-04-21 14:19:16 EDT
+Last updated 2015-04-22 08:55:48 EDT
 </div>
 </div>
 </body>

@@ -13,12 +13,12 @@ class BreakLoopException extends Exception{}
 
 class WorkFlow {
     private final DeployDBApp deployDBApp
-    private registry.ModelRegistry<models.Promotion> promotionRegistry
+    private registry.ModelRegistry<models.promotion.Promotion> promotionRegistry
     private registry.ModelRegistry<models.Environment> environmentRegistry
     private registry.ModelRegistry<models.pipeline.Pipeline> pipelineRegistry
     private registry.ModelRegistry<models.Service> serviceRegistry
     private models.Webhook.Webhook globalWebhook
-    private ModelLoader<models.Promotion> promotionLoader
+    private ModelLoader<models.promotion.Promotion> promotionLoader
     private ModelLoader<models.Environment> environmentLoader
     private ModelLoader<models.pipeline.Pipeline> pipelineLoader
     private ModelLoader<models.Service> serviceLoader
@@ -49,7 +49,7 @@ class WorkFlow {
         /**
          * Instantiate registries for in memory storage
          */
-        promotionRegistry = new registry.ModelRegistry<models.Promotion>()
+        promotionRegistry = new registry.ModelRegistry<models.promotion.Promotion>()
         environmentRegistry = new registry.ModelRegistry<models.Environment>()
         pipelineRegistry = new registry.ModelRegistry<models.pipeline.Pipeline>()
         serviceRegistry = new registry.ModelRegistry<models.Service>()
@@ -57,7 +57,7 @@ class WorkFlow {
         /**
          * Instantiate in memory loaders for yaml parsing
          */
-        promotionLoader = new ModelLoader<>(models.Promotion.class)
+        promotionLoader = new ModelLoader<>(models.promotion.Promotion.class)
         environmentLoader = new ModelLoader<>(models.Environment.class)
         pipelineLoader = new ModelLoader<>(models.pipeline.Pipeline.class)
         serviceLoader = new ModelLoader<>(models.Service.class)
@@ -146,8 +146,8 @@ class WorkFlow {
          * Instantiate new registries for in memory storage. We will overwrite the
          * older registries in the end
          */
-        registry.ModelRegistry<models.Promotion> tmpPromotionRegistry =
-                new registry.ModelRegistry<models.Promotion>()
+        registry.ModelRegistry<models.promotion.Promotion> tmpPromotionRegistry =
+                new registry.ModelRegistry<models.promotion.Promotion>()
         registry.ModelRegistry<models.Environment> tmpEnvironmentRegistry =
                 new registry.ModelRegistry<models.Environment>()
         registry.ModelRegistry<models.pipeline.Pipeline> tmpPipelineRegistry =
@@ -162,7 +162,7 @@ class WorkFlow {
         String promotionsDirName = this.deployDBApp.configDirectory + "/promotions"
         loadConfigModelsCommon(promotionsDirName, ModelType.PROMOTION,
                 tmpPromotionRegistry, this.promotionLoader,
-                inputStreams, modelConfigList) { models.Promotion promotion ->
+                inputStreams, modelConfigList) { models.promotion.Promotion promotion ->
             logger.debug("Loaded promotions model: ${promotion.ident}")
         }
 
@@ -348,6 +348,39 @@ class WorkFlow {
     }
 
     /**
+     * Retrieve Promotion either from memory or DB (if config has changed)
+     *
+     * @param deployment
+     * @return Promotion
+     */
+    models.promotion.Promotion retrievePromotion(models.Deployment deployment, String promotionIdent) {
+
+        /**
+         * If configuration is changed since the flow creation, then retrieve and
+         * rebuild objects from DB
+         */
+        if (deployment.flow.configChecksum != this.deployDBApp.configChecksum) {
+            /* Load promotion from config */
+            models.ModelConfig promotionConfig =
+                    this.modelConfigDAO.findModelConfig(ModelType.PROMOTION,
+                            promotionIdent, deployment.flow.configChecksum)
+            if (promotionConfig) {
+                models.promotion.Promotion promotion =
+                        this.promotionLoader.loadFromString(promotionConfig.contents)
+                return promotion
+            } else {
+                logger.error("Failed to find Promotion configuration for " +
+                        "deployment: ${deployment.id}, Promotion: ${promotionIdent}, " +
+                        "config-checksum: ${deployment.flow.configChecksum}")
+                return null
+            }
+        } else {
+            /* Load from promotion */
+            return this.promotionRegistry.get(promotionIdent)
+        }
+    }
+
+    /**
      * Work flow for artifact created
      *
      * Creates deployments and flows for the given artifact, based on the
@@ -424,7 +457,7 @@ class WorkFlow {
                 }
 
                 /* Get all promotions in service & pipelines */
-                List<models.Promotion> promotions = service.getPromotions().collect() { String promotionIdent ->
+                List<models.promotion.Promotion> promotions = service.getPromotions().collect() { String promotionIdent ->
                     this.promotionRegistry.get(promotionIdent)
                 }
                 promotions.addAll(pipelinePromotions)

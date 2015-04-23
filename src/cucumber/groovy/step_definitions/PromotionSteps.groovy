@@ -1,7 +1,7 @@
 this.metaClass.mixin(cucumber.api.groovy.EN)
 
 import deploydb.ModelLoader
-import deploydb.models.Promotion
+import deploydb.models.promotion.Promotion
 import deploydb.registry.ModelRegistry
 
 
@@ -27,5 +27,13 @@ Given(~/^promotions are configured$/) { ->
         promotionRegistry.put(a.ident, a)
         Promotion b = samplePromotion2()
         promotionRegistry.put(b.ident, b)
+    }
+}
+
+
+Given(~/^a manual LDAP promotion is configured$/) { ->
+    withPromotionRegistry { ModelRegistry<Promotion> promotionRegistry ->
+        Promotion a = sampleManualLDAPPromotion()
+        promotionRegistry.put(a.ident, a)
     }
 }

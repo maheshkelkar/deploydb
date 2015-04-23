@@ -6,6 +6,7 @@ import deploydb.WorkFlow
 import deploydb.auth.User
 import deploydb.mappers.PromotionResultAddMapper
 import deploydb.models.Deployment
+import deploydb.models.promotion.Promotion
 import deploydb.models.PromotionResult
 import deploydb.mappers.DeploymentUpdateMapper
 import io.dropwizard.auth.Auth
@@ -46,10 +47,9 @@ public class DeploymentResource {
     @GET
     @UnitOfWork
     @Timed(name = "get-requests")
-    List<Deployment> getAll(@Auth User user,
-            @QueryParam("pageNumber") @DefaultValue("0") IntParam pageNumber,
-            @QueryParam("perPageSize") @DefaultValue("20") deploydb.ModelPageSizeParam
-                    perPageSize) {
+    List<Deployment> getAll(@QueryParam("pageNumber") @DefaultValue("0") IntParam pageNumber,
+                            @QueryParam("perPageSize") @DefaultValue("20") deploydb.ModelPageSizeParam
+                                    perPageSize) {
         /**
          * Fetch deployment by page
          */
@@ -143,7 +143,8 @@ public class DeploymentResource {
     @Path('{id}/promotions')
     @UnitOfWork
     @Timed(name='post-requests')
-    Response addPromotionResult(@Context HttpServletRequest request,
+    Response addPromotionResult(@Auth(required=false) User user,
+                                @Context HttpServletRequest request,
                                 @PathParam('id') LongParam deploymentId,
                                 @Valid PromotionResultAddMapper promotionResultAddMapper) {
 
@@ -160,6 +161,17 @@ public class DeploymentResource {
             pr -> pr.promotionIdent == promotionResultAddMapper.promotionIdent }
         if (promotionResult == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND)
+        }
+
+        /**
+         * Validate the user credentials
+         */
+        Promotion promotion = this.workFlow.retrievePromotion(deploy, promotionResult.promotionIdent)
+        if (promotion == null) {
+            throw new WebApplicationException(Response.Status.NOT_FOUND)
+        }
+        if (!promotion.validate(user)) {
+            throw new WebApplicationException(Response.Status.UNAUTHORIZED)
         }
 
         /**

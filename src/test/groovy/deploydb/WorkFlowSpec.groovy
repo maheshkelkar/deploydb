@@ -38,7 +38,6 @@ class workFlowWithArgsSpec extends Specification {
         modelConfigHelper.cleanup()
     }
 
-
     def "Load entire config from a directory and make sure it passes"() {
         given:
         modelConfigHelper.createPromotionConfigFile()

@@ -1,6 +1,5 @@
 this.metaClass.mixin(cucumber.api.groovy.EN)
 
-
 import deploydb.dao.ArtifactDAO
 import deploydb.dao.DeploymentDAO
 import deploydb.dao.FlowDAO
@@ -170,6 +169,39 @@ And(~/the first deployments is in "(.*?)" state$/) { String deploymentState ->
         Flow f = new Flow(a1, "faas", "0xdead")
         f.addDeployment(d1)
         f.addDeployment(d2)
+
+        /**
+         * Save flow in DB, which will save the deployments & promotionResults as well
+         */
+        FlowDAO fdao = new FlowDAO(sessionFactory)
+        fdao.persist(f)
+    }
+}
+
+Given(~/^there is a deployment with manual LDAP promotion$/) { ->
+    withSession {
+
+        /**
+         * Create sample artifact
+         */
+        ArtifactDAO adao = new ArtifactDAO(sessionFactory)
+        Artifact a1 = sampleArtifact()
+        adao.persist(a1)
+
+        /**
+         * Create sample promotion & promotionResult(s)
+         */
+        PromotionResult p1 = new PromotionResult("manual-promotion", Status.STARTED, null)
+
+        /**
+         * Create deployment
+         */
+        Deployment d1 = sampleDeployment(a1, "pre-prod",Status.COMPLETED)
+        d1.addPromotionResult(p1)
+
+        /* Create a flow */
+        Flow f = new Flow(a1, "faas", "0xdead")
+        f.addDeployment(d1)
 
         /**
          * Save flow in DB, which will save the deployments & promotionResults as well
