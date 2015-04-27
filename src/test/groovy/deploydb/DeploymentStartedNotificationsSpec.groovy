@@ -2,10 +2,14 @@ package deploydb
 
 import spock.lang.*
 
+import dropwizardintegtest.IntegrationModelHelper
+import dropwizardintegtest.IntegrationRestApiClient
+
 class DeploymentStartedNotificationsSpec extends Specification {
 
     IntegrationTestAppHelper integAppHelper = new IntegrationTestAppHelper()
-    IntegrationModelHelper integModelHelper = new  IntegrationModelHelper(integAppHelper)
+    IntegrationRestApiClient integrationRestApiClient = new IntegrationRestApiClient()
+    IntegrationModelHelper integModelHelper = new  IntegrationModelHelper(integrationRestApiClient)
     private WebhooksModelConfigHelper mcfgHelper = new WebhooksModelConfigHelper()
 
     def setup() {

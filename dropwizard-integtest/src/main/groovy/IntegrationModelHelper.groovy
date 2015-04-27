@@ -1,13 +1,12 @@
-package deploydb
+package dropwizardintegtest
 
-import deploydb.models.Artifact
 import javax.ws.rs.core.Response
 
 class IntegrationModelHelper {
 
-    private IntegrationTestAppHelper integrationTestAppHelper = null
-    IntegrationModelHelper(IntegrationTestAppHelper integTestAppHelper) {
-        integrationTestAppHelper = integTestAppHelper
+    private IntegrationRestApiClient integrationRestApiClient = null
+    IntegrationModelHelper(IntegrationRestApiClient integTestAppHelper) {
+        integrationRestApiClient = integTestAppHelper
     }
     boolean sendCreateArtifact() {
         String path = "/api/artifacts"
@@ -19,7 +18,7 @@ class IntegrationModelHelper {
         "sourceUrl" : "http://example.com/cucumber.jar"
       }
     """
-        return (integrationTestAppHelper.postJsonToPath(path, messageBody, false)).status == 201
+        return (integrationRestApiClient.postJsonToPath(path, messageBody, false)).status == 201
 
     }
 
@@ -30,7 +29,7 @@ class IntegrationModelHelper {
         "status" : "STARTED"
       }
      """
-        Response response = integrationTestAppHelper.patchJsonToPath(path, messageBody)
+        Response response = integrationRestApiClient.patchJsonToPath(path, messageBody)
         response.close()
         return response.status == 200
     }
@@ -42,7 +41,7 @@ class IntegrationModelHelper {
         "status" : "COMPLETED"
       }
      """
-        Response response = integrationTestAppHelper.patchJsonToPath(path, messageBody)
+        Response response = integrationRestApiClient.patchJsonToPath(path, messageBody)
         response.close()
         return response.status == 200
     }
@@ -56,7 +55,7 @@ class IntegrationModelHelper {
         "infoUrl" : "http://local.lookout.com/jenkins/job-id/2/results"
       }
      """
-        Response response = integrationTestAppHelper.postJsonToPath(path, messageBody, false)
+        Response response = integrationRestApiClient.postJsonToPath(path, messageBody, false)
         response.close()
         return response.status == 201
 
