@@ -160,3 +160,10 @@ Feature: Environment READ APIs
         "createdAt" : "{{created_timestamp}}"
       }]
     """
+
+  @wip
+  Scenario: Fetching deployments for an environment that doesn't exist
+
+    When I GET "/api/environments/pre-prod/deployments"
+    Then the response should be 404
+
