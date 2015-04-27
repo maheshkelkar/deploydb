@@ -72,3 +72,60 @@ Feature: Environment READ APIs
 
     When I GET "/api/environments/faas"
     Then the response should be 404
+
+
+  @freezetime @wip
+  Scenario: Fetching all artifacts in the environment
+
+    Given there is a deployment
+    When I GET "/api/environments/integ/artifacts"
+    Then the response should be 200
+    And the body should be JSON:
+    """
+      [{
+        "artifact" : {
+          "id" : 1,
+          "group" : "com.example.cucumber",
+          "name" : "cucumber-artifact",
+          "version" : "1.0.1",
+          "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar",
+          "createdAt" : "{{created_timestamp}}"
+        },
+        "service" : "faas",
+        "status" : "STARTED"
+      }]
+    """
+
+  @freezetime @wip
+  Scenario: Fetching all artifacts in the environment by the pageNumber and perPageSize
+
+    Given there are deployments
+    When I GET "/api/environments/integ/artifacts?pageNumber=0&perPageSize=5""
+    Then the response should be 200
+    And the body should be JSON:
+    """
+      [{
+        "artifact" : {
+          "id" : 1,
+          "group" : "com.example.cucumber",
+          "name" : "cucumber-artifact",
+          "version" : "1.0.1",
+          "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar",
+          "createdAt" : "{{created_timestamp}}"
+        },
+        "service" : "faas",
+        "status" : "STARTED"
+      },
+      {
+        "artifact" : {
+          "id" : 2,
+          "group" : "com.example.cucumber",
+          "name" : "cucumber-artifact",
+          "version" : "1.0.2",
+          "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.2/cucumber-artifact-1.0.1.jar",
+          "createdAt" : "{{created_timestamp}}"
+        },
+        "service" : "faas",
+        "status" : "STARTED"
+      }]
+    """
