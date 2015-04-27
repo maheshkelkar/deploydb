@@ -75,14 +75,15 @@ Feature: Environment READ APIs
 
 
   @freezetime @wip
-  Scenario: Fetching all artifacts in the environment
+  Scenario: Fetching all deployments in the environment
 
     Given there is a deployment
-    When I GET "/api/environments/integ/artifacts"
+    When I GET "/api/environments/pre-prod/deployments"
     Then the response should be 200
     And the body should be JSON:
     """
       [{
+        "id" : 1,
         "artifact" : {
           "id" : 1,
           "group" : "com.example.cucumber",
@@ -91,20 +92,31 @@ Feature: Environment READ APIs
           "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar",
           "createdAt" : "{{created_timestamp}}"
         },
+        "environment" : "pre-prod",
         "service" : "faas",
-        "status" : "STARTED"
+        "status" : "STARTED",
+        "promotions" : [{
+          "id" : 1,
+          "promotion" : "jenkins-smoke",
+          "status" : "STARTED",
+          "infoUrl" : null,
+          "createdAt" : "{{created_timestamp}}"
+         }],
+        "createdAt" : "{{created_timestamp}}"
       }]
     """
 
+
   @freezetime @wip
-  Scenario: Fetching all artifacts in the environment by the pageNumber and perPageSize
+  Scenario: Fetching all deployments in the environment by the pageNumber and perPageSize
 
     Given there are deployments
-    When I GET "/api/environments/integ/artifacts?pageNumber=0&perPageSize=5""
+    When I GET "/api/environments/pre-prod/deployments?pageNumber=0&perPageSize=5""
     Then the response should be 200
     And the body should be JSON:
     """
-      [{
+       [{
+        "id" : 1,
         "artifact" : {
           "id" : 1,
           "group" : "com.example.cucumber",
@@ -113,19 +125,38 @@ Feature: Environment READ APIs
           "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar",
           "createdAt" : "{{created_timestamp}}"
         },
+        "environment" : "pre-prod",
         "service" : "faas",
-        "status" : "STARTED"
+        "status" : "STARTED",
+        "promotions" : [{
+          "id" : 1,
+          "promotion" : "jenkins-smoke",
+          "status" : "STARTED",
+          "infoUrl" : null,
+          "createdAt" : "{{created_timestamp}}"
+        }],
+        "createdAt" : "{{created_timestamp}}"
       },
       {
+        "id" : 2,
         "artifact" : {
           "id" : 2,
           "group" : "com.example.cucumber",
           "name" : "cucumber-artifact",
           "version" : "1.0.2",
-          "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.2/cucumber-artifact-1.0.1.jar",
+          "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.2/cucumber-artifact-1.0.2.jar",
           "createdAt" : "{{created_timestamp}}"
         },
+        "environment" : "pre-prod",
         "service" : "faas",
-        "status" : "STARTED"
+        "status" : "STARTED",
+        "promotions" : [{
+          "id" : 2,
+          "promotion" : "status-check",
+          "status" : "STARTED",
+          "infoUrl" : "http://local.lookout.com/jenkins/job-id/2/results",
+          "createdAt" : "{{created_timestamp}}"
+        }],
+        "createdAt" : "{{created_timestamp}}"
       }]
     """
