@@ -3,11 +3,9 @@ package deploydb.resources
 import com.codahale.metrics.annotation.Timed
 import deploydb.WorkFlow
 import deploydb.models.Deployment
+import deploydb.models.Environment
 import io.dropwizard.hibernate.UnitOfWork
 import io.dropwizard.jersey.params.IntParam
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-
 import javax.ws.rs.Consumes
 import javax.ws.rs.DefaultValue
 import javax.ws.rs.GET
@@ -18,9 +16,9 @@ import javax.ws.rs.QueryParam
 import javax.ws.rs.WebApplicationException
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
-import deploydb.registry.ModelRegistry
-import deploydb.models.Environment
 
 /**
  * EnvironmentResource class registered with JettyClient for servicing REST request

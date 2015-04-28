@@ -3,13 +3,12 @@ package deploydb.dao
 import deploydb.IntegrationModelHelper
 import deploydb.IntegrationTestAppHelper
 import deploydb.WebhooksModelConfigHelper
+import deploydb.models.Deployment
 import org.hibernate.Criteria
 import org.hibernate.SessionFactory
 import spock.lang.*
 
 class DeploymentDAOSpec extends Specification {
-    private DeploymentDAO dao
-    private SessionFactory sessionFactory = Mock(SessionFactory)
     IntegrationTestAppHelper integAppHelper = new IntegrationTestAppHelper()
     IntegrationModelHelper integModelHelper = new  IntegrationModelHelper(integAppHelper)
     private WebhooksModelConfigHelper mcfgHelper = new WebhooksModelConfigHelper()
@@ -26,11 +25,8 @@ class DeploymentDAOSpec extends Specification {
     }
 
     def "ensure the constructor works"() {
-        given:
-        DeploymentDAO dao
-
         when:
-        dao = new DeploymentDAO(sessionFactory)
+        DeploymentDAO dao = new DeploymentDAO(integAppHelper.sessionFactory)
 
         then:
         dao instanceof DeploymentDAO
@@ -38,6 +34,7 @@ class DeploymentDAOSpec extends Specification {
 
     def "getByArtifactId() should return null if there are no deployments"() {
         given:
+        SessionFactory sessionFactory = Mock(SessionFactory)
         DeploymentDAO dao = Spy(DeploymentDAO, constructorArgs: [sessionFactory])
         def criteria = Mock(Criteria)
         criteria./add|set|addOrder|setMaxResults|setFirstResult/(_) >> criteria
@@ -48,24 +45,22 @@ class DeploymentDAOSpec extends Specification {
         dao.getByArtifactId(1).isEmpty()
     }
 
-    @Ignore
     def "getByEnvironmentIdent() should return null if there are no deployments"() {
-        given:
-        DeploymentDAO dao = new DeploymentDAO(integAppHelper.runner.getApplication().sessionFactory)
+        when:
+        List<Deployment> deploymentsByEnv
+        integAppHelper.withSession {
+            deploymentsByEnv = integAppHelper.runner.getApplication().workFlow.deploymentDAO
+                    .getByEnvironmentIdent("basicEnv", 0, 20)
+        }
 
-        expect:
-        integAppHelper.runner.getApplication().workflow.deploymentDAO
-                .getByEnvironmentIdent("basicEnv", 1, 20).isEmpty()
+        then:
+        deploymentsByEnv.isEmpty() == true
     }
 
-    @Ignore
     def "getByEnvironmentIdent() should returns deployments for the environment ident"() {
         given:
-        DeploymentDAO dao = new DeploymentDAO(integAppHelper.runner.getApplication().sessionFactory)
-
         // Create the required config
         mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
-        mcfgHelper.createDeploymentCompletedWebhookConfigFile()
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
         // load up the configuration
@@ -74,14 +69,22 @@ class DeploymentDAOSpec extends Specification {
         // setup the deployment for completed trigger
         integModelHelper.sendCreateArtifact()
 
-        expect:
-        integAppHelper.runner.getApplication().workflow.deploymentDAO
-                .getByEnvironmentIdent("basicEnv", 1, 20).size() == 1
-        integAppHelper.runner.getApplication().workflow.deploymentDAO
-                .getByPage(1, 20) ==
-        integAppHelper.runner.getApplication().workflow.deploymentDAO
-                .getByEnvironmentIdent("basicEnv", 1, 20).size() == 1
-        integAppHelper.runner.getApplication().workflow.deploymentDAO
-                .getByEnvironmentIdent("integ", 1, 20).isEmpty()
+        when:
+        List<Deployment> deploymentsByEnv
+        List<Deployment> allDeployments
+        List<Deployment> deploymentsByUnknownEnv
+        integAppHelper.withSession {
+            deploymentsByEnv = integAppHelper.runner.getApplication().workFlow.deploymentDAO
+                    .getByEnvironmentIdent("basicEnv", 0, 20)
+            allDeployments = integAppHelper.runner.getApplication().workFlow.deploymentDAO
+                    .getByPage(0, 20)
+            deploymentsByUnknownEnv = integAppHelper.runner.getApplication().workFlow.deploymentDAO
+                    .getByEnvironmentIdent("integ", 0, 20)
+        }
+
+        then:
+        deploymentsByEnv.size() == 1
+        deploymentsByEnv == allDeployments
+        deploymentsByUnknownEnv.isEmpty()
     }
 }
