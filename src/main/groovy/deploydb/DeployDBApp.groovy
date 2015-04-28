@@ -182,7 +182,7 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
         environment.jersey().register(new resources.DeploymentResource(workFlow))
         environment.jersey().register(new resources.FlowResource(workFlow))
         environment.jersey().register(new resources.PromotionResource(workFlow.promotionRegistry))
-        environment.jersey().register(new resources.EnvironmentResource(workFlow.environmentRegistry))
+        environment.jersey().register(new resources.EnvironmentResource(workFlow))
         environment.jersey().register(new resources.PipelineResource(workFlow.pipelineRegistry))
         environment.jersey().register(new resources.ServiceResource(workFlow.serviceRegistry))
     }
