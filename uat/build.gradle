@@ -1,0 +1,53 @@
+
+apply plugin: 'eclipse'
+apply plugin: 'groovy'
+apply plugin: 'application'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+version = '0.1'
+group = 'com.github.lookout.deploydb.uat'
+description = 'User Acceptance Testing artifact for deploydb'
+
+mainClassName = 'uat.UatMainApp'
+
+project.targetCompatibility = 1.7
+
+dependencies {
+    compile ('org.codehaus.groovy:groovy-all:2.4.0+')
+
+    [
+            'dropwizard-core',
+            'dropwizard-assets',
+            'dropwizard-jersey',
+            'dropwizard-views-mustache',
+            'dropwizard-testing',
+    ].each {
+        compile ("io.dropwizard:${it}:0.8.1")
+    }
+
+    /* Used instead of the default HTTP connector for the Jersey client to
+     * allow us to make PATCH requests
+     */
+    compile ('org.glassfish.jersey.connectors:jersey-apache-connector:2.+')
+    compile ('org.spockframework:spock-core:0.7-groovy-2.0')
+    compile project(':dropwizard-integtest')
+}
+
+repositories {
+    jcenter()
+    mavenCentral()
+
+    maven { url 'http://dl.bintray.com/lookout/systems' }
+}
+
+task generateScript(type: CreateStartScripts) {
+    applicationName = "uatDeploydb"
+    outputDir = new File("build/dist/")
+}
+
+shadowJar {
+    exclude 'META-INF/*.RSA', 'META-INF/*.DSA'
+    manifest {
+        attributes 'Main-Class' : mainClassName
+    }
+}
