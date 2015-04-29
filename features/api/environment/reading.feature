@@ -74,7 +74,7 @@ Feature: Environment READ APIs
     Then the response should be 404
 
 
-  @freezetime @wip
+  @freezetime
   Scenario: Fetching all deployments in the environment
 
     Given there is a deployment
@@ -107,11 +107,11 @@ Feature: Environment READ APIs
     """
 
 
-  @freezetime @wip
+  @freezetime
   Scenario: Fetching all deployments in the environment by the pageNumber and perPageSize
 
     Given there are deployments
-    When I GET "/api/environments/pre-prod/deployments?pageNumber=0&perPageSize=5""
+    When I GET "/api/environments/pre-prod/deployments?pageNumber=0&perPageSize=5"
     Then the response should be 200
     And the body should be JSON:
     """
@@ -161,7 +161,7 @@ Feature: Environment READ APIs
       }]
     """
 
-  @wip
+
   Scenario: Fetching deployments for an environment that doesn't exist
 
     When I GET "/api/environments/pre-prod/deployments"
