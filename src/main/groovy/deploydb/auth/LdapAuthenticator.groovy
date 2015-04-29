@@ -5,6 +5,7 @@ import groovy.transform.TypeChecked
 import io.dropwizard.auth.Authenticator
 import io.dropwizard.auth.basic.BasicCredentials
 import javax.naming.Context
+import javax.naming.AuthenticationException
 import javax.naming.NamingEnumeration
 import javax.naming.NamingException
 import javax.naming.directory.InitialDirContext
@@ -26,6 +27,17 @@ class LdapAuthenticator implements Authenticator<BasicCredentials, BasicCredenti
      * an initial context.
      */
     static final String contextFactoryClassName = "com.sun.jndi.ldap.LdapCtxFactory"
+
+    /**
+     * Handling the referral:
+     *
+     * When you search in AD, if AD thinks there are more information
+     * available in another place, it returns a referral (place to find more info)
+     * along with your search results. You could avoid this exception by setting
+     * Context.REFERRAL to follow. Then it would search in the referral also
+     * (That's why it takes more time to return result).
+     */
+    static final String referralAction = "follow"
 
     /**
      * The constant holds the name of property for specifying connect timeout
@@ -60,12 +72,11 @@ class LdapAuthenticator implements Authenticator<BasicCredentials, BasicCredenti
      * @return Directory context
      * @throws NamingException if naming exception is encountered by underlying JNDI
      * @throws ConnectException if uri is invalid
+     * @throws AuthenticationException is bind credentials are invalid
      */
-    protected InitialDirContext buildContext(BasicCredentials credentials)
-            throws NamingException, ConnectException {
+    protected InitialDirContext bindContext()
+            throws NamingException, ConnectException, AuthenticationException {
 
-        final String userDN = String.format("%s=%s,%s", configuration.userNameAttribute,
-                credentials.username, configuration.userFilter)
         final Hashtable<String, String> env = new Hashtable<>()
 
         /**
@@ -83,6 +94,11 @@ class LdapAuthenticator implements Authenticator<BasicCredentials, BasicCredenti
          * function will throw a ConnectException.
          */
         env.put(Context.PROVIDER_URL, configuration.uri.toString())
+
+        /**
+         * Set referral action (See above for details)
+         */
+        env.put(Context.REFERRAL, referralAction)
 
         /**
          * If cannot establish a connection within a certain timeout period,
@@ -115,12 +131,60 @@ class LdapAuthenticator implements Authenticator<BasicCredentials, BasicCredenti
          */
         env.put(connectPoolTimeoutName, connectPoolTimeoutValue)
 
+        env.put("javax.net.ssl.trustStore", "/Users/mkelkar/deploydb/kelkarkeystore")
+
+
         /** User specific attributes */
-        env.put(Context.SECURITY_PRINCIPAL, userDN)
-        env.put(Context.SECURITY_CREDENTIALS, credentials.password)
+        env.put(Context.SECURITY_AUTHENTICATION, "simple")
+        env.put(Context.SECURITY_PRINCIPAL, configuration.bindDN)
+        env.put(Context.SECURITY_CREDENTIALS, configuration.bindPassword)
 
         /** Create a context instance and initiate a connection to LDAP server */
         return new InitialDirContext(env)
+    }
+
+    /**
+     * Search context for this criteria and return the sanitized attribute values
+     * for the attributeName
+     * @param context
+     * @param name
+     * @param filter
+     * @param attributeName
+     * @return
+     * @throws NamingException
+     */
+    protected Set<String> searchContext(InitialDirContext context, String name,
+                                        String filter, String attributeName)
+            throws NamingException {
+        /**
+         * Optimize the output search results to single attribute only
+         */
+        SearchControls searchCtls = new SearchControls()
+        searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE)
+        String[] returnedAtts = [attributeName] as String[]
+        searchCtls.setReturningAttributes(returnedAtts)
+
+        /** Search for attribute with name, filter & controls */
+        final NamingEnumeration<SearchResult> results = context.search(
+                name, filter, searchCtls)
+
+        /** Walk and prepare the response */
+        Set<String> attribValues = new HashSet<>()
+        try {
+            while (results.hasMore()) {
+                SearchResult current = results.next()
+
+                /** Get the specified attribute's value */
+                if (current.getAttributes() != null &&
+                        current.getAttributes().get(attributeName) != null) {
+                    String attribute = (String) current.getAttributes().get(attributeName).get(0)
+                    attribValues.add(attribute)
+                }
+            }
+        } finally {
+            results.close()
+        }
+        return attribValues
     }
 
     /**
@@ -133,48 +197,83 @@ class LdapAuthenticator implements Authenticator<BasicCredentials, BasicCredenti
      * @param username
      * @return Set of groupNames
      */
-    protected Set<String> getGroupMemberships(InitialDirContext context, String username)
+    protected Set<String> getGroupMemberships(InitialDirContext context, String userDN)
             throws NamingException {
 
         /**
-         * Filter the user groups for configured groupClass (aka objectClass)
-         *
-         * Details about filter format can be found here:
-         * <http://docstore.mik.ua/orelly/java-ent/jenut/ch06_12.htm>
-         *
-         * E.g. (&(memberUid=myusername)(objectClass=groupOfUniqueNames))
-         * - Filter the groups where myusername is member AND objectClass is groupOfUniqueNames
+         * We are searching from the top i.e. baseDC; filter for the groups that username
+         * belong to and has the given group's ObjectClass
          */
         final String filter = String.format("(&(%s=%s)(objectClass=%s))",
-                configuration.groupMembershipAttribute, username,
-                configuration.groupClassName)
+                configuration.groupMembershipPrefix, userDN,
+                configuration.groupObjectClass)
 
-        /**
-         * Optimize the output search results to single groupNameAttribute only
-         */
-        SearchControls searchCtls = new SearchControls()
-        String[] returnedAtts = [configuration.groupNameAttribute] as String[]
-        searchCtls.setReturningAttributes(returnedAtts)
+        /** Search from baseDC */
+        return searchContext(context, configuration.baseDC, filter, configuration.groupNamePrefix)
+    }
 
-        /** Search for group with groupFilter string, filter & controls */
-        final NamingEnumeration<SearchResult> results = context.search(
-                configuration.groupFilter, filter, searchCtls)
+    /**
+     * Get user attributes and match the password
+     *
+     * The configuration attributes used in here are guaranteed to be non-null by annotation.
+     * If those parameters are mis-configured, then search query would fail
 
-        /** Walk and prepare the response */
-        Set<String> groups = new HashSet<>()
+     * @param context
+     * @param credentials
+     * @return true on success
+     * @throws NamingException if naming exception is encountered by underlying JNDI
+     * @throws AuthenticationException is user credentials are invalid
+     */
+    protected String authenticateUser(InitialDirContext context, BasicCredentials credentials)
+            throws NamingException, AuthenticationException {
+
+        InitialDirContext userContext = null
         try {
-            while (results.hasMore()) {
-                SearchResult current = results.next()
-                if (current.getAttributes() != null &&
-                        current.getAttributes().get(configuration.groupNameAttribute) != null) {
-                    String group = (String) current.getAttributes().get(configuration.groupNameAttribute).get(0)
-                    groups.add(group)
-                }
+
+            /**
+             * Find User DN
+             *
+             * In order to authenticate, we should bind (again) to AD with credentials. But,
+             * to do so we need fully qualified user distinguished name (DN). We cannot
+             * construct it based on available information.
+             */
+
+            /**
+             * We are searching from the top i.e. baseDC; filter the output using username and
+             * ObjectClass that user belong to
+             */
+            final String filter = String.format("(&(%s=%s)(objectClass=%s))",
+                    configuration.userNamePrefix, credentials.username,
+                    configuration.userObjectClass)
+
+            /** Search from baseDC */
+            Set<String> distinguishedNames = searchContext(context, configuration.baseDC,
+                    filter, configuration.distinguishedNamePrefix)
+
+            /**
+             * The search should yield us 1 user DN. If we received anything but that, then
+             * raise an exception
+             */
+            if (distinguishedNames.size() != 1) {
+                throw new Exception("failed to find User DN for ${credentials.username}")
             }
+            String userDN = distinguishedNames[0]
+
+            /* Using environment attributes from the existing context and authenticate the user */
+            Hashtable env = context.getEnvironment()
+            Hashtable environment = (Hashtable)env.clone()
+            environment.put(Context.SECURITY_AUTHENTICATION, "simple")
+            environment.put(Context.SECURITY_PRINCIPAL, userDN)
+            environment.put(Context.SECURITY_CREDENTIALS, credentials.password)
+            userContext = new InitialDirContext(environment)
+
+            /** Return authenticated user distinguished name */
+            return userDN
         } finally {
-            results.close()
+            if (userContext) {
+                userContext.close()
+            }
         }
-        return groups
     }
 
     /**
@@ -183,8 +282,13 @@ class LdapAuthenticator implements Authenticator<BasicCredentials, BasicCredenti
      * If there are no groups, user is still considered as authenticated,
      * but is not associated with any groups.
      *
-     * Logs all the authentication or naming exceptions and return authentication
-     * failure
+     * Logs all the authentication or naming exceptions and returns failure
+     *
+     * Authentication is a 4 step process
+     * 1. Create a context (A) using bind credentials
+     * 2. Search userDN with the context (A) and username
+     * 3. Rebind or create a new context (B) using userDN and password
+     * 4. Search groups with context (A) and userDN
      *
      * @param credentials
      * @return User - Optional User class
@@ -193,11 +297,15 @@ class LdapAuthenticator implements Authenticator<BasicCredentials, BasicCredenti
     Optional<User> authenticate(BasicCredentials credentials) {
         InitialDirContext context = null
         try {
+            /** Bind */
+            context = bindContext()
+
             /** Authenticate */
-            context = buildContext(credentials)
+            String userDN = authenticateUser(context, credentials)
 
             /** Get a list of groups that this user is authorized for */
-            Set<String> groupMemberships = getGroupMemberships(context, credentials.username)
+            Set<String> groupMemberships = getGroupMemberships(context, userDN)
+
             return Optional.of(new User(credentials.username, groupMemberships))
 
         } catch (Exception err) {

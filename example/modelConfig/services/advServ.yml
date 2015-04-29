@@ -1,0 +1,8 @@
+description: "Advanced Service"
+artifacts:
+  - adv.group.1:bg1
+  - adv.group.2:bg2
+pipelines:
+  - basicPipe
+promotions:
+  - manualPromo

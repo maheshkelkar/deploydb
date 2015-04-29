@@ -14,7 +14,7 @@ class DeploymentCreatedNotificationsSpec extends Specification {
         integAppHelper.startWebhookTestServerWithConfiguration('webhookTestServer.example.yml')
         integAppHelper.webhookRunner.requestWebhookObject.contentTypeParam =
                 "application/vnd.deploydb.deploymentcreated.v1+json"
-        integAppHelper.runner.getApplication().configDirectory = mcfgHelper.baseCfgDirName
+        integAppHelper.runner.getApplication().configuration.configDirectory = mcfgHelper.baseCfgDirName
     }
 
     def cleanup() {

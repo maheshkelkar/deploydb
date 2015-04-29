@@ -12,7 +12,7 @@ class MultipleEnvironmentsNotificationsSpec extends Specification {
         mcfgHelper.setup()
         integAppHelper.startAppWithConfiguration('deploydb.spock.yml')
         integAppHelper.startWebhookTestServerWithConfiguration('webhookTestServer.example.yml')
-        integAppHelper.runner.getApplication().configDirectory = mcfgHelper.baseCfgDirName
+        integAppHelper.runner.getApplication().configuration.configDirectory = mcfgHelper.baseCfgDirName
         integAppHelper.webhookRunner.requestWebhookObject.contentTypeParam =
                 "application/vnd.deploydb.deploymentcreated.v1+json"
         integAppHelper.startWebhookTestServerWithConfiguration('webhookTestServer.example.yml')

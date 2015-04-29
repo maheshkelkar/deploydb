@@ -46,10 +46,10 @@ class Promotion {
     boolean isType() {
         try {
             PromotionImpl impl = getPromotionImpl()
+            return impl instanceof PromotionImpl
         } catch (all) {
             return false
         }
-        return true
     }
 
     /**

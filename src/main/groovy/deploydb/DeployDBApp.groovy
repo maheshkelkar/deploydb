@@ -37,7 +37,7 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
     private WebhookManager webhooksManager
     private WorkFlow workFlow
     private provider.V1TypeProvider typeProvider
-    private String configDirectory
+    private DeployDBConfiguration configuration
     private String configChecksum
 
     static void main(String[] args) throws Exception {
@@ -130,12 +130,12 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
 
     /** DeployDB is up and running */
     @Override
-    public void run(DeployDBConfiguration configuration,
+    public void run(DeployDBConfiguration deployDBConfiguration,
                     Environment environment) {
         /*
          * Create webhook manager based on configuration
          */
-        webhooksManager = new WebhookManager(configuration)
+        webhooksManager = new WebhookManager(deployDBConfiguration)
 
          /**
          * Initialize the workflow object
@@ -146,7 +146,7 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
         /**
          * Load configuration models
          */
-        this.configDirectory = configuration.configDirectory
+        this.configuration = deployDBConfiguration
         loadModelConfiguration()
 
         /**
@@ -166,8 +166,8 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
         /** Register Ldap Authentication */
         CachingAuthenticator<BasicCredentials, auth.User> authenticator = new CachingAuthenticator<>(
                 environment.metrics(),
-                new auth.LdapAuthenticator(configuration.ldapConfiguration),
-                configuration.ldapConfiguration.cachePolicy)
+                new auth.LdapAuthenticator(this.configuration.ldapConfiguration),
+                this.configuration.ldapConfiguration.cachePolicy)
         environment.jersey().register(
                 AuthFactory.binder(new BasicAuthFactory<auth.User>(authenticator,
                         "Please enter the user credentials",
@@ -213,7 +213,7 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
                 workFlow.loadConfigModels()
             } catch (Exception e) {
                 logger.error("failed to read config from directory: " +
-                        "${configDirectory} with an exception: ", e)
+                        "${this.configuration.configDirectory} with an exception: ", e)
                 throw e
             }
         }

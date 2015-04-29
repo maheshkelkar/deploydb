@@ -25,14 +25,18 @@ ldap:
   uri: ldap://server.example.com:10389
   # Cache 10000 credentials for at least 10 minutes
   cachePolicy: maximumSize=10000, expireAfterWrite=10m
-  userFilter: ou=people,dc=yourcompany,dc=com
-  groupFilter: ou=groups,dc=yourcompany,dc=com
-  userNameAttribute: cn
-  groupNameAttribute: cn
+  baseDC: "dc=example,dc=com"
+  bindDN: "cn=admin"
+  bindPassword: "secret"
+  userNamePrefix: cn
+  # Filter groups by ObjectClass associated with user
+  userObjectClass: posixUser
+  groupNamePrefix: cn
   # Attribute that defines the association
-  groupMembershipAttribute: memberUid
+  groupMembershipPrefix: memberUid
   # Filter groups by ObjectClass associated with group
-  groupClassName: posixGroup
+  groupObjectClass: posixGroup
+  distinguishedNamePrefix: dn
   connectTimeout: 500ms
   readTimeout: 500ms
 ----
