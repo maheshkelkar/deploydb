@@ -45,7 +45,7 @@ class DeploymentDAOSpec extends Specification {
         dao.getByArtifactId(1).isEmpty()
     }
 
-    def "getByEnvironmentIdent() should return null if there are no deployments"() {
+    def "getByEnvironmentIdent() should return empty list if there are no deployments"() {
         when:
         List<Deployment> deploymentsByEnv
         integAppHelper.withSession {
@@ -72,19 +72,15 @@ class DeploymentDAOSpec extends Specification {
         when:
         List<Deployment> deploymentsByEnv
         List<Deployment> allDeployments
-        List<Deployment> deploymentsByUnknownEnv
         integAppHelper.withSession {
             deploymentsByEnv = integAppHelper.runner.getApplication().workFlow.deploymentDAO
                     .getByEnvironmentIdent("basicEnv", 0, 20)
             allDeployments = integAppHelper.runner.getApplication().workFlow.deploymentDAO
                     .getByPage(0, 20)
-            deploymentsByUnknownEnv = integAppHelper.runner.getApplication().workFlow.deploymentDAO
-                    .getByEnvironmentIdent("integ", 0, 20)
         }
 
         then:
         deploymentsByEnv.size() == 1
         deploymentsByEnv == allDeployments
-        deploymentsByUnknownEnv.isEmpty()
     }
 }

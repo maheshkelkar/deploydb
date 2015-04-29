@@ -62,8 +62,8 @@ class DeploymentDAO extends AbstractDAO<Deployment> {
     /**
      * Find deployments for an environment
      *
-     * @param environmentIdent ident of the Environment
-     * @return deployments
+     * @param envIdent identity of the Environment
+     * @return deployments list of Deployments
      */
     List<Deployment> getByEnvironmentIdent(String envIdent,
                                            int pageNumber, int perPageSize) {

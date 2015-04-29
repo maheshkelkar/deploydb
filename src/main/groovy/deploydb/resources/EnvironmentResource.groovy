@@ -67,10 +67,10 @@ public class EnvironmentResource {
 
 
     /**
-     * Returns the deployments using artifact id
+     * Returns the deployments using environment identitiy
      *
-     * @param artifactId id of the artifact
-     * @return deployments
+     * @param environmentIdent identity of the Environemnt
+     * @return deployments list of Deployments
      */
     @GET
     @Path("/{name}/deployments")
@@ -83,10 +83,10 @@ public class EnvironmentResource {
                                             deploydb.ModelPageSizeParam perPageSize) {
         List<Deployment> deploymentList = this.workFlow.deploymentDAO
                 .getByEnvironmentIdent(environmentIdent, pageNumber.get(), perPageSize.get())
-        if (deploymentList == null || deploymentList.isEmpty()) {
-            throw new WebApplicationException(Response.Status.NOT_FOUND)
+        if (deploymentList) {
+            return deploymentList
         }
-        return deploymentList
+        throw new WebApplicationException(Response.Status.NOT_FOUND)
     }
 }
 
