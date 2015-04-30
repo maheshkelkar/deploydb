@@ -66,6 +66,19 @@ class LdapAuthenticator implements Authenticator<BasicCredentials, BasicCredenti
     }
 
     /**
+     * Format the LDAP search filter string for the user lookup
+     *
+     * @param userString username or user domain name, etc
+     * @return formatter string
+     */
+    protected String formatUserFilterString(String userString) {
+        final String filter = String.format("(&(%s=%s)(objectClass=%s))",
+                configuration.userNamePrefix, userString,
+                configuration.userObjectClass)
+        return filter
+    }
+
+    /**
      * Creates, connects to LDAP server using JNDI
      *
      * @param credentials
@@ -239,13 +252,9 @@ class LdapAuthenticator implements Authenticator<BasicCredentials, BasicCredenti
              * We are searching from the top i.e. baseDC; filter the output using username and
              * ObjectClass that user belong to
              */
-            final String filter = String.format("(&(%s=%s)(objectClass=%s))",
-                    configuration.userNamePrefix, credentials.username,
-                    configuration.userObjectClass)
-
-            /** Search from baseDC */
             Set<String> distinguishedNames = searchContext(context, configuration.baseDC,
-                    filter, configuration.distinguishedNamePrefix)
+                    formatUserFilterString(credentials.username),
+                    configuration.distinguishedNamePrefix)
 
             /**
              * The search should yield us 1 user DN. If we received anything but that, then

@@ -209,13 +209,11 @@ class LdapAuthenticatorWithArgsSpec extends Specification {
         given:
         LdapAuthenticator ldapAuthenticator = new LdapAuthenticator(ldapConfiguration)
         InitialDirContext context = ldapAuthenticator.bindContext()
-        final String filter = String.format("(&(%s=%s)(objectClass=%s))",
-                ldapConfiguration.userNamePrefix, "peter",
-                ldapConfiguration.userObjectClass)
 
         when:
         Set<String> attributes = ldapAuthenticator.searchContext(
-                context, ldapConfiguration.baseDC, filter,
+                context, ldapConfiguration.baseDC,
+                ldapAuthenticator.formatUserFilterString("peter"),
                 ldapConfiguration.distinguishedNamePrefix)
 
         then:
@@ -228,13 +226,11 @@ class LdapAuthenticatorWithArgsSpec extends Specification {
         ldapConfiguration.distinguishedNamePrefix = "invalidDN"
         LdapAuthenticator ldapAuthenticator = new LdapAuthenticator(ldapConfiguration)
         InitialDirContext context = ldapAuthenticator.bindContext()
-        final String filter = String.format("(&(%s=%s)(objectClass=%s))",
-                ldapConfiguration.userNamePrefix, "peter",
-                ldapConfiguration.userObjectClass)
 
         when:
         Set<String> attributes = ldapAuthenticator.searchContext(
-                context, ldapConfiguration.baseDC, filter,
+                context, ldapConfiguration.baseDC,
+                ldapAuthenticator.formatUserFilterString("peter"),
                 ldapConfiguration.distinguishedNamePrefix)
 
         then:
