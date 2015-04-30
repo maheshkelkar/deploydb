@@ -131,9 +131,6 @@ class LdapAuthenticator implements Authenticator<BasicCredentials, BasicCredenti
          */
         env.put(connectPoolTimeoutName, connectPoolTimeoutValue)
 
-        env.put("javax.net.ssl.trustStore", "/Users/mkelkar/deploydb/kelkarkeystore")
-
-
         /** User specific attributes */
         env.put(Context.SECURITY_AUTHENTICATION, "simple")
         env.put(Context.SECURITY_PRINCIPAL, configuration.bindDN)

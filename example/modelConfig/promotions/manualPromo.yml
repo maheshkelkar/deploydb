@@ -1,4 +1,4 @@
 type:  deploydb.models.promotion.ManualLDAPPromotionImpl
 description: "Manual LDAP Promotion"
 attributes:
-    allowedGroup: GRP-AWS-Dev-Eng
+    allowedGroup: ManualPromotionGroup
