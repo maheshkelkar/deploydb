@@ -9,6 +9,7 @@ import io.dropwizard.auth.basic.BasicCredentials
 import javax.naming.AuthenticationException
 import javax.naming.NamingEnumeration
 import javax.naming.NamingException
+import javax.naming.PartialResultException
 import javax.naming.directory.InitialDirContext
 import javax.naming.directory.SearchResult
 import spock.lang.*
@@ -290,6 +291,28 @@ class LdapAuthenticatorWithArgsSpec extends Specification {
         then:
         thrown(NamingException)
     }
+
+    def "searchContext() - handles the PartialResultException raised by results.hasMore()"() {
+        given:
+        LdapAuthenticator ldapAuthenticator = new LdapAuthenticator(ldapConfiguration)
+
+        /* Naming Enumeration Mocking */
+        TestNamingEnumeration<SearchResult> results = Mock(TestNamingEnumeration)
+        1 * results.hasMore() >> { throw new PartialResultException() }
+        1 * results.close()
+        0 * results._
+
+        /** Mock InitialDirContext to return "results" */
+        InitialDirContext context = mockInitialDirContext() { return results }
+
+        when:
+        Set<String> attributes = ldapAuthenticator.searchContext(
+                context,"dc=example,dc=com", "(cn=foo)", "pizza")
+
+        then:
+        attributes.size() == 0
+    }
+
 
     def "authenticateUser() - successful user authentication"() {
         given:

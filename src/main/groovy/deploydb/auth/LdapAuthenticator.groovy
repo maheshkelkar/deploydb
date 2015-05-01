@@ -8,6 +8,7 @@ import javax.naming.Context
 import javax.naming.AuthenticationException
 import javax.naming.NamingEnumeration
 import javax.naming.NamingException
+import javax.naming.PartialResultException
 import javax.naming.directory.InitialDirContext
 import javax.naming.directory.SearchControls
 import javax.naming.directory.SearchResult
@@ -29,15 +30,18 @@ class LdapAuthenticator implements Authenticator<BasicCredentials, BasicCredenti
     static final String contextFactoryClassName = "com.sun.jndi.ldap.LdapCtxFactory"
 
     /**
-     * Handling the referral:
+     * Handling the referral: ignore (which also is default)
      *
-     * When you search in AD, if AD thinks there are more information
-     * available in another place, it returns a referral (place to find more info)
-     * along with your search results. You could avoid this exception by setting
-     * Context.REFERRAL to follow. Then it would search in the referral also
-     * (That's why it takes more time to return result).
+     * - When you search in AD, if AD thinks there are more information
+     *   available in another place, it returns a referral (place to find more info)
+     *   along with your search results.
+     * - This may significantly slow down the process (1-5 seconds) and may cause
+     *   recursive referrals in a poorly configured AD.
+     * - LDAP service provider receives a referral despite your having set
+     *   Context.REFERRAL to "ignore", it will throw a PartialResultException to
+     *   indicate that more results might be forthcoming
      */
-    static final String referralAction = "follow"
+    static final String referralAction = "ignore"
 
     /**
      * The constant holds the name of property for specifying connect timeout
@@ -191,9 +195,12 @@ class LdapAuthenticator implements Authenticator<BasicCredentials, BasicCredenti
                     attribValues.add(attribute)
                 }
             }
+        } catch (PartialResultException e) {
+            logger.info("Ignoring " + e.getMessage())
         } finally {
             results.close()
         }
+
         return attribValues
     }
 
@@ -315,7 +322,7 @@ class LdapAuthenticator implements Authenticator<BasicCredentials, BasicCredenti
             return Optional.of(new User(credentials.username, groupMemberships))
 
         } catch (Exception err) {
-            logger.error("${credentials.username} failed to authenticate with an Exception: ${err.getMessage()}")
+            logger.error("${credentials.username} failed to authenticate with an Exception: " + err.getMessage())
         } finally {
             if (context) {
                 context.close()
