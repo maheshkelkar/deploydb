@@ -16,7 +16,7 @@ class DeploymentDAOSpec extends Specification {
     def setup() {
         mcfgHelper.setup()
         integAppHelper.startAppWithConfiguration('deploydb.spock.yml')
-        integAppHelper.runner.getApplication().configDirectory = mcfgHelper.baseCfgDirName
+        integAppHelper.runner.getApplication().configuration.configDirectory = mcfgHelper.baseCfgDirName
     }
 
     def cleanup() {

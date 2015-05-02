@@ -20,6 +20,7 @@ import org.hibernate.Session
 import org.hibernate.SessionFactory
 import org.hibernate.context.internal.ManagedSessionContext
 import dropwizardintegtest.StubAppRunner
+import dropwizardintegtest.TestLdapServer
 import dropwizardintegtest.WebhookTestServerAppRunner
 import dropwizardintegtest.webhookTestServerApp
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature

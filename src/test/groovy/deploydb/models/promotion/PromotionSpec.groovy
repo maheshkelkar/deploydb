@@ -170,7 +170,7 @@ description: Manual LDAP Promotion Smoke Test
         thrown(ConfigurationValidationException)
     }
 
-    def "Loading a promotion config with invalid type throws a validation exception"() {
+    def "Loading a promotion config with invalid classname throws a validation exception"() {
         when:
         Promotion promotion = promotionLoader.loadFromString("""
 type: deploydb.invalid.promotion.classname.BasicPromotionImpl
@@ -180,4 +180,13 @@ description: Basic Promotion Smoke Test
         thrown(ConfigurationValidationException)
     }
 
+    def "Loading a promotion config with invalid derivation throws a validation exception"() {
+        when:
+        Promotion promotion = promotionLoader.loadFromString("""
+type: deploydb.models.promotion.Promotion
+description: Basic Promotion Smoke Test
+""")
+        then:
+        thrown(ConfigurationValidationException)
+    }
 }

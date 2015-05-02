@@ -66,9 +66,6 @@ dependencies {
     cucumberCompile 'info.cukes:cucumber-groovy:1.2.+'
     cucumberCompile project(':dropwizard-integtest')
 
-    /* Include unboundid sdk for in-memory ldap test server */
-    cucumberCompile 'com.unboundid:unboundid-ldapsdk:2.3.8'
-
     codenarc(
             "org.codenarc:CodeNarc:0.22",
             "org.codehaus.groovy:groovy-all:2.4.0+"

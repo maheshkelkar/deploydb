@@ -13,7 +13,7 @@ class PromotionCompletedNotificationsSpec extends Specification {
         integAppHelper.startAppWithConfiguration('deploydb.spock.yml')
         integAppHelper.startWebhookTestServerWithConfiguration('webhookTestServer.example.yml')
         // load up the configuration
-        integAppHelper.runner.getApplication().configDirectory = mcfgHelper.baseCfgDirName
+        integAppHelper.runner.getApplication().configuration.configDirectory = mcfgHelper.baseCfgDirName
 
         integAppHelper.webhookRunner.requestWebhookObject.contentTypeParam =
                 "application/vnd.deploydb.promotioncompleted.v1+json"

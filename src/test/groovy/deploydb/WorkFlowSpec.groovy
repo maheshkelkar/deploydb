@@ -17,16 +17,18 @@ class WorkFlowSpec extends Specification {
     }
 }
 
-class workFlowWithArgsSpec extends Specification {
+class WorkFlowWithArgsSpec extends Specification {
     private ModelConfigHelper modelConfigHelper = new ModelConfigHelper()
     private DeployDBApp app = new DeployDBApp()
+    private DeployDBConfiguration deployDBConfiguration = new DeployDBConfiguration()
     private WorkFlow workFlow
     private FlowDAO fdao = Mock(FlowDAO)
     private ModelConfigDAO mdao = Mock(ModelConfigDAO)
 
     def setup() {
         modelConfigHelper.setup()
-        app.configDirectory = modelConfigHelper.baseCfgDirName
+        app.configuration = deployDBConfiguration
+        app.configuration.configDirectory = modelConfigHelper.baseCfgDirName
         app.configChecksum = null
         workFlow = new WorkFlow(app)
         workFlow.initializeRegistry()
