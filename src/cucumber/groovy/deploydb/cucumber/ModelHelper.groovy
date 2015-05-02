@@ -53,14 +53,6 @@ class ModelHelper {
                 'jenkins-smoke for Fun as a Service')
     }
 
-    Promotion sampleManualLDAPPromotion() {
-        Promotion promotion = new Promotion("manual-promotion",
-                "deploydb.models.promotion.ManualLDAPPromotionImpl",
-                "Manual Promotion smoke test")
-        promotion.attributes = ["allowedGroup":"fox"]
-        return promotion
-    }
-
     /**
      * Creates a sample environment object
      */

@@ -28,3 +28,18 @@ logging:
       threshold: ALL
       archive: false
       timeZone: UTC
+
+ldap:
+  uri: ldap://localhost:10389
+  cachePolicy: maximumSize=10000, expireAfterWrite=10m
+  baseDC: "dc=example,dc=com"
+  bindDN: "cn=admin"
+  bindPassword: "secret"
+  userNamePrefix: cn
+  userObjectClass: posixUser
+  groupNamePrefix: cn
+  groupMembershipPrefix: memberUid
+  groupObjectClass: posixGroup
+  distinguishedNamePrefix: entryDN
+  connectTimeout: 500ms
+  readTimeout: 500ms
