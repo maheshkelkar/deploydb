@@ -4,7 +4,7 @@ import spock.lang.*
 import dropwizardintegtest.IntegrationModelHelper
 import dropwizardintegtest.IntegrationRestApiClient
 
-class ArtifactTriggerSpec extends Specification {
+class DeploymentTriggerSpec extends Specification {
 
     IntegrationRestApiClient integrationRestApiClient = new IntegrationRestApiClient()
     IntegrationModelHelper integModelHelper = new IntegrationModelHelper(integrationRestApiClient)
@@ -14,18 +14,9 @@ class ArtifactTriggerSpec extends Specification {
         integrationRestApiClient.host = "http://localhost"
     }
 
-    def "create artifact should return success"() {
-
-        when:
-        boolean success = integModelHelper.sendCreateArtifact()
-
-        then:
-        success == true
-    }
-
     def "read artifact should return success"() {
         when:
-        boolean success = integModelHelper.sendGetApi("/api/artifacts/1")
+        boolean success = integModelHelper.sendGetApi("/api/deployments/1")
 
         then:
         success == true

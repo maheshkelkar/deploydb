@@ -29,14 +29,15 @@ dependencies {
      * allow us to make PATCH requests
      */
     compile ('org.glassfish.jersey.connectors:jersey-apache-connector:2.+')
+    compile('com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.4.1')
     compile ('org.spockframework:spock-core:0.7-groovy-2.0')
     compile project(':dropwizard-integtest')
 }
 
 repositories {
     jcenter()
-    mavenCentral()
 
+    mavenCentral()
     maven { url 'http://dl.bintray.com/lookout/systems' }
 }
 

@@ -1,10 +1,17 @@
 package uat
 
-class UatMainApp {
-    static void main(String[] args) {
+import org.codehaus.groovy.testng.TestNgRunner
 
-        // run all the tests
-        ArtifactTriggerSpec artifactTriggerSpec = new ArtifactTriggerSpec()
-        artifactTriggerSpec.createArtifactShouldReturnSuccess()
+
+class UatMainApp {
+
+    static void main(String[] args) {
+        uat.TestRunner testRunner = new uat.TestRunner()
+        ConsulClient consulClient = new ConsulClient()
+
+        consulClient.getDeploydbHosts()
+        boolean success = testRunner.runTests()
+
+        success ? System.exit(0):System.exit(1)
     }
 }

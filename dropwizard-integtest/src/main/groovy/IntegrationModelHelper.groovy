@@ -18,8 +18,17 @@ class IntegrationModelHelper {
         "sourceUrl" : "http://example.com/cucumber.jar"
       }
     """
-        return (integrationRestApiClient.postJsonToPath(path, messageBody, false)).status == 201
+        Response response = integrationRestApiClient.postJsonToPath(path, messageBody, false)
+        response.close()
 
+        return response.status == 201
+
+    }
+
+    boolean sendGetApi(String path) {
+        Response response = integrationRestApiClient.getFromPath(path, false)
+        response.close()
+        return response.status == 200
     }
 
     boolean sendDeploymentStartedTrigger() {

@@ -1,5 +1,6 @@
 package dropwizardintegtest
 
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider
 import com.github.mustachejava.DefaultMustacheFactory
 import com.github.mustachejava.Mustache
 
@@ -30,6 +31,7 @@ class IntegrationRestApiClient {
         if (this.jerseyClient == null) {
             ClientConfig clientConfig = new ClientConfig()
             clientConfig.connectorProvider(new ApacheConnectorProvider())
+            clientConfig.register(JacksonJsonProvider.class);
             this.jerseyClient = ClientBuilder.newClient(clientConfig)
         }
         return this.jerseyClient
