@@ -215,4 +215,45 @@ class PromotionCompletedNotificationsSpec extends Specification {
         sleep(1000)
         integAppHelper.webhookRunner.requestWebhookObject.requestMessageBodies.size() == 4
     }
+
+    def "With multiple promotions, deployment status is not updated with first promotion completed trigger" () {
+        given:
+        // Create the required config
+        mcfgHelper.createPromotionConfigFile()
+        mcfgHelper.createManualPromotionConfigFile()
+        mcfgHelper.createEnvironmentNoWebhooksConfigFile()
+        mcfgHelper.createPipelineConfigFile()
+        mcfgHelper.createMultiPromoServiceConfigFile()
+
+        // load up the configuration
+        integAppHelper.runner.getApplication().loadModelConfiguration()
+
+        // Setup deployment for promotion trigger
+        setupDeploymentForPromotionTrigger()
+
+        when:
+        boolean success = integModelHelper.sendPromotionCompletedTrigger()
+        models.Deployment deployment
+        Long deploymentId = 1
+        integAppHelper.withSession {
+            deployment = integAppHelper.runner.getApplication().workFlow.deploymentDAO
+                    .get(deploymentId)
+        }
+        println "***MVK: deployment=${deployment}"
+
+        then:
+        success == true
+        sleep(1000)
+        deployment != null
+        deployment.promotionResultSet.size() == 2
+        deployment.status == Status.COMPLETED
+        models.PromotionResult manualPromoResult = deployment.promotionResultSet.find() {
+            pr -> pr.promotionIdent == "manualPromo"
+        }
+        manualPromoResult.status == Status.STARTED
+        models.PromotionResult basicPromoResult = deployment.promotionResultSet.find() {
+            pr -> pr.promotionIdent == "basicPromo"
+        }
+        basicPromoResult.status == Status.SUCCESS
+    }
 }

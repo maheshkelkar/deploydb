@@ -125,7 +125,7 @@ class WorkFlowWithArgsSpec extends Specification {
         modelConfigHelper.createWebhookConfigFile()
         workFlow.loadConfigModels()
         String oldChecksum = app.configChecksum
-        modelConfigHelper.createAnotherPromotionConfigFile()
+        modelConfigHelper.createManualPromotionConfigFile()
         mdao.persist(_) >> _
 
         when:
