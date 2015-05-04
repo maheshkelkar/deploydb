@@ -178,7 +178,7 @@ And(~/the first deployments is in "(.*?)" state$/) { String deploymentState ->
     }
 }
 
-Given(~/^there is a deployment with manual LDAP promotion$/) { ->
+Given(~/^there is a deployment with "(.*?)" promotion$/) { String promotionIdent ->
     withSession {
 
         /**
@@ -191,7 +191,7 @@ Given(~/^there is a deployment with manual LDAP promotion$/) { ->
         /**
          * Create sample promotion & promotionResult(s)
          */
-        PromotionResult p1 = new PromotionResult("manual-promotion", Status.STARTED, null)
+        PromotionResult p1 = new PromotionResult(promotionIdent, Status.STARTED, null)
 
         /**
          * Create deployment

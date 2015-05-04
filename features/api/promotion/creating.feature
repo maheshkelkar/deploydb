@@ -30,15 +30,23 @@ Feature: Promotion Result APIs
     """
 
 
-  @freezetime @wip
-  Scenario: (issue 166) Adding a result for a Manual LDAP Promotion associated with a Deployment succeeds
+  @freezetime
+  Scenario: Adding a result for a Manual LDAP Promotion associated with a Deployment
+            succeeds only if user belongs to the configured group
 
-    Given a manual LDAP promotion is configured
-    And there is a deployment with manual LDAP promotion
+    Given a promotion configuration name "manualPromo":
+    """
+    type:  deploydb.models.promotion.ManualLDAPPromotionImpl
+    description: "Manual LDAP Promotion"
+    attributes:
+      allowedGroup: fox
+
+    """
+    And there is a deployment with "manualPromo" promotion
     When I POST to "/api/deployments/1/promotions" with credentials "peter:griffin" and:
     """
       {
-        "name"  : "manual-promotion",
+        "name"  : "manualPromo",
         "status" : "SUCCESS"
       }
     """
@@ -47,7 +55,7 @@ Feature: Promotion Result APIs
     """
       {
         "id" : 1,
-        "promotion" : "manual-promotion",
+        "promotion" : "manualPromo",
         "status" : "SUCCESS",
         "infoUrl" : null,
         "createdAt" : "{{created_timestamp}}"
