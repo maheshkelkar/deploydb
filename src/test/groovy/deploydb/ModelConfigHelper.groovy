@@ -55,10 +55,12 @@ description: "Basic Smoke test for the Basic Service"
         promotionFile.write(fileContents)
     }
 
-    def createAnotherPromotionConfigFile() {
+    def createManualPromotionConfigFile() {
         String fileContents = """
 type:  deploydb.models.promotion.ManualLDAPPromotionImpl
-description: "Advanced Smoke test for the Basic Service"
+description: "Manual LDAP Promotion"
+attributes:
+    allowedGroup: ManualPromotionGroup
 """
         /* Create temp file */
         File promotionsDir = new File("${baseCfgDirName}/promotions")
@@ -66,7 +68,7 @@ description: "Advanced Smoke test for the Basic Service"
             promotionsDir.mkdirs()
         }
 
-        File promotionFile = new File(promotionsDir, "advancedPromo.yml")
+        File promotionFile = new File(promotionsDir, "manualPromo.yml")
         promotionFile.write(fileContents)
     }
 
@@ -178,6 +180,28 @@ environments:
 
         File pipelineFile = new File(pipelinesDir, "basicPipe.yml")
         pipelineFile.write(fileContents)
+    }
+
+    def createMultiPromoServiceConfigFile() {
+        String fileContents = """
+description: "Basic Service"
+artifacts:
+  - basic.group.1:bg1
+  - basic.group.2:bg2
+pipelines:
+  - basicPipe
+promotions:
+  - basicPromo
+  - manualPromo
+"""
+        /* Create temp file */
+        File servicesDir = new File("${baseCfgDirName}/services")
+        if (!servicesDir.exists()) {
+            servicesDir.mkdirs()
+        }
+
+        File serviceFile = new File(servicesDir, "basicServ.yml")
+        serviceFile.write(fileContents)
     }
 
 }

@@ -682,8 +682,8 @@ class WorkFlow {
 
 
         /* Find out if any other promotions are waiting for results */
-        models.PromotionResult startedPromotionResult = deployment.getPromotionResultSet().find() {
-            pr -> pr.promotionIdent == Status.STARTED
+        models.PromotionResult startedPromotionResult = deployment.promotionResultSet.find() {
+            pr -> pr.status == Status.STARTED
         }
         if (startedPromotionResult != null) {
             /* Wait for more promotion results */
