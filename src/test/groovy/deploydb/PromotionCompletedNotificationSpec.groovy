@@ -243,7 +243,6 @@ class PromotionCompletedNotificationsSpec extends Specification {
         then:
         success == true
         sleep(1000)
-        deployment != null
         deployment.promotionResultSet.size() == 2
         deployment.status == Status.COMPLETED
         models.PromotionResult manualPromoResult = deployment.promotionResultSet.find() {
