@@ -239,7 +239,6 @@ class PromotionCompletedNotificationsSpec extends Specification {
             deployment = integAppHelper.runner.getApplication().workFlow.deploymentDAO
                     .get(deploymentId)
         }
-        println "***MVK: deployment=${deployment}"
 
         then:
         success == true
