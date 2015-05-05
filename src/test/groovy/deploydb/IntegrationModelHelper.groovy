@@ -1,6 +1,5 @@
 package deploydb
 
-import deploydb.models.Artifact
 import javax.ws.rs.core.Response
 
 class IntegrationModelHelper {

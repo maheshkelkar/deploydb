@@ -4,7 +4,6 @@ import com.google.common.base.Optional
 import deploydb.IntegrationModelHelper
 import deploydb.IntegrationTestAppHelper
 import deploydb.ModelConfigHelper
-import dropwizardintegtest.TestLdapServer
 import io.dropwizard.auth.basic.BasicCredentials
 import javax.naming.AuthenticationException
 import javax.naming.NamingEnumeration
@@ -14,7 +13,6 @@ import javax.naming.directory.InitialDirContext
 import javax.naming.directory.SearchResult
 import spock.lang.*
 
-import javax.validation.OverridesAttribute
 
 class LdapAuthenticatorSpec extends Specification {
 
