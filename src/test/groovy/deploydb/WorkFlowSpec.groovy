@@ -2,7 +2,6 @@ package deploydb
 
 import deploydb.dao.FlowDAO
 import deploydb.dao.ModelConfigDAO
-import deploydb.models.Flow
 import spock.lang.*
 
 class WorkFlowSpec extends Specification {

@@ -6,17 +6,17 @@ import deploydb.Status
 import deploydb.WorkFlow
 import deploydb.auth.User
 import deploydb.models.Artifact
-import io.dropwizard.testing.junit.ResourceTestRule
-import javax.ws.rs.client.Client
-import org.junit.Rule
-import spock.lang.*
 import deploydb.models.Deployment
 import deploydb.dao.DeploymentDAO
-import io.dropwizard.auth.Auth
 import io.dropwizard.auth.AuthFactory
 import io.dropwizard.auth.Authenticator
 import io.dropwizard.auth.basic.BasicAuthFactory
 import io.dropwizard.auth.basic.BasicCredentials
+import io.dropwizard.testing.junit.ResourceTestRule
+import javax.ws.rs.client.Client
+import org.junit.Rule
+import spock.lang.*
+
 
 class DeploymentResourceSpec extends Specification {
     def app = new DeployDBApp()

@@ -5,8 +5,8 @@ import deploydb.auth.User
 import deploydb.registry.ModelRegistry
 import io.dropwizard.configuration.ConfigurationParsingException
 import io.dropwizard.configuration.ConfigurationValidationException
-import spock.lang.Ignore
 import spock.lang.Specification
+
 
 class PromotionSpec extends Specification {
     def "ensure Promotion object can be instantiated"() {
