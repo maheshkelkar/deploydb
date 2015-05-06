@@ -1,12 +1,10 @@
 package deploydb.models
 
-import spock.lang.*
-import com.fasterxml.jackson.annotation.JsonProperty
 import io.dropwizard.configuration.ConfigurationParsingException
 import io.dropwizard.configuration.ConfigurationValidationException 
 import deploydb.ModelLoader
 import deploydb.registry.ModelRegistry
-import deploydb.models.Environment
+import spock.lang.*
 
 class EnvironmentSpec extends Specification {
     def "ensure Environment object can be instantiated"() {

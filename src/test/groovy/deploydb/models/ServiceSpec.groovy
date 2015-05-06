@@ -1,12 +1,11 @@
 package deploydb.models
 
-import spock.lang.*
-import com.fasterxml.jackson.annotation.JsonProperty
 import io.dropwizard.configuration.ConfigurationParsingException
 import io.dropwizard.configuration.ConfigurationValidationException 
 import deploydb.ModelLoader
 import deploydb.registry.ModelRegistry
-import deploydb.models.Service
+import spock.lang.*
+
 
 class ServiceSpec extends Specification {
     def "ensure Service object can be instantiated"() {

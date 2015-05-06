@@ -29,11 +29,3 @@ Given(~/^promotions are configured$/) { ->
         promotionRegistry.put(b.ident, b)
     }
 }
-
-
-Given(~/^a manual LDAP promotion is configured$/) { ->
-    withPromotionRegistry { ModelRegistry<Promotion> promotionRegistry ->
-        Promotion a = sampleManualLDAPPromotion()
-        promotionRegistry.put(a.ident, a)
-    }
-}

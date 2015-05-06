@@ -4,14 +4,16 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '1.2.0'
     id "com.github.samueltbrown.cucumber" version "0.8"
     id "com.github.tkruse.groovysh" version "1.0.4"
+    id "net.saliman.cobertura" version "2.2.8"
 }
 
 apply plugin: 'eclipse'
 apply plugin: 'groovy'
 apply plugin: 'application'
 apply plugin: 'codenarc'
+apply plugin: 'cobertura'
 
-version = '0.2.2'
+version = '0.3.0'
 group = 'com.github.lookout'
 description = 'DeployDB is a tool to provide a single source of truth for artifact-based deployments'
 // Needed for the application plugin's `run` task
@@ -66,9 +68,6 @@ dependencies {
     cucumberCompile 'info.cukes:cucumber-groovy:1.2.+'
     cucumberCompile project(':dropwizard-integtest')
 
-    /* Include unboundid sdk for in-memory ldap test server */
-    cucumberCompile 'com.unboundid:unboundid-ldapsdk:2.3.8'
-
     codenarc(
             "org.codenarc:CodeNarc:0.22",
             "org.codehaus.groovy:groovy-all:2.4.0+"
@@ -91,6 +90,17 @@ repositories {
 codenarc {
     sourceSets = [sourceSets.main, sourceSets.cucumber]
     configFile = file('gradle/codenarc/codenarc.xml')
+}
+
+cobertura {
+    coverageSourceDirs = [sourceSets.main.groovy.srcDirs]
+    coverageTestTasks {
+        project.tasks.matching {
+            it.name.contains("test")
+        }
+    }
+    coverageIgnoreTrivial = true
+    coverageIgnores = ['org.slf4j.Logger.*']
 }
 
 cucumber {

@@ -1,5 +1,20 @@
 # DeployDB Changelog
 
+## 0.3.0 - Ares
+
+* [#117](https://github.com/lookout/deploydb/issues/117) - API needed to access Deployments based on an Artifact ID
+* [#118](https://github.com/lookout/deploydb/issues/118) - API needed to search for Artifacts based on version/name criteria
+* [#126](https://github.com/lookout/deploydb/issues/126) - Make deployments self sufficient by storing config information in the DB objects
+* [#127](https://github.com/lookout/deploydb/issues/127) - DeployDB should be tested on multiple database providers in Travis
+* [#128](https://github.com/lookout/deploydb/pull/128) - Add API support to fetch artifacts by query parameter
+* [#129](https://github.com/lookout/deploydb/issues/129) - Generic "query" to fetch artifacts based on any one of the columns - name, version or group
+* [#134](https://github.com/lookout/deploydb/issues/134) - Add support to fetch deployment by artifact id
+* [#138](https://github.com/lookout/deploydb/pull/138) - Issue 134 fetch deployment by artifact
+* [#141](https://github.com/lookout/deploydb/pull/141) - Allow Models-config to change (configReload) while deployments are in progress
+* [#147](https://github.com/lookout/deploydb/pull/147) - Fix the startup help message with examples on how to run and do database migration.
+* [#170](https://github.com/lookout/deploydb/pull/170) - Implement REST API to get deployment by environment ident
+
+
 ## 0.2.0 - Antares
 
 * [#3](https://github.com/lookout/deploydb/issues/3) - Model what "Promotion Criteria" looks like

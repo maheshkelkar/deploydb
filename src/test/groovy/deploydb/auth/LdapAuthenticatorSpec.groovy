@@ -1,17 +1,17 @@
 package deploydb.auth
 
 import com.google.common.base.Optional
+import deploydb.IntegrationTestAppHelper
+import deploydb.ModelConfigHelper
 import io.dropwizard.auth.basic.BasicCredentials
+import javax.naming.AuthenticationException
 import javax.naming.NamingEnumeration
 import javax.naming.NamingException
+import javax.naming.PartialResultException
 import javax.naming.directory.InitialDirContext
-import javax.naming.directory.Attributes
-import javax.naming.directory.BasicAttribute
-import javax.naming.directory.BasicAttributes
 import javax.naming.directory.SearchResult
 import spock.lang.*
 
-import javax.validation.OverridesAttribute
 
 class LdapAuthenticatorSpec extends Specification {
 
@@ -26,7 +26,21 @@ class LdapAuthenticatorSpec extends Specification {
 }
 
 class LdapAuthenticatorWithArgsSpec extends Specification {
+    private IntegrationTestAppHelper integAppHelper = new IntegrationTestAppHelper()
+    private ModelConfigHelper mcfgHelper = new ModelConfigHelper()
     LdapConfiguration ldapConfiguration
+
+    def setup() {
+        mcfgHelper.setup()
+        integAppHelper.startAppWithConfiguration('deploydb.spock.yml')
+        integAppHelper.runner.getApplication().configuration.configDirectory = mcfgHelper.baseCfgDirName
+        ldapConfiguration = integAppHelper.runner.getApplication().configuration.ldapConfiguration
+    }
+
+    def cleanup() {
+        integAppHelper.stopApp()
+        mcfgHelper.cleanup()
+    }
 
     class TestNamingEnumeration<SearchResult> extends NamingEnumeration {
         @Override
@@ -41,60 +55,76 @@ class LdapAuthenticatorWithArgsSpec extends Specification {
         SearchResult nextElement() { throw new NoSuchElementException() }
     }
 
-    def setup() {
-        ldapConfiguration = new LdapConfiguration()
-    }
-
-    def "authenticate() - successful authentication"() {
+    def "authenticate() - real successful authentication"() {
         given:
-        /** Define interface objects */
-        Set<String> groups = ["Fandango"]
-        InitialDirContext context = Mock(InitialDirContext)
-        1 * context.close() >> _
-
-        /** Create LdapAuthenticator */
-        LdapAuthenticator ldapAuthenticator =
-                Spy(LdapAuthenticator, constructorArgs: [ldapConfiguration]) {
-                    /** Mock interface functions */
-                    buildContext(_) >> context
-                    getGroupMemberships(_, _) >> groups
-                }
+        LdapAuthenticator ldapAuthenticator = new LdapAuthenticator(ldapConfiguration)
 
         when:
-        Optional<User> userOpt = ldapAuthenticator.authenticate(new BasicCredentials("foo", "bar"))
+        Optional<User> userOpt = ldapAuthenticator.authenticate(new BasicCredentials("peter", "griffin"))
 
         then:
         userOpt.isPresent() == true
-        userOpt.get().name == "foo"
-        userOpt.get().groups.size() == 1
-        userOpt.get().groups[0] == "Fandango"
+        userOpt.get().name == "peter"
+        userOpt.get().groups.size() == 2
+        userOpt.get().groups.contains("fox")
+        userOpt.get().groups.contains("familyguy")
     }
 
-    def "authenticate() - when buildContext throws NamingException, then should return failure"() {
+    def "authenticate() - when bindContext throws NamingException, then should return failure"() {
         given:
         LdapAuthenticator ldapAuthenticator =
                 Spy(LdapAuthenticator, constructorArgs: [ldapConfiguration]) {
                     /** Mock interface functions */
-                    buildContext(_, _) >> { throw new NamingException("test") }
+                    bindContext() >> { throw new NamingException("test") }
                 }
 
         when:
-        Optional<User> userOpt = ldapAuthenticator.authenticate(new BasicCredentials("foo", "bar"))
+        Optional<User> userOpt = ldapAuthenticator.authenticate(new BasicCredentials("peter", "griffin"))
 
         then:
         userOpt.isPresent() == false
     }
 
-    def "authenticate() - when buildContext throws ConnectException, then should return failure"() {
+    def "authenticate() - when bindContext throws ConnectException, then should return failure"() {
         given:
         LdapAuthenticator ldapAuthenticator =
                 Spy(LdapAuthenticator, constructorArgs: [ldapConfiguration]) {
                     /** Mock interface functions */
-                    buildContext(_, _) >> { throw new ConnectException("test") }
+                    bindContext() >> { throw new ConnectException("test") }
                 }
 
         when:
-        Optional<User> userOpt = ldapAuthenticator.authenticate(new BasicCredentials("foo", "bar"))
+        Optional<User> userOpt = ldapAuthenticator.authenticate(new BasicCredentials("peter", "griffin"))
+
+        then:
+        userOpt.isPresent() == false
+    }
+
+    def "authenticate() - when bindContext throws AuthenticationException, then should return failure"() {
+        given:
+        LdapAuthenticator ldapAuthenticator =
+                Spy(LdapAuthenticator, constructorArgs: [ldapConfiguration]) {
+                    /** Mock interface functions */
+                    bindContext() >> { throw new AuthenticationException("test") }
+                }
+
+        when:
+        Optional<User> userOpt = ldapAuthenticator.authenticate(new BasicCredentials("peter", "griffin"))
+
+        then:
+        userOpt.isPresent() == false
+    }
+
+    def "authenticate() - when authenticateUser throws an exception"() {
+        given:
+        LdapAuthenticator ldapAuthenticator =
+                Spy(LdapAuthenticator, constructorArgs: [ldapConfiguration]) {
+                    /** Mock interface functions */
+                    authenticateUser(_, _) >> { throw new NamingException("test") }
+                }
+
+        when:
+        Optional<User> userOpt = ldapAuthenticator.authenticate(new BasicCredentials("peter", "griffin"))
 
         then:
         userOpt.isPresent() == false
@@ -102,116 +132,109 @@ class LdapAuthenticatorWithArgsSpec extends Specification {
 
     def "authenticate() - when getGroupMemberShips throws an exception"() {
         given:
-        /** Define interface objects */
-        InitialDirContext context = Mock(InitialDirContext)
-        1 * context.close() >> _
-
-        /** Create LdapAuthenticator */
         LdapAuthenticator ldapAuthenticator =
                 Spy(LdapAuthenticator, constructorArgs: [ldapConfiguration]) {
                     /** Mock interface functions */
-                    buildContext(_) >> context
                     getGroupMemberships(_, _) >> { throw new NamingException("test") }
                 }
 
         when:
-        Optional<User> userOpt = ldapAuthenticator.authenticate(new BasicCredentials("foo", "bar"))
+        Optional<User> userOpt = ldapAuthenticator.authenticate(new BasicCredentials("peter", "griffin"))
 
         then:
         userOpt.isPresent() == false
     }
 
-    @Ignore
-    def "buildContext() - successful authentication"() {
-        //TO DO - when LDAP server is available with SPOCK tests
-        //when:
-        // launch ldap server
-        // create dir context and make sure it returns a valid context
-        //then:
-        //success
-    }
+    def "bindContext() - successful authentication"() {
+        given:
+        LdapAuthenticator ldapAuthenticator = new LdapAuthenticator(ldapConfiguration)
 
-    @Ignore
-    def "buildContext() - ldap server returns authentication failure"() {
-        //TO DO - when LDAP server is available with SPOCK tests
-        //when:
-        // launch ldap server
-        // create dir context and make sure it returns a valid context
-        //then:
-        // Authentication exception
-    }
-
-    def "buildContext() - empty uri causes ConfigurationException to be thrown"() {
         when:
+        InitialDirContext context = ldapAuthenticator.bindContext()
+
+        then:
+        context != null
+    }
+
+    def "bindContext() - authentication failure raise AuthenticationException"() {
+        given:
+        ldapConfiguration.bindPassword = "fake"
+        LdapAuthenticator ldapAuthenticator = new LdapAuthenticator(ldapConfiguration)
+
+        when:
+        ldapAuthenticator.bindContext()
+
+        then:
+        thrown (javax.naming.AuthenticationException)
+    }
+
+    def "bindContext() - empty uri causes ConfigurationException to be thrown"() {
+        given:
         ldapConfiguration.uri = new URI("")
         LdapAuthenticator ldapAuthenticator = new LdapAuthenticator(ldapConfiguration)
-        InitialDirContext context = ldapAuthenticator.buildContext(new BasicCredentials("foo", "bar"))
+
+        when:
+        ldapAuthenticator.bindContext()
 
         then:
         thrown(javax.naming.ConfigurationException)
     }
 
-    def "buildContext() - uri with non-ldap protocol causes NamingException to be thrown"() {
-        when:
+    def "bindContext() - uri with non-ldap protocol causes NamingException to be thrown"() {
+        given:
         ldapConfiguration.uri = new URI("http://localhost:10389")
         LdapAuthenticator ldapAuthenticator = new LdapAuthenticator(ldapConfiguration)
-        InitialDirContext context = ldapAuthenticator.buildContext(new BasicCredentials("foo", "bar"))
+
+        when:
+        ldapAuthenticator.bindContext()
 
         then:
         thrown(javax.naming.NamingException)
     }
 
-    def "buildContext() - malformed uri causes NamingException to be thrown"() {
+    def "bindContext() - malformed uri causes NamingException to be thrown"() {
         when:
         ldapConfiguration.uri = new URI("ldap:localhost:10389")
         LdapAuthenticator ldapAuthenticator = new LdapAuthenticator(ldapConfiguration)
-        InitialDirContext context = ldapAuthenticator.buildContext(new BasicCredentials("foo", "bar"))
+        ldapAuthenticator.bindContext()
 
         then:
         thrown(javax.naming.NamingException)
     }
 
-    def "getGroupMemberships() - successful to retrieve groups"() {
+    def "searchContext() - successful to retrieve attributes"() {
         given:
-        ldapConfiguration.groupNameAttribute = "pizza"
         LdapAuthenticator ldapAuthenticator = new LdapAuthenticator(ldapConfiguration)
-
-        /**
-         * Mock the interfaces to return following attributes
-         */
-        InitialDirContext context = mockGetGroupMembershipInterface("pizza", "Fandango")
+        InitialDirContext context = ldapAuthenticator.bindContext()
 
         when:
-        Set<String> groups = ldapAuthenticator.getGroupMemberships(context, "foo")
+        Set<String> attributes = ldapAuthenticator.searchContext(
+                context, ldapConfiguration.baseDC,
+                ldapAuthenticator.formatUserFilterString("peter"),
+                ldapConfiguration.distinguishedNamePrefix)
 
         then:
-        groups.size() == 1
-        groups[0] == "Fandango"
+        attributes.size() == 1
+        attributes[0] == "cn=peter griffin,ou=people,dc=example,dc=com"
     }
 
-    def "getGroupMemberships() - returns empty SET on groupNameAttribute mismatch"() {
+    def "searchContext() - returns empty SET on filter fails to match"() {
         given:
-        ldapConfiguration.groupNameAttribute = "pizza"
+        ldapConfiguration.distinguishedNamePrefix = "invalidDN"
         LdapAuthenticator ldapAuthenticator = new LdapAuthenticator(ldapConfiguration)
-
-        /**
-         * Mock the interfaces to return following attributes
-         */
-        InitialDirContext context = mockGetGroupMembershipInterface("BadPizza", "Fandango")
+        InitialDirContext context = ldapAuthenticator.bindContext()
 
         when:
-        Set<String> groups = ldapAuthenticator.getGroupMemberships(context, "foo")
+        Set<String> attributes = ldapAuthenticator.searchContext(
+                context, ldapConfiguration.baseDC,
+                ldapAuthenticator.formatUserFilterString("peter"),
+                ldapConfiguration.distinguishedNamePrefix)
 
         then:
-        groups.size() == 0
+        attributes.size() == 0
     }
 
-    @Ignore
-    def "getGroupMemberships() - returns empty SET on groupClassName fails to match"() {
-        //TO DO - when LDAP server is available with SPOCK tests
-    }
-
-    def "getGroupMembership() - returns empty SET when context.search() returns are empty"() {
+    def "searchContext() - returns empty SET when context.search() returns are empty"() {
         given:
         LdapAuthenticator ldapAuthenticator = new LdapAuthenticator(ldapConfiguration)
 
@@ -222,13 +245,14 @@ class LdapAuthenticatorWithArgsSpec extends Specification {
         InitialDirContext context = mockInitialDirContext() { return emptyResults }
 
         when:
-        Set<String> groups = ldapAuthenticator.getGroupMemberships(context, "foo")
+        Set<String> attributes = ldapAuthenticator.searchContext(
+                context,"dc=example,dc=com", "(cn=foo)", "pizza")
 
         then:
-        groups.size() == 0
+        attributes.size() == 0
     }
 
-    def "getGroupMembership() - rethrows the NamingException raised by context.search()"() {
+    def "searchContext() - rethrows the NamingException raised by context.search()"() {
         given:
         LdapAuthenticator ldapAuthenticator = new LdapAuthenticator(ldapConfiguration)
 
@@ -238,13 +262,13 @@ class LdapAuthenticatorWithArgsSpec extends Specification {
         0 * context._
 
         when:
-        Set<String> groups = ldapAuthenticator.getGroupMemberships(context, "foo")
+        ldapAuthenticator.searchContext(context,"dc=example,dc=com", "(cn=foo)", "pizza")
 
         then:
         thrown(NamingException)
     }
 
-    def "getGroupMembership() - rethrows the NamingException raised by results.hasMore()"() {
+    def "searchContext() - rethrows the NamingException raised by results.hasMore()"() {
         given:
         LdapAuthenticator ldapAuthenticator = new LdapAuthenticator(ldapConfiguration)
 
@@ -254,56 +278,69 @@ class LdapAuthenticatorWithArgsSpec extends Specification {
         1 * results.close()
         0 * results._
 
-        /** Mock InitialDirContext to return "results"*/
+        /** Mock InitialDirContext to return "results" */
         InitialDirContext context = mockInitialDirContext() { return results }
 
         when:
-        Set<String> groups = ldapAuthenticator.getGroupMemberships(context, "foo")
+        ldapAuthenticator.searchContext(context,"dc=example,dc=com", "(cn=foo)", "pizza")
 
         then:
         thrown(NamingException)
     }
 
+    def "searchContext() - handles the PartialResultException raised by results.hasMore()"() {
+        given:
+        LdapAuthenticator ldapAuthenticator = new LdapAuthenticator(ldapConfiguration)
+
+        /* Naming Enumeration Mocking */
+        TestNamingEnumeration<SearchResult> results = Mock(TestNamingEnumeration)
+        1 * results.hasMore() >> { throw new PartialResultException() }
+        1 * results.close()
+        0 * results._
+
+        /** Mock InitialDirContext to return "results" */
+        InitialDirContext context = mockInitialDirContext() { return results }
+
+        when:
+        Set<String> attributes = ldapAuthenticator.searchContext(
+                context,"dc=example,dc=com", "(cn=foo)", "pizza")
+
+        then:
+        attributes.size() == 0
+    }
+
+
+    def "authenticateUser() - successful user authentication"() {
+        given:
+        LdapAuthenticator ldapAuthenticator = new LdapAuthenticator(ldapConfiguration)
+        InitialDirContext context = ldapAuthenticator.bindContext()
+
+        when:
+        String userDN = ldapAuthenticator.authenticateUser(context, new BasicCredentials("peter", "griffin"))
+
+        then:
+        userDN == "cn=peter griffin,ou=people,dc=example,dc=com"
+    }
+
+    def "authenticateUser() - invalid credentials throw AuthenticationException"() {
+        given:
+        LdapAuthenticator ldapAuthenticator = new LdapAuthenticator(ldapConfiguration)
+        InitialDirContext context = ldapAuthenticator.bindContext()
+
+        when:
+        String userDN = ldapAuthenticator.authenticateUser(context, new BasicCredentials("peter", "simpson"))
+
+        then:
+        thrown(javax.naming.AuthenticationException)
+    }
+
     /* Class Helpers */
 
     /** Mock InitialDirContext */
-    InitialDirContext mockInitialDirContext(Closure closure) {
+    private InitialDirContext mockInitialDirContext(Closure closure) {
         InitialDirContext context = Mock(InitialDirContext)
         1 * context.search(_, _, _) >> closure.call()
         0 * context._
-        return context
-    }
-
-    /* Populate SearchResult */
-    SearchResult populateSearchResult(String attribType, String attribValue) {
-        Attributes matchAttrs = new BasicAttributes(true)
-        matchAttrs.put(new BasicAttribute(attribType, attribValue))
-        return new SearchResult("faux_name", null, matchAttrs)
-    }
-
-    /** Mock TestNamingEnumeration for 1 walk through the while loop */
-    TestNamingEnumeration<SearchResult> mockResultsWalkOneLoop(Closure closure) {
-        TestNamingEnumeration<SearchResult> results = Mock(TestNamingEnumeration)
-        1 * results.hasMore() >> true
-        1 * results.hasMore() >> false
-        1 * results.close()
-        1 * results.next() >> closure.call()
-        0 * results._
-
-        return results
-    }
-
-    /** Mocking all interfaces of getGroupMemberships() */
-    InitialDirContext mockGetGroupMembershipInterface(String attribType, String attribValue) {
-        /** Populate SearchResult */
-        SearchResult result = populateSearchResult(attribType, attribValue)
-
-        /** Mock NamingEnumeration to walk through while loop once and return "result" */
-        TestNamingEnumeration<SearchResult> results = mockResultsWalkOneLoop() { return result }
-
-        /** Mock InitialDirContext to return "results"*/
-        InitialDirContext context = mockInitialDirContext() { return results }
-
         return context
     }
 }

@@ -1,17 +1,10 @@
 package deploydb.models
 
-
-import spock.lang.*
-import com.fasterxml.jackson.annotation.JsonProperty
 import io.dropwizard.configuration.ConfigurationParsingException
-import io.dropwizard.configuration.ConfigurationValidationException
 import deploydb.ModelLoader
-import deploydb.registry.ModelRegistry
 import deploydb.models.Webhook.Webhook
-import deploydb.models.Webhook.Deployment
+import spock.lang.*
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 class WebhookSpec extends Specification {
     def "ensure Webhook object can be instantiated"() {

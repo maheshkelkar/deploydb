@@ -134,7 +134,7 @@ class WorkFlow {
     void loadConfigModels() {
 
         /** Validate base config directory */
-        File baseConfigDirectory = new File(this.deployDBApp.configDirectory)
+        File baseConfigDirectory = new File(this.deployDBApp.configuration.configDirectory)
         if (!baseConfigDirectory.exists() || !baseConfigDirectory.isDirectory()) {
             throw new Exception("No DeployDB configuration found. DeployDB would not function properly")
         }
@@ -159,7 +159,7 @@ class WorkFlow {
         List<models.ModelConfig> modelConfigList = []
 
         /* Load promotions */
-        String promotionsDirName = this.deployDBApp.configDirectory + "/promotions"
+        String promotionsDirName = this.deployDBApp.configuration.configDirectory + "/promotions"
         loadConfigModelsCommon(promotionsDirName, ModelType.PROMOTION,
                 tmpPromotionRegistry, this.promotionLoader,
                 inputStreams, modelConfigList) { models.promotion.Promotion promotion ->
@@ -167,7 +167,7 @@ class WorkFlow {
         }
 
         /* Load environments */
-        String environmentsDirName = this.deployDBApp.configDirectory + "/environments"
+        String environmentsDirName = this.deployDBApp.configuration.configDirectory + "/environments"
         loadConfigModelsCommon(environmentsDirName, ModelType.ENVIRONMENT,
                 tmpEnvironmentRegistry, this.environmentLoader,
                 inputStreams, modelConfigList) { models.Environment environment ->
@@ -175,7 +175,7 @@ class WorkFlow {
         }
 
         /* Load pipelines */
-        String pipelinesDirName = this.deployDBApp.configDirectory + "/pipelines"
+        String pipelinesDirName = this.deployDBApp.configuration.configDirectory + "/pipelines"
         loadConfigModelsCommon(pipelinesDirName, ModelType.PIPELINE,
                 tmpPipelineRegistry, this.pipelineLoader,
                 inputStreams, modelConfigList) { models.pipeline.Pipeline pipeline ->
@@ -203,7 +203,7 @@ class WorkFlow {
         }
 
         /* Load services */
-        String servicesDirName = this.deployDBApp.configDirectory + "/services"
+        String servicesDirName = this.deployDBApp.configuration.configDirectory + "/services"
         loadConfigModelsCommon(servicesDirName, ModelType.SERVICE,
                 tmpServiceRegistry, this.serviceLoader,
                 inputStreams, modelConfigList) { models.Service service ->
@@ -228,7 +228,7 @@ class WorkFlow {
         }
 
         /* Load webhook */
-        String webhookDirName = this.deployDBApp.configDirectory + "/webhook"
+        String webhookDirName = this.deployDBApp.configuration.configDirectory + "/webhook"
         try {
             loadConfigModelsCommon(webhookDirName, ModelType.WEBHOOK,
                 null, this.webhookLoader,
@@ -682,8 +682,8 @@ class WorkFlow {
 
 
         /* Find out if any other promotions are waiting for results */
-        models.PromotionResult startedPromotionResult = deployment.getPromotionResultSet().find() {
-            pr -> pr.promotionIdent == Status.STARTED
+        models.PromotionResult startedPromotionResult = deployment.promotionResultSet.find() {
+            pr -> pr.status == Status.STARTED
         }
         if (startedPromotionResult != null) {
             /* Wait for more promotion results */

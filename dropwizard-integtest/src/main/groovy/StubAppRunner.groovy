@@ -141,6 +141,6 @@ public class StubAppRunner<C extends Configuration> {
     }
 
     void setConfigDirectory(String configDirectory) {
-        application.configDirectory = configDirectory
+        application.configuration.configDirectory = configDirectory
     }
 }

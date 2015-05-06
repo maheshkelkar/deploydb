@@ -21,7 +21,7 @@ class LdapConfiguration {
     /**
      * Uri to LDAP Server
      *
-     * - Valid format: ldap://<hostname>:<optional port number>
+     * - Valid format: ldap[s]://<hostname>:<optional port number>
      * - "uri" can be null only if we are using default setting. In that case
      *   no authentication is performed.
      * - if "uri" is empty or invalid, then deploydb will attempt to connect and
@@ -35,29 +35,92 @@ class LdapConfiguration {
     @JsonProperty
     private CacheBuilderSpec cachePolicy = CacheBuilderSpec.disableCaching()
 
+    /**
+     * Base domain component
+     *
+     * Used as a base name in the LDAP search query
+     */
     @NotEmpty
     @JsonProperty
-    private String userFilter = "ou=people,dc=example,dc=com"
+    private String baseDC = "dc=example,dc=com"
 
+    /** Bind Username */
     @NotEmpty
     @JsonProperty
-    private String groupFilter = "ou=groups,dc=example,dc=com"
+    private String bindDN = "cn=admin"
 
+    /** Bind password */
     @NotEmpty
     @JsonProperty
-    private String userNameAttribute = "cn"
+    private String bindPassword = "secret"
 
+    /**
+     * User common name prefix
+     *
+     * Used in LDAP search query to:
+     * - filter matches e.g. (&(cn=username)(objectClass=posixUser))
+     * - control returned attributes in the matched entry
+     */
     @NotEmpty
     @JsonProperty
-    private String groupNameAttribute = "cn"
+    private String userNamePrefix = "cn"
 
+    /**
+     * User object class name
+     *
+     * This is used in the query to search user data record in AD
+     *
+     * An objectClass is a collection of attributes (or an attribute container).
+     * More info can be found at <http://www.zytrax.com/books/ldap/ch3/#objectclasses>
+     */
     @NotEmpty
     @JsonProperty
-    private String groupMembershipAttribute = "memberUid"
+    private String userObjectClass = "posixUser"
 
+    /**
+     * Group common name prefix
+     *
+     * Used in LDAP search query to:
+     * - control returned attributes in the matched entry
+     */
     @NotEmpty
     @JsonProperty
-    private String groupClassName = "posixGroup"
+    private String groupNamePrefix = "cn"
+
+    /**
+     * Group membership prefix
+     *
+     * Note that attribute value for this prefix is assumed to userDN (distinguished name)
+     * E.g. cn=username,OU=users,DC=example,DC=com
+     *
+     * Used in LDAP search query to:
+     * - filter matches e.g. (&(memberUid=cn=username,OU=users,DC=example,DC=com)(objectClass=posixGroup))
+     */
+    @NotEmpty
+    @JsonProperty
+    private String groupMembershipPrefix = "memberUid"
+
+    /**
+     * Group object class name
+     *
+     * This is used in the query to search group data record in AD
+     *
+     * An objectClass is a collection of attributes (or an attribute container).
+     * More info can be found at <http://www.zytrax.com/books/ldap/ch3/#objectclasses>
+     */
+    @NotEmpty
+    @JsonProperty
+    private String groupObjectClass = "posixGroup"
+
+    /**
+     * Domain name prefix
+     *
+     * Used in LDAP search query to:
+     * - controls returned attributes in the matched entry
+     */
+    @NotEmpty
+    @JsonProperty
+    private String distinguishedNamePrefix = "dn"
 
     @Valid
     @JsonProperty

@@ -27,11 +27,14 @@ logging:
 ldap:
   uri: ldap://localhost:10389
   cachePolicy: maximumSize=10000, expireAfterWrite=10m
-  userFilter: ou=people,dc=yourcompany,dc=com
-  groupFilter: ou=groups,dc=yourcompany,dc=com
-  userNameAttribute: cn
-  groupNameAttribute: cn
-  groupMembershipAttribute: memberUid
-  groupClassName: groupOfUniqueNames
+  baseDC: "dc=example,dc=com"
+  bindDN: "cn=admin"
+  bindPassword: "secret"
+  userNamePrefix: cn
+  userObjectClass: posixUser
+  groupNamePrefix: cn
+  groupMembershipPrefix: memberUid
+  groupObjectClass: posixGroup
+  distinguishedNamePrefix: entryDN
   connectTimeout: 500ms
   readTimeout: 500ms

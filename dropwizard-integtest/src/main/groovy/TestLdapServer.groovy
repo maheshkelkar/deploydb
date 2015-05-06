@@ -1,4 +1,4 @@
-package deploydb.cucumber
+package dropwizardintegtest
 
 import com.unboundid.ldap.listener.InMemoryDirectoryServer
 import com.unboundid.ldap.listener.InMemoryDirectoryServerConfig
@@ -6,7 +6,7 @@ import com.unboundid.ldap.listener.InMemoryListenerConfig
 import com.unboundid.ldap.sdk.Attribute
 import com.unboundid.ldap.sdk.DN
 import com.unboundid.ldap.sdk.Entry
-import com.unboundid.ldap.sdk.LDAPException
+import com.unboundid.ldap.sdk.OperationType
 import com.unboundid.ldif.LDIFReader
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -20,13 +20,13 @@ final class TestLdapServer {
     private InMemoryDirectoryServer server = null
 
     /**
-     * The root DN of the LDAP directory.
+     * The base/root DN of the LDAP directory.
      */
-    private String root = "dc=yourcompany,dc=com"
+    private String baseDN = "dc=example,dc=com"
     /**
      * The distinguished name of the admin account.
      */
-    private String authDn = "uid=admin,ou=system"
+    private String adminCN = "cn=admin"
     /**
      * The password for the admin account.
      */
@@ -43,21 +43,22 @@ final class TestLdapServer {
     private static final Logger logger = LoggerFactory.getLogger(TestLdapServer.class)
 
     /**
-     * Configure and start the embedded UnboundID server creating the root DN and loading the LDIF seed data.
+     * Configure and start the embedded UnboundID server creating the base DN and loading the LDIF seed data.
      */
     void start() {
         try {
             logger.info("Starting UnboundID server")
             final InMemoryListenerConfig listenerConfig =
                     InMemoryListenerConfig.createLDAPConfig("testLdapListener", serverPort)
-            final InMemoryDirectoryServerConfig config = new InMemoryDirectoryServerConfig(new DN(root))
+            final InMemoryDirectoryServerConfig config = new InMemoryDirectoryServerConfig(new DN(baseDN))
             config.setListenerConfigs(listenerConfig)
             config.setSchema(null)
-            if (authDn != null) {
-                config.addAdditionalBindCredentials(authDn, passwd)
+            if (adminCN != null) {
+                config.addAdditionalBindCredentials(adminCN, passwd)
             }
+            config.setAuthenticationRequiredOperationTypes(OperationType.BIND)
             server = new InMemoryDirectoryServer(config)
-            server.add(new Entry(root, new Attribute("objectclass", "domain", "top")))
+            server.add(new Entry(baseDN, new Attribute("objectclass", "domain", "top")))
             if (ldifFile != null) {
                 final InputStream inputStream = new FileInputStream(ldifFile)
                 try {
@@ -69,11 +70,7 @@ final class TestLdapServer {
             }
             server.startListening()
             logger.info("Started UnboundID server")
-        } catch (final LDAPException e) {
-            e.printStackTrace()
-            logger.error("Could not launch embedded UnboundID directory server", e)
-        } catch (final IOException e) {
-            e.printStackTrace()
+        } catch (final Exception e) {
             logger.error("Could not launch embedded UnboundID directory server", e)
         }
     }
@@ -82,8 +79,10 @@ final class TestLdapServer {
      * Shutdown the the embedded UnboundID server.
      */
     void stop() {
-        logger.info("Stopping UnboundID server")
-        server.shutDown(true)
+        if (server) {
+            logger.info("Stopping UnboundID server")
+            server.shutDown(true)
+        }
         logger.info("Stopped UnboundID server")
     }
 }

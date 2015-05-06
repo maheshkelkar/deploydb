@@ -1,57 +1,60 @@
-dn: ou=people,dc=yourcompany,dc=com
+dn: ou=people,dc=example,dc=com
 ou: people
 objectClass: organizationalUnit
 
-dn: ou=groups,dc=yourcompany,dc=com
+dn: ou=groups,dc=example,dc=com
 ou: groups
 objectClass: organizationalUnit
 
-dn: cn=fox,ou=groups,dc=yourcompany,dc=com
+dn: cn=Fox,ou=groups,dc=example,dc=com
 cn: fox
 add: memberUid
-memberUid: bart
-memberUid: lisa
-memberUid: peter
-memberUid: lois
-objectClass: groupOfUniqueNames
+memberUid: cn=Bart Simpson,ou=people,dc=example,dc=com
+memberUid: cn=Lisa Simpson,ou=people,dc=example,dc=com
+memberUid: cn=Peter Griffin,ou=people,dc=example,dc=com
+memberUid: cn=Lois Griffin,ou=people,dc=example,dc=com
+objectClass: posixGroup
 
-dn: cn=Simpsons,ou=groups,dc=yourcompany,dc=com
-cn: Simpsons
-memberUid: bart
-memberUid: lisa
-objectClass: groupOfUniqueNames
+dn: cn=Simpsons,ou=groups,dc=example,dc=com
+cn: simpsons
+memberUid: cn=Bart Simpson,ou=people,dc=example,dc=com
+memberUid: cn=Lisa Simpson,ou=people,dc=example,dc=com
+objectClass: posixGroup
 
-dn: cn=FamilyGuy,ou=groups,dc=yourcompany,dc=com
-cn: FamilyGuy
-memberUid: peter
-memberUid: lois
-objectClass: groupOfUniqueNames
+dn: cn=Family Guy,ou=groups,dc=example,dc=com
+cn: familyguy
+memberUid: cn=Peter Griffin,ou=people,dc=example,dc=com
+memberUid: cn=Lois Griffin,ou=people,dc=example,dc=com
+objectClass: posixGroup
 
-dn: cn=bart,ou=people,dc=yourcompany,dc=com
-cn: Bart Simpson
+dn: cn=Bart Simpson,ou=people,dc=example,dc=com
+cn: bart
 sn: Simpson
 givenName: Bart
 uid: bart
-objectClass: inetOrgPerson
+objectClass: posixUser
+userpassword: simpson
 
-dn: cn=lisa,ou=people,dc=yourcompany,dc=com
-cn: Lisa Simpson
+dn: cn=Lisa Simpson,ou=people,dc=example,dc=com
+cn: lisa
 sn: Simpson
 givenName: Lisa
 uid: lisa
-objectClass: inetOrgPerson
+objectClass: posixUser
+userpassword: simpson
 
-dn: cn=peter,ou=people,dc=yourcompany,dc=com
-cn: Peter Griffin
+dn: cn=Peter Griffin,ou=people,dc=example,dc=com
+cn: peter
 sn: Griffin
 givenName: Peter
 uid: peter
-objectClass: inetOrgPerson
+objectClass: posixUser
 userpassword: griffin
 
-dn: cn=lois,ou=people,dc=yourcompany,dc=com
-cn: Lois Griffin
+dn: cn=Lois Griffin,ou=people,dc=example,dc=com
+cn: lois
 sn: Griffin
 givenName: Lois
 uid: lois
-objectClass: inetOrgPerson
+objectClass: posixUser
+userpassword: griffin
