@@ -40,7 +40,7 @@ class DeploymentCompletedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentCompletedTrigger()
+        boolean success = integModelHelper.sendDeploymentCompletedTrigger(1L)
 
         then:
         success == true
@@ -68,7 +68,7 @@ class DeploymentCompletedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentCompletedTrigger()
+        boolean success = integModelHelper.sendDeploymentCompletedTrigger(1L)
 
         then:
         success == true
@@ -95,7 +95,7 @@ class DeploymentCompletedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentCompletedTrigger()
+        boolean success = integModelHelper.sendDeploymentCompletedTrigger(1L)
 
         then:
         success == true
@@ -123,7 +123,7 @@ class DeploymentCompletedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentCompletedTrigger()
+        boolean success = integModelHelper.sendDeploymentCompletedTrigger(1L)
 
         then:
         success == true
@@ -151,7 +151,7 @@ class DeploymentCompletedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentCompletedTrigger()
+        boolean success = integModelHelper.sendDeploymentCompletedTrigger(1L)
 
         then:
         success == true
@@ -178,7 +178,7 @@ class DeploymentCompletedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentCompletedTrigger()
+        boolean success = integModelHelper.sendDeploymentCompletedTrigger(1L)
 
         then:
         success == true
@@ -207,7 +207,7 @@ class DeploymentCompletedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentCompletedTrigger()
+        boolean success = integModelHelper.sendDeploymentCompletedTrigger(1L)
 
         then:
         success == true

@@ -3,8 +3,6 @@ Feature: DeployDB cleanup APIs
   As a DeployDB administrator
   I should be able to cleanup the artifact, deployment promotion results models
 
-
-  @dbd
   Scenario: The model cleanup shall be successful
     Given there is a deployment
     When I POST to "/tasks/modelCleanup?group=com.example.cucumber&name=cucumber-artifact&version=1.0.1" from the admin app

@@ -34,8 +34,8 @@ class PromotionCompletedNotificationsSpec extends Specification {
 
 
         integModelHelper.sendCreateArtifact()
-        integModelHelper.sendDeploymentStartedTrigger()
-        integModelHelper.sendDeploymentCompletedTrigger()
+        integModelHelper.sendDeploymentStartedTrigger(1L)
+        integModelHelper.sendDeploymentCompletedTrigger(1L)
     }
 
     def "no webhook should be called when you receive promotion completed trigger if there is no webhook config" () {
@@ -51,7 +51,7 @@ class PromotionCompletedNotificationsSpec extends Specification {
         setupDeploymentForPromotionTrigger()
 
         when:
-        boolean success = integModelHelper.sendPromotionCompletedTrigger()
+        boolean success = integModelHelper.sendPromotionCompletedTrigger(1L)
 
         then:
         success == true
@@ -78,7 +78,7 @@ class PromotionCompletedNotificationsSpec extends Specification {
         setupDeploymentForPromotionTrigger()
 
         when:
-        boolean success = integModelHelper.sendPromotionCompletedTrigger()
+        boolean success = integModelHelper.sendPromotionCompletedTrigger(1L)
 
         then:
         success == true
@@ -104,7 +104,7 @@ class PromotionCompletedNotificationsSpec extends Specification {
         setupDeploymentForPromotionTrigger()
 
         when:
-        boolean success = integModelHelper.sendPromotionCompletedTrigger()
+        boolean success = integModelHelper.sendPromotionCompletedTrigger(1L)
 
         then:
         success == true
@@ -131,7 +131,7 @@ class PromotionCompletedNotificationsSpec extends Specification {
         setupDeploymentForPromotionTrigger()
 
         when:
-        boolean success = integModelHelper.sendPromotionCompletedTrigger()
+        boolean success = integModelHelper.sendPromotionCompletedTrigger(1L)
 
         then:
         success == true
@@ -158,7 +158,7 @@ class PromotionCompletedNotificationsSpec extends Specification {
         setupDeploymentForPromotionTrigger()
 
         when:
-        boolean success = integModelHelper.sendPromotionCompletedTrigger()
+        boolean success = integModelHelper.sendPromotionCompletedTrigger(1L)
 
         then:
         success == true
@@ -184,7 +184,7 @@ class PromotionCompletedNotificationsSpec extends Specification {
         setupDeploymentForPromotionTrigger()
 
         when:
-        boolean success = integModelHelper.sendPromotionCompletedTrigger()
+        boolean success = integModelHelper.sendPromotionCompletedTrigger(1L)
 
         then:
         success == true
@@ -212,7 +212,7 @@ class PromotionCompletedNotificationsSpec extends Specification {
         setupDeploymentForPromotionTrigger()
 
         when:
-        boolean success = integModelHelper.sendPromotionCompletedTrigger()
+        boolean success = integModelHelper.sendPromotionCompletedTrigger(1L)
 
         then:
         success == true

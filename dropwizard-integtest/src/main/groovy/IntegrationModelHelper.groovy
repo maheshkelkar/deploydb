@@ -31,8 +31,8 @@ class IntegrationModelHelper {
         return response.status == 200
     }
 
-    boolean sendDeploymentStartedTrigger() {
-        String path = "/api/deployments/1"
+    boolean sendDeploymentStartedTrigger(long deploymentId) {
+        String path = "/api/deployments/" + String.valueOf(deploymentId)
         String messageBody = """
       {
         "status" : "STARTED"
@@ -43,8 +43,8 @@ class IntegrationModelHelper {
         return response.status == 200
     }
 
-    boolean sendDeploymentCompletedTrigger() {
-        String path = "/api/deployments/1"
+    boolean sendDeploymentCompletedTrigger(long deploymentId) {
+        String path = "/api/deployments/" + String.valueOf(deploymentId)
         String messageBody = """
       {
         "status" : "COMPLETED"
@@ -55,8 +55,8 @@ class IntegrationModelHelper {
         return response.status == 200
     }
 
-    boolean sendPromotionCompletedTrigger() {
-        String path = "/api/deployments/1/promotions"
+    boolean sendPromotionCompletedTrigger(long deploymentId) {
+        String path = "/api/deployments/" + String.valueOf(deploymentId) + "/promotions"
         String messageBody = """
       {
         "name"  : "basicPromo",

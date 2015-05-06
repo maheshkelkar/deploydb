@@ -3,12 +3,13 @@ apply plugin: 'eclipse'
 apply plugin: 'groovy'
 apply plugin: 'application'
 apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'com.jfrog.bintray'
 
 version = '0.1'
 group = 'com.github.lookout.deploydb.uat'
 description = 'User Acceptance Testing artifact for deploydb'
 
-mainClassName = 'uat.UatMainApp'
+mainClassName = 'deploydb.UatMainApp'
 
 project.targetCompatibility = 1.7
 
@@ -52,3 +53,42 @@ shadowJar {
         attributes 'Main-Class' : mainClassName
     }
 }
+
+assemble.dependsOn shadowJar
+
+////////////////////////////////////////////////////////////////////////////////
+// PUBLISHING TASKS
+////////////////////////////////////////////////////////////////////////////////
+
+artifacts {
+    archives distShadowTar, distShadowZip, shadowJar
+}
+/* Disabling the addition of a jar to the archives which gets in the way of our
+ * means to publish artifacts. It appears that the java plugin doesn't give you
+ * the means to remove the 'default jar' from the artifacts list by any other
+ * means
+ */
+jar.enabled = false
+configurations.archives.artifacts.removeAll { it.archiveTask.is jar }
+
+bintray {
+    user = project.bintrayUser
+    key = project.bintrayKey
+    publish = true
+    dryRun = false
+    configurations = ['archives']
+
+    pkg {
+        userOrg = 'lookout'
+        repo = 'systems'
+        name = 'DeployDB'
+        labels = []
+
+        version {
+            name = project.version
+            vcsTag = "v${project.version}"
+            desc = project.description
+        }
+    }
+}
+bintrayUpload.dependsOn assemble

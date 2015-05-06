@@ -1,4 +1,4 @@
-package uat
+package deploydb
 
 import dropwizardintegtest.IntegrationRestApiClient
 
@@ -9,18 +9,18 @@ class ConsulClient {
 
     IntegrationRestApiClient restApiClient = new IntegrationRestApiClient()
 
-   List<String> getDeploydbHosts() {
+    def getDeploydbHosts() {
 
        restApiClient.port = 8500
        String path = "/v1/health/service/deploydb?passing"
        Response response = restApiClient.getFromPath(path, false)
-       List<String>  hosts = new ArrayList()
+       def hosts = [:]
 
        List<ServiceHealth> serviceHealthList = response.readEntity(new GenericType<List<ServiceHealth>>(){})
        serviceHealthList.each {
-           hosts << it.node.address + ":" + it.service.port
+           hosts[it.node.address] = it.service.port
        }
 
-       return hosts
+       hosts
    }
 }

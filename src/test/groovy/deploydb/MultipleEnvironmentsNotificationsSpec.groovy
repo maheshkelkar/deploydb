@@ -65,7 +65,7 @@ class MultipleEnvironmentsNotificationsSpec extends Specification {
         integAppHelper.webhookRunner.requestWebhookObject.configuredUriPaths =
                 ["/job/basicEnv-deploy-created/build", "/job/basicEnv-deploy-completed/build"]
 
-        success = integModelHelper.sendDeploymentCompletedTrigger()
+        success = integModelHelper.sendDeploymentCompletedTrigger(1L)
 
         then:
         success == true
@@ -80,7 +80,7 @@ class MultipleEnvironmentsNotificationsSpec extends Specification {
                 ["/job/basicEnv-deploy-created/build", "/job/basicEnv-deploy-completed/build",
                 "/job/prodEnv-deploy-created/build"]
 
-        success = integModelHelper.sendPromotionCompletedTrigger()
+        success = integModelHelper.sendPromotionCompletedTrigger(1L)
 
         then:
         success == true

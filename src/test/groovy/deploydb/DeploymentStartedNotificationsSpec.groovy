@@ -38,7 +38,7 @@ class DeploymentStartedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentStartedTrigger()
+        boolean success = integModelHelper.sendDeploymentStartedTrigger(1L)
 
         then:
         success == true
@@ -66,7 +66,7 @@ class DeploymentStartedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentStartedTrigger()
+        boolean success = integModelHelper.sendDeploymentStartedTrigger(1L)
 
         then:
         success == true
@@ -93,7 +93,7 @@ class DeploymentStartedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentStartedTrigger()
+        boolean success = integModelHelper.sendDeploymentStartedTrigger(1L)
 
         then:
         success == true
@@ -121,7 +121,7 @@ class DeploymentStartedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentStartedTrigger()
+        boolean success = integModelHelper.sendDeploymentStartedTrigger(1L)
 
         then:
         success == true
@@ -148,7 +148,7 @@ class DeploymentStartedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentStartedTrigger()
+        boolean success = integModelHelper.sendDeploymentStartedTrigger(1L)
 
         then:
         success == true
@@ -176,7 +176,7 @@ class DeploymentStartedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentStartedTrigger()
+        boolean success = integModelHelper.sendDeploymentStartedTrigger(1L)
 
         then:
         success == true
@@ -205,7 +205,7 @@ class DeploymentStartedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentStartedTrigger()
+        boolean success = integModelHelper.sendDeploymentStartedTrigger(1L)
 
         then:
         success == true

@@ -23,6 +23,9 @@ class FlowDAO extends AbstractDAO<Flow> {
         ArtifactDAO artifactDAO = new ArtifactDAO(currentSession().getSessionFactory())
         Artifact artifact = artifactDAO.criteria().add(Restrictions.eq('group', group))
                 .add(Restrictions.eq('name', name)).add(Restrictions.eq('version', version)).uniqueResult()
+        if(artifact == null) {
+            return
+        }
         Flow flow = criteria().add(Restrictions.eq('artifact.id', artifact.id)).uniqueResult()
 
         // now delete the found flow

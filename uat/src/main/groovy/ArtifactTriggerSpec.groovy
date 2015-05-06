@@ -1,8 +1,10 @@
-package uat
+package deploydb
 
 import spock.lang.*
 import dropwizardintegtest.IntegrationModelHelper
 import dropwizardintegtest.IntegrationRestApiClient
+
+import javax.ws.rs.core.Response
 
 class ArtifactTriggerSpec extends Specification {
 
@@ -10,14 +12,33 @@ class ArtifactTriggerSpec extends Specification {
     IntegrationModelHelper integModelHelper = new IntegrationModelHelper(integrationRestApiClient)
 
     def setup() {
-        //integrationRestApiClient.host = "http://10.32.10.63"
-        integrationRestApiClient.host = "http://localhost"
+        integrationRestApiClient.host = "http://" + System.getProperty("DeploydbHost")
+        integrationRestApiClient.port = Integer.valueOf(System.getProperty("DeploydbPort"))
+    }
+
+     boolean sendCreateArtifact() {
+        String path = "/api/artifacts"
+        String messageBody = """
+      {
+        "group" : "basic.group.1",
+        "name" : "bg1",
+        "version" : "1.2.345",
+        "sourceUrl" : "http://example.com/cucumber.jar"
+      }
+    """
+        Response response = integrationRestApiClient.postJsonToPath(path, messageBody, false)
+        UatArtifact uatArtifact = response.readEntity(UatArtifact)
+        System.setProperty("artifactId", String.valueOf(uatArtifact.id))
+        response.close()
+
+        return response.status == 201
+
     }
 
     def "create artifact should return success"() {
 
         when:
-        boolean success = integModelHelper.sendCreateArtifact()
+        boolean success = sendCreateArtifact()
 
         then:
         success == true
@@ -25,7 +46,8 @@ class ArtifactTriggerSpec extends Specification {
 
     def "read artifact should return success"() {
         when:
-        boolean success = integModelHelper.sendGetApi("/api/artifacts/1")
+        String path = "/api/artifacts/" + System.getProperty("artifactId")
+        boolean success = integModelHelper.sendGetApi(path)
 
         then:
         success == true
