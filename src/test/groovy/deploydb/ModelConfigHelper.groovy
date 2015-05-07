@@ -204,13 +204,13 @@ promotions:
         serviceFile.write(fileContents)
     }
 
-    def createServicePromoitionPipelineModelsConfigFiles() {
+    def createServicePromotionPipelineModelsConfigFiles() {
         createPromotionConfigFile()
         createPipelineConfigFile()
         createServiceConfigFile()
     }
 
-    def createBasicProdServicePromoitionPipelineModelsConfigFiles() {
+    def createBasicProdServicePromotionPipelineModelsConfigFiles() {
         createEnvironmentConfigFile()
         createProdEnvironmentConfigFile()
         createPromotionConfigFile()

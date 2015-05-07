@@ -2,6 +2,10 @@ package dropwizardintegtest
 
 import javax.ws.rs.core.Response
 
+/**
+ * This class is used by the spock integration test suites and UAT tests. This will be used by
+ * clients of deploydb to verify the contract of deploydb interface
+ */
 class IntegrationModelHelper {
 
     private IntegrationRestApiClient integrationRestApiClient = null

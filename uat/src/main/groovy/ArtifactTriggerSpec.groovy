@@ -1,4 +1,4 @@
-package deploydb
+package uat
 
 import spock.lang.*
 import dropwizardintegtest.IntegrationModelHelper
@@ -28,7 +28,12 @@ class ArtifactTriggerSpec extends Specification {
     """
         Response response = integrationRestApiClient.postJsonToPath(path, messageBody, false)
         UatArtifact uatArtifact = response.readEntity(UatArtifact)
-        System.setProperty("artifactId", String.valueOf(uatArtifact.id))
+         /**
+          * We can't hard code the id to fetch the deployment because in some environments there
+          * will be more artifacts than test artifacts created by UAT
+          * Let's save the created artifact id and use them to read artifact and deployments
+          */
+         System.setProperty("artifactId", String.valueOf(uatArtifact.id))
         response.close()
 
         return response.status == 201

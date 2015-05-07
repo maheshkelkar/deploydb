@@ -1,6 +1,7 @@
-package deploydb
+package uat
 
 import dropwizardintegtest.IntegrationRestApiClient
+import uat.consul.ServiceHealth
 
 import javax.ws.rs.core.Response
 import javax.ws.rs.core.GenericType

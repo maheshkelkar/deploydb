@@ -11,6 +11,7 @@ class DeploymentStartedNotificationsSpec extends Specification {
     IntegrationRestApiClient integrationRestApiClient = new IntegrationRestApiClient()
     IntegrationModelHelper integModelHelper = new  IntegrationModelHelper(integrationRestApiClient)
     private WebhooksModelConfigHelper mcfgHelper = new WebhooksModelConfigHelper()
+    private long deploymentId = 1L
 
     def setup() {
         mcfgHelper.setup()
@@ -30,7 +31,7 @@ class DeploymentStartedNotificationsSpec extends Specification {
     def "no webhook should be called when you receive deployment started trigger if there is no webhook config" () {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
         // load up the configuration
@@ -38,7 +39,7 @@ class DeploymentStartedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentStartedTrigger(1L)
+        boolean success = integModelHelper.sendDeploymentStartedTrigger(deploymentId)
 
         then:
         success == true
@@ -49,7 +50,7 @@ class DeploymentStartedNotificationsSpec extends Specification {
     def "webhook should be called when you receive deployment started trigger" () {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createDeploymentStartedWebhookConfigFile()
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
@@ -66,7 +67,7 @@ class DeploymentStartedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentStartedTrigger(1L)
+        boolean success = integModelHelper.sendDeploymentStartedTrigger(deploymentId)
 
         then:
         success == true
@@ -77,7 +78,7 @@ class DeploymentStartedNotificationsSpec extends Specification {
     def "environment webhook should be called when you receive deployment started trigger" () {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createDeploymentStartedEnvironmentWebhookConfigFile()
 
         // load up the configuration
@@ -93,7 +94,7 @@ class DeploymentStartedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentStartedTrigger(1L)
+        boolean success = integModelHelper.sendDeploymentStartedTrigger(deploymentId)
 
         then:
         success == true
@@ -104,7 +105,7 @@ class DeploymentStartedNotificationsSpec extends Specification {
     def "both global and environment webhooks should be called when you receive deployment started trigger" () {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createDeploymentStartedWebhookConfigFile()
         mcfgHelper.createDeploymentStartedEnvironmentWebhookConfigFile()
 
@@ -121,7 +122,7 @@ class DeploymentStartedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentStartedTrigger(1L)
+        boolean success = integModelHelper.sendDeploymentStartedTrigger(deploymentId)
 
         then:
         success == true
@@ -132,7 +133,7 @@ class DeploymentStartedNotificationsSpec extends Specification {
     def "multiple webhooks should be called when you receive deployment started trigger" () {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createMultipleDeploymentStartedWebhooksConfigFile()
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
@@ -148,7 +149,7 @@ class DeploymentStartedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentStartedTrigger(1L)
+        boolean success = integModelHelper.sendDeploymentStartedTrigger(deploymentId)
 
         then:
         success == true
@@ -159,7 +160,7 @@ class DeploymentStartedNotificationsSpec extends Specification {
     def "multiple environments webhook should be called when you receive deployment started trigger" () {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createMultipleDeploymentStartedEnvironmentWebhooksConfigFile()
 
         // load up the configuration
@@ -176,7 +177,7 @@ class DeploymentStartedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentStartedTrigger(1L)
+        boolean success = integModelHelper.sendDeploymentStartedTrigger(deploymentId)
 
         then:
         success == true
@@ -187,7 +188,7 @@ class DeploymentStartedNotificationsSpec extends Specification {
     def "both multiple global and environment webhooks should be called when you receive deployment started trigger" () {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createMultipleDeploymentStartedWebhooksConfigFile()
         mcfgHelper.createMultipleDeploymentStartedEnvironmentWebhooksConfigFile()
 
@@ -205,7 +206,7 @@ class DeploymentStartedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentStartedTrigger(1L)
+        boolean success = integModelHelper.sendDeploymentStartedTrigger(deploymentId)
 
         then:
         success == true

@@ -1,7 +1,7 @@
 Feature: DeployDB cleanup APIs
 
   As a DeployDB administrator
-  I should be able to cleanup the artifact, deployment promotion results models
+  I should be able to delete the artifact, deployment promotion results models from deploydb
 
   Scenario: The model cleanup shall be successful
     Given there is a deployment

@@ -62,7 +62,7 @@ class DeploymentDAOSpec extends Specification {
     def "getByEnvironmentIdent() should returns deployments for the environment ident"() {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
         // load up the configuration

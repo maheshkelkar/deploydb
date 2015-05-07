@@ -11,6 +11,7 @@ class PromotionCompletedNotificationsSpec extends Specification {
     IntegrationRestApiClient integrationRestApiClient = new IntegrationRestApiClient()
     IntegrationModelHelper integModelHelper = new  IntegrationModelHelper(integrationRestApiClient)
     private WebhooksModelConfigHelper mcfgHelper = new WebhooksModelConfigHelper()
+    private long deploymentId = 1L
 
     def setup() {
         mcfgHelper.setup()
@@ -34,14 +35,14 @@ class PromotionCompletedNotificationsSpec extends Specification {
 
 
         integModelHelper.sendCreateArtifact()
-        integModelHelper.sendDeploymentStartedTrigger(1L)
-        integModelHelper.sendDeploymentCompletedTrigger(1L)
+        integModelHelper.sendDeploymentStartedTrigger(deploymentId)
+        integModelHelper.sendDeploymentCompletedTrigger(deploymentId)
     }
 
     def "no webhook should be called when you receive promotion completed trigger if there is no webhook config" () {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
         // load up the configuration
@@ -51,7 +52,7 @@ class PromotionCompletedNotificationsSpec extends Specification {
         setupDeploymentForPromotionTrigger()
 
         when:
-        boolean success = integModelHelper.sendPromotionCompletedTrigger(1L)
+        boolean success = integModelHelper.sendPromotionCompletedTrigger(deploymentId)
 
         then:
         success == true
@@ -62,7 +63,7 @@ class PromotionCompletedNotificationsSpec extends Specification {
     def "webhook should be called when you receive promotion completed trigger" () {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createPromotionCompletedWebhookConfigFile()
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
@@ -78,7 +79,7 @@ class PromotionCompletedNotificationsSpec extends Specification {
         setupDeploymentForPromotionTrigger()
 
         when:
-        boolean success = integModelHelper.sendPromotionCompletedTrigger(1L)
+        boolean success = integModelHelper.sendPromotionCompletedTrigger(deploymentId)
 
         then:
         success == true
@@ -89,7 +90,7 @@ class PromotionCompletedNotificationsSpec extends Specification {
     def "environment webhook should be called when you receive promotion completed trigger" () {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createPromotionCompletedEnvironmentWebhookConfigFile()
 
         // load up the configuration
@@ -104,7 +105,7 @@ class PromotionCompletedNotificationsSpec extends Specification {
         setupDeploymentForPromotionTrigger()
 
         when:
-        boolean success = integModelHelper.sendPromotionCompletedTrigger(1L)
+        boolean success = integModelHelper.sendPromotionCompletedTrigger(deploymentId)
 
         then:
         success == true
@@ -115,7 +116,7 @@ class PromotionCompletedNotificationsSpec extends Specification {
     def "both global and environment webhooks should be called when you receive promotion completed trigger" () {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createPromotionCompletedWebhookConfigFile()
         mcfgHelper.createPromotionCompletedEnvironmentWebhookConfigFile()
 
@@ -131,7 +132,7 @@ class PromotionCompletedNotificationsSpec extends Specification {
         setupDeploymentForPromotionTrigger()
 
         when:
-        boolean success = integModelHelper.sendPromotionCompletedTrigger(1L)
+        boolean success = integModelHelper.sendPromotionCompletedTrigger(deploymentId)
 
         then:
         success == true
@@ -142,7 +143,7 @@ class PromotionCompletedNotificationsSpec extends Specification {
     def "multiple webhooks should be called when you receive promotion completed trigger" () {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createMultiplePromotionCompletedWebhookConfigFile()
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
@@ -158,7 +159,7 @@ class PromotionCompletedNotificationsSpec extends Specification {
         setupDeploymentForPromotionTrigger()
 
         when:
-        boolean success = integModelHelper.sendPromotionCompletedTrigger(1L)
+        boolean success = integModelHelper.sendPromotionCompletedTrigger(deploymentId)
 
         then:
         success == true
@@ -169,7 +170,7 @@ class PromotionCompletedNotificationsSpec extends Specification {
     def "multiple environment webhooks should be called when you receive promotion completed trigger" () {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createMultiplePromotionCompletedEnvironmentWebhookConfigFile()
 
         // load up the configuration
@@ -184,7 +185,7 @@ class PromotionCompletedNotificationsSpec extends Specification {
         setupDeploymentForPromotionTrigger()
 
         when:
-        boolean success = integModelHelper.sendPromotionCompletedTrigger(1L)
+        boolean success = integModelHelper.sendPromotionCompletedTrigger(deploymentId)
 
         then:
         success == true
@@ -195,7 +196,7 @@ class PromotionCompletedNotificationsSpec extends Specification {
     def "both multiple global and environment webhooks should be called when you receive promotion completed trigger" () {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createMultiplePromotionCompletedEnvironmentWebhookConfigFile()
         mcfgHelper.createMultiplePromotionCompletedWebhookConfigFile()
 
@@ -212,7 +213,7 @@ class PromotionCompletedNotificationsSpec extends Specification {
         setupDeploymentForPromotionTrigger()
 
         when:
-        boolean success = integModelHelper.sendPromotionCompletedTrigger(1L)
+        boolean success = integModelHelper.sendPromotionCompletedTrigger(deploymentId)
 
         then:
         success == true
@@ -236,9 +237,8 @@ class PromotionCompletedNotificationsSpec extends Specification {
         setupDeploymentForPromotionTrigger()
 
         when:
-        boolean success = integModelHelper.sendPromotionCompletedTrigger(1L)
+        boolean success = integModelHelper.sendPromotionCompletedTrigger(deploymentId)
         models.Deployment deployment
-        Long deploymentId = 1
         integAppHelper.withSession {
             deployment = integAppHelper.runner.getApplication().workFlow.deploymentDAO
                     .get(deploymentId)

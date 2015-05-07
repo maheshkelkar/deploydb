@@ -5,13 +5,11 @@ apply plugin: 'application'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'com.jfrog.bintray'
 
-version = '0.1'
-group = 'com.github.lookout.deploydb.uat'
+version = rootProject.version
+group = 'com.github.lookout.uat'
 description = 'User Acceptance Testing artifact for deploydb'
 
-mainClassName = 'deploydb.UatMainApp'
-
-project.targetCompatibility = 1.7
+mainClassName = 'uat.UatMainApp'
 
 dependencies {
     compile ('org.codehaus.groovy:groovy-all:2.4.0+')
@@ -23,7 +21,7 @@ dependencies {
             'dropwizard-views-mustache',
             'dropwizard-testing',
     ].each {
-        compile ("io.dropwizard:${it}:0.8.1")
+        compile ("io.dropwizard:${it}:${dropwizardVersion}")
     }
 
     /* Used instead of the default HTTP connector for the Jersey client to
@@ -37,14 +35,6 @@ dependencies {
 
 repositories {
     jcenter()
-
-    mavenCentral()
-    maven { url 'http://dl.bintray.com/lookout/systems' }
-}
-
-task generateScript(type: CreateStartScripts) {
-    applicationName = "uatDeploydb"
-    outputDir = new File("build/dist/")
 }
 
 shadowJar {

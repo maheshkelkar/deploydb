@@ -11,6 +11,7 @@ class MultipleEnvironmentsNotificationsSpec extends Specification {
     IntegrationRestApiClient integrationRestApiClient = new IntegrationRestApiClient()
     IntegrationModelHelper integModelHelper = new  IntegrationModelHelper(integrationRestApiClient)
     private WebhooksModelConfigHelper mcfgHelper = new WebhooksModelConfigHelper()
+    private long deploymentId = 1L
 
     def setup() {
         mcfgHelper.setup()
@@ -38,7 +39,7 @@ class MultipleEnvironmentsNotificationsSpec extends Specification {
 
         given:
         // Create the required config
-        mcfgHelper.createBasicProdServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createBasicProdServicePromotionPipelineModelsConfigFiles()
 
         // load up the configuration
         integAppHelper.runner.getApplication().loadModelConfiguration()
@@ -65,7 +66,7 @@ class MultipleEnvironmentsNotificationsSpec extends Specification {
         integAppHelper.webhookRunner.requestWebhookObject.configuredUriPaths =
                 ["/job/basicEnv-deploy-created/build", "/job/basicEnv-deploy-completed/build"]
 
-        success = integModelHelper.sendDeploymentCompletedTrigger(1L)
+        success = integModelHelper.sendDeploymentCompletedTrigger(deploymentId)
 
         then:
         success == true
@@ -80,7 +81,7 @@ class MultipleEnvironmentsNotificationsSpec extends Specification {
                 ["/job/basicEnv-deploy-created/build", "/job/basicEnv-deploy-completed/build",
                 "/job/prodEnv-deploy-created/build"]
 
-        success = integModelHelper.sendPromotionCompletedTrigger(1L)
+        success = integModelHelper.sendPromotionCompletedTrigger(deploymentId)
 
         then:
         success == true

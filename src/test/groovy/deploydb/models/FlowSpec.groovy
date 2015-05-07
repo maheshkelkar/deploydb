@@ -320,7 +320,7 @@ class FlowCleanupSpec extends Specification {
     def "delete of existing flow cleans up deployments and artifact"() {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
         // load up the configuration

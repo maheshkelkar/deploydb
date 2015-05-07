@@ -12,6 +12,11 @@ import org.glassfish.jersey.client.JerseyInvocation
 import javax.ws.rs.core.Response
 import javax.ws.rs.client.Entity
 
+/**
+ * This class is used by the spock integration test suites and UAT tests. This will be used by
+ * clients to send REST calls to servers and return responses from the server for further
+ * processing in the client code
+ */
 class IntegrationRestApiClient {
     private Client jerseyClient = null
     String host = "http://localhost"

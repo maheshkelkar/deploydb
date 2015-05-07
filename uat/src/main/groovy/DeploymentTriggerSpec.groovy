@@ -1,4 +1,4 @@
-package deploydb
+package uat
 
 import spock.lang.*
 import dropwizardintegtest.IntegrationModelHelper
@@ -19,6 +19,12 @@ class DeploymentTriggerSpec extends Specification {
     }
 
     boolean sendGetDeployments() {
+        /**
+         * We can't hard code the id to fetch the deployment because in some environments there
+         * will be more artifacts than test artifacts created by UAT
+         * Let's use the artifact id of that was created as part of ArtifactTriggerSpec and use
+         * that to fectch the deployment.
+         */
         String path = "/api/deployments/by-artifact/" + System.getProperty("artifactId")
 
         Response response = integrationRestApiClient.getFromPath(path, false)
