@@ -69,9 +69,27 @@ class ArtifactDAO extends AbstractDAO<Artifact> {
         return artifacts
     }
 
-    boolean artifactExists(String group, String name, String version) {
+    /**
+     * Fetch the artifact using group, name, version
+     * @param group Artifact group
+     * @param name Artifact name
+     * @param version Artifact version
+     * @return Artifact returned by the search if available otherwise null
+     */
+    Artifact findArtifactByGroupNameVersion(String group, String name, String version) {
         return criteria().add(Restrictions.eq('group', group))
-                  .add(Restrictions.eq('name', name))
-                  .add(Restrictions.eq('version', version)).uniqueResult() == null ? false: true
+                .add(Restrictions.eq('name', name))
+                .add(Restrictions.eq('version', version)).uniqueResult()
+    }
+
+    /**
+     * Check if the artifact exists based group, name, version
+     * @param group Artifact group
+     * @param name Artifact name
+     * @param version Artifact version
+     * @return true if Artifact exists otherwise false
+     */
+    boolean artifactExists(String group, String name, String version) {
+        return findArtifactByGroupNameVersion(group, name, version) == null ? false: true
     }
 }

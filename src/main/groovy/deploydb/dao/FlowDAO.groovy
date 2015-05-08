@@ -1,6 +1,5 @@
 package deploydb.dao
 
-import deploydb.models.Artifact
 import deploydb.models.Flow
 import groovy.transform.InheritConstructors
 import io.dropwizard.hibernate.AbstractDAO
@@ -13,20 +12,14 @@ import org.hibernate.criterion.Restrictions
 @InheritConstructors
 class FlowDAO extends AbstractDAO<Flow> {
 
-    void deleteFlowByArtifactNameGroupVersion(String group,
-                                              String name,
-                                              String version) {
+    /**
+     * Delete the flow based on Artifact id. This function will delete the assocaited models -
+     * Artifact, Deployments and PromotionResults
+     * @param id Artifact id of the flow
+     */
+    void deleteFlowByArtifactId(long id) {
         Session session = currentSession()
-
-        // We can't find the flow using artifact name, group and version, so
-        // we need to fetch the artifact, and use artifact id to fetch the flow
-        ArtifactDAO artifactDAO = new ArtifactDAO(currentSession().getSessionFactory())
-        Artifact artifact = artifactDAO.criteria().add(Restrictions.eq('group', group))
-                .add(Restrictions.eq('name', name)).add(Restrictions.eq('version', version)).uniqueResult()
-        if(artifact == null) {
-            return
-        }
-        Flow flow = criteria().add(Restrictions.eq('artifact.id', artifact.id)).uniqueResult()
+        Flow flow = criteria().add(Restrictions.eq('artifact.id', id)).uniqueResult()
 
         // now delete the found flow
         session.delete(flow)

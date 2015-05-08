@@ -3,6 +3,7 @@ package deploydb.models
 import deploydb.IntegrationTestAppHelper
 import deploydb.Status
 import deploydb.dao.PromotionResultDAO
+import spock.lang.Ignore
 import spock.lang.Specification
 import dropwizardintegtest.IntegrationModelHelper
 import dropwizardintegtest.IntegrationRestApiClient
@@ -333,8 +334,10 @@ class FlowCleanupSpec extends Specification {
 
         // remove the flow
         integAppHelper.runner.getApplication().withHibernateSession {
+            Artifact artifact = integAppHelper.runner.getApplication().workFlow.artifactDAO.
+                    findArtifactByGroupNameVersion("basic.group.1", "bg1", "1.2.345")
             integAppHelper.runner.getApplication().workFlow.flowDAO.
-                    deleteFlowByArtifactNameGroupVersion("basic.group.1", "bg1", "1.2.345")
+                    deleteFlowByArtifactId(artifact.id)
         }
 
 

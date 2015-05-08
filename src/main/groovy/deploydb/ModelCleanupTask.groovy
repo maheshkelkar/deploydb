@@ -2,6 +2,7 @@ package deploydb
 
 import com.codahale.metrics.annotation.Timed
 import com.google.common.collect.ImmutableMultimap
+import deploydb.models.Artifact
 import io.dropwizard.servlets.tasks.Task
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -33,7 +34,14 @@ class ModelCleanupTask extends Task {
 
         this.workFlow.deployDBApp.withHibernateSession() {
             try {
-                this.workFlow.flowDAO.deleteFlowByArtifactNameGroupVersion(group, name, version)
+                // Lets fetch the artifact using name, group and version
+                Artifact artifact = this.workFlow.artifactDAO.findArtifactByGroupNameVersion(
+                        group, name,version)
+                if(artifact == null) {
+                    return
+                }
+                // Now delete flow using the artifact id
+                this.workFlow.flowDAO.deleteFlowByArtifactId(artifact.id)
                 output.println("Done!")
             } catch (Exception e) {
                 logger.error("Cleanup of the model failed with an exception: ", e)
