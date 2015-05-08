@@ -32,7 +32,6 @@ class TestRunner {
         integrationRestApiClient.port = Integer.valueOf(System.getProperty("DeploydbPort")) + 1
 
         String path = "/tasks/modelCleanup?group="+artifactGroup+"&name="+artifactName+"&version="+artifactVersion
-//        String path = "/tasks/modelCleanup?group=basic.group.1&name=bg1&version=1.2.345"
         Response response = integrationRestApiClient.postJsonToPath(path, "", false)
         response.close()
 

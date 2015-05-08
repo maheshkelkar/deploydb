@@ -6,7 +6,7 @@ import org.codehaus.groovy.testng.TestNgRunner
 class UatMainApp {
 
     static void main(String[] args) {
-        uat.TestRunner testRunner = new uat.TestRunner()
+        TestRunner testRunner = new TestRunner()
         ConsulClient consulClient = new ConsulClient()
 
         boolean success = true
