@@ -1,11 +1,14 @@
 package deploydb
 
 import spock.lang.*
+import dropwizardintegtest.IntegrationModelHelper
+import dropwizardintegtest.IntegrationRestApiClient
 
 class DeploymentCreatedNotificationsSpec extends Specification {
 
     IntegrationTestAppHelper integAppHelper = new IntegrationTestAppHelper()
-    IntegrationModelHelper integModelHelper = new  IntegrationModelHelper(integAppHelper)
+    IntegrationRestApiClient integrationRestApiClient = new IntegrationRestApiClient()
+    IntegrationModelHelper integModelHelper = new  IntegrationModelHelper(integrationRestApiClient)
     private WebhooksModelConfigHelper mcfgHelper = new WebhooksModelConfigHelper()
 
     def setup() {
@@ -27,7 +30,7 @@ class DeploymentCreatedNotificationsSpec extends Specification {
 
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
         // load up the configuration
@@ -47,7 +50,7 @@ class DeploymentCreatedNotificationsSpec extends Specification {
 
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createWebhookConfigFile()
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
@@ -74,7 +77,7 @@ class DeploymentCreatedNotificationsSpec extends Specification {
 
         given:
         // create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createEnvironmentConfigFile()
 
         // load up the config
@@ -99,7 +102,7 @@ class DeploymentCreatedNotificationsSpec extends Specification {
 
         given:
         // create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createWebhookConfigFile()
         mcfgHelper.createEnvironmentConfigFile()
 
@@ -125,7 +128,7 @@ class DeploymentCreatedNotificationsSpec extends Specification {
 
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createMultipleWebhooksConfigFile()
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
@@ -151,7 +154,7 @@ class DeploymentCreatedNotificationsSpec extends Specification {
 
         given:
         // create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createMultipleWebhooksEnvironmentConfigFile()
 
         // load up the config
@@ -176,7 +179,7 @@ class DeploymentCreatedNotificationsSpec extends Specification {
 
         given:
         // create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createMultipleWebhooksConfigFile()
         mcfgHelper.createMultipleWebhooksEnvironmentConfigFile()
 

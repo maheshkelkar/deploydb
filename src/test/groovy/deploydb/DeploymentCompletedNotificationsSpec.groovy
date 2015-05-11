@@ -2,11 +2,16 @@ package deploydb
 
 import spock.lang.*
 
+import dropwizardintegtest.IntegrationModelHelper
+import dropwizardintegtest.IntegrationRestApiClient
+
 class DeploymentCompletedNotificationsSpec extends Specification {
 
     IntegrationTestAppHelper integAppHelper = new IntegrationTestAppHelper()
-    IntegrationModelHelper integModelHelper = new  IntegrationModelHelper(integAppHelper)
+    IntegrationRestApiClient integrationRestApiClient = new IntegrationRestApiClient()
+    IntegrationModelHelper integModelHelper = new  IntegrationModelHelper(integrationRestApiClient)
     private WebhooksModelConfigHelper mcfgHelper = new WebhooksModelConfigHelper()
+    private long deploymentId = 1L
 
     def setup() {
         mcfgHelper.setup()
@@ -26,7 +31,7 @@ class DeploymentCompletedNotificationsSpec extends Specification {
     def "no webhook should be called when you receive deployment completed trigger if there is no webhook config" () {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
         // load up the configuration
@@ -36,7 +41,7 @@ class DeploymentCompletedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentCompletedTrigger()
+        boolean success = integModelHelper.sendDeploymentCompletedTrigger(deploymentId)
 
         then:
         success == true
@@ -47,7 +52,7 @@ class DeploymentCompletedNotificationsSpec extends Specification {
     def "webhook should be called when you receive deployment completed trigger" () {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createDeploymentCompletedWebhookConfigFile()
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
@@ -64,7 +69,7 @@ class DeploymentCompletedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentCompletedTrigger()
+        boolean success = integModelHelper.sendDeploymentCompletedTrigger(deploymentId)
 
         then:
         success == true
@@ -75,7 +80,7 @@ class DeploymentCompletedNotificationsSpec extends Specification {
     def "environment webhook should be called when you receive deployment completed trigger" () {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createDeploymentCompletedEnvironmentWebhookConfigFile()
 
         // load up the configuration
@@ -91,7 +96,7 @@ class DeploymentCompletedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentCompletedTrigger()
+        boolean success = integModelHelper.sendDeploymentCompletedTrigger(deploymentId)
 
         then:
         success == true
@@ -102,7 +107,7 @@ class DeploymentCompletedNotificationsSpec extends Specification {
     def "both global and environment webhooks should be called when you receive deployment completed trigger" () {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createDeploymentCompletedWebhookConfigFile()
         mcfgHelper.createDeploymentCompletedEnvironmentWebhookConfigFile()
 
@@ -119,7 +124,7 @@ class DeploymentCompletedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentCompletedTrigger()
+        boolean success = integModelHelper.sendDeploymentCompletedTrigger(deploymentId)
 
         then:
         success == true
@@ -130,7 +135,7 @@ class DeploymentCompletedNotificationsSpec extends Specification {
     def "multiple webhooks should be called when you receive deployment completed trigger" () {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createMultipleDeploymentCompletedWebhooksConfigFile()
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
@@ -147,7 +152,7 @@ class DeploymentCompletedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentCompletedTrigger()
+        boolean success = integModelHelper.sendDeploymentCompletedTrigger(deploymentId)
 
         then:
         success == true
@@ -158,7 +163,7 @@ class DeploymentCompletedNotificationsSpec extends Specification {
     def "multiple environments webhook should be called when you receive deployment completed trigger" () {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createMultipleDeploymentCompletedEnvironmentWebhooksConfigFile()
 
         // load up the configuration
@@ -174,7 +179,7 @@ class DeploymentCompletedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentCompletedTrigger()
+        boolean success = integModelHelper.sendDeploymentCompletedTrigger(deploymentId)
 
         then:
         success == true
@@ -185,7 +190,7 @@ class DeploymentCompletedNotificationsSpec extends Specification {
     def "both multiple global and environment webhooks should be called when you receive deployment completed trigger" () {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createMultipleDeploymentCompletedWebhooksConfigFile()
         mcfgHelper.createMultipleDeploymentCompletedEnvironmentWebhooksConfigFile()
 
@@ -203,7 +208,7 @@ class DeploymentCompletedNotificationsSpec extends Specification {
         integModelHelper.sendCreateArtifact()
 
         when:
-        boolean success = integModelHelper.sendDeploymentCompletedTrigger()
+        boolean success = integModelHelper.sendDeploymentCompletedTrigger(deploymentId)
 
         then:
         success == true

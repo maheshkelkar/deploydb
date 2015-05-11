@@ -1,1 +1,1 @@
-include "dropwizard-integtest"
+include "dropwizard-integtest", "uat"

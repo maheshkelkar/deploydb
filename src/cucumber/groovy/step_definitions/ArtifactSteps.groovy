@@ -10,6 +10,7 @@ Given(~/^there is an artifact$/) { ->
         dao.persist(a)
     }
 }
+
 Given(~/^there are artifacts$/) { ->
     withSession {
         ArtifactDAO dao = new ArtifactDAO(sessionFactory)
@@ -40,4 +41,15 @@ And(~/^the (.*?) is over ([1-9][0-9]*) characters$/) { String var, int varSize -
         "sourceUrl" : "$sourceUrl"
       }
     """
+}
+
+And(~/^the artifact doesn't exist$/) { ->
+    boolean artifactFound = true
+    withSession {
+        ArtifactDAO dao = new ArtifactDAO(sessionFactory)
+        artifactFound = dao.artifactExists("com.example.cucumber",
+                                           "cucumber-artifact",
+                                           "1.0.1")
+    }
+    artifactFound == false
 }

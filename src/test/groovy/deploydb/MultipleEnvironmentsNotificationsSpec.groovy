@@ -2,11 +2,16 @@ package deploydb
 
 import spock.lang.*
 
+import dropwizardintegtest.IntegrationModelHelper
+import dropwizardintegtest.IntegrationRestApiClient
+
 class MultipleEnvironmentsNotificationsSpec extends Specification {
 
     IntegrationTestAppHelper integAppHelper = new IntegrationTestAppHelper()
-    IntegrationModelHelper integModelHelper = new  IntegrationModelHelper(integAppHelper)
+    IntegrationRestApiClient integrationRestApiClient = new IntegrationRestApiClient()
+    IntegrationModelHelper integModelHelper = new  IntegrationModelHelper(integrationRestApiClient)
     private WebhooksModelConfigHelper mcfgHelper = new WebhooksModelConfigHelper()
+    private long deploymentId = 1L
 
     def setup() {
         mcfgHelper.setup()
@@ -34,7 +39,7 @@ class MultipleEnvironmentsNotificationsSpec extends Specification {
 
         given:
         // Create the required config
-        mcfgHelper.createBasicProdServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createBasicProdServicePromotionPipelineModelsConfigFiles()
 
         // load up the configuration
         integAppHelper.runner.getApplication().loadModelConfiguration()
@@ -61,7 +66,7 @@ class MultipleEnvironmentsNotificationsSpec extends Specification {
         integAppHelper.webhookRunner.requestWebhookObject.configuredUriPaths =
                 ["/job/basicEnv-deploy-created/build", "/job/basicEnv-deploy-completed/build"]
 
-        success = integModelHelper.sendDeploymentCompletedTrigger()
+        success = integModelHelper.sendDeploymentCompletedTrigger(deploymentId)
 
         then:
         success == true
@@ -76,7 +81,7 @@ class MultipleEnvironmentsNotificationsSpec extends Specification {
                 ["/job/basicEnv-deploy-created/build", "/job/basicEnv-deploy-completed/build",
                 "/job/prodEnv-deploy-created/build"]
 
-        success = integModelHelper.sendPromotionCompletedTrigger()
+        success = integModelHelper.sendPromotionCompletedTrigger(deploymentId)
 
         then:
         success == true

@@ -163,6 +163,9 @@ class DeployDBApp extends Application<DeployDBConfiguration> {
         /** Add admin task for config reload */
         environment.admin().addTask(new ConfigReloadTask(workFlow))
 
+        /** Add admin task for model cleanup */
+        environment.admin().addTask(new ModelCleanupTask(workFlow))
+
         /** Register Ldap Authentication */
         CachingAuthenticator<BasicCredentials, auth.User> authenticator = new CachingAuthenticator<>(
                 environment.metrics(),

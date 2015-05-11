@@ -1,6 +1,7 @@
 package deploydb.dao
 
-import deploydb.IntegrationModelHelper
+import dropwizardintegtest.IntegrationModelHelper
+import dropwizardintegtest.IntegrationRestApiClient
 import deploydb.IntegrationTestAppHelper
 import deploydb.WebhooksModelConfigHelper
 import deploydb.models.Deployment
@@ -10,7 +11,8 @@ import spock.lang.*
 
 class DeploymentDAOSpec extends Specification {
     IntegrationTestAppHelper integAppHelper = new IntegrationTestAppHelper()
-    IntegrationModelHelper integModelHelper = new  IntegrationModelHelper(integAppHelper)
+    IntegrationRestApiClient integrationRestApiClient = new IntegrationRestApiClient()
+    IntegrationModelHelper integModelHelper = new  IntegrationModelHelper(integrationRestApiClient)
     private WebhooksModelConfigHelper mcfgHelper = new WebhooksModelConfigHelper()
 
     def setup() {
@@ -60,7 +62,7 @@ class DeploymentDAOSpec extends Specification {
     def "getByEnvironmentIdent() should returns deployments for the environment ident"() {
         given:
         // Create the required config
-        mcfgHelper.createServicePromoitionPipelineModelsConfigFiles()
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
         mcfgHelper.createEnvironmentNoWebhooksConfigFile()
 
         // load up the configuration

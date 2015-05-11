@@ -1,7 +1,14 @@
 package deploydb.models
 
+import deploydb.IntegrationTestAppHelper
 import deploydb.Status
+import deploydb.dao.PromotionResultDAO
+import spock.lang.Ignore
 import spock.lang.Specification
+import dropwizardintegtest.IntegrationModelHelper
+import dropwizardintegtest.IntegrationRestApiClient
+import deploydb.ModelConfigHelper
+
 
 class FlowSpec extends Specification {
 
@@ -271,4 +278,74 @@ class FlowSpecWithArgsSpec extends Specification {
         firstFlow.hashCode() != secondFlow.hashCode()
     }
 
+}
+
+class FlowCleanupSpec extends Specification {
+
+    IntegrationTestAppHelper integAppHelper = new IntegrationTestAppHelper()
+    IntegrationRestApiClient integrationRestApiClient = new IntegrationRestApiClient()
+    IntegrationModelHelper integModelHelper = new IntegrationModelHelper(integrationRestApiClient)
+    private ModelConfigHelper mcfgHelper = new ModelConfigHelper()
+
+    boolean foundArtifact = true
+    List<Deployment> deployments
+    List<PromotionResult> promotionResults
+
+    def setup() {
+        mcfgHelper.setup()
+        integAppHelper.startAppWithConfiguration('deploydb.spock.yml')
+        integAppHelper.runner.getApplication().configuration.configDirectory = mcfgHelper.baseCfgDirName
+
+        foundArtifact = true
+    }
+
+    def cleanup() {
+        integAppHelper.stopApp()
+        mcfgHelper.cleanup()
+    }
+
+    void updateModelsExistence() {
+        // update the existence of flow, deployments and promotion results
+        PromotionResultDAO promotionResultDAO = new PromotionResultDAO(
+                integAppHelper.runner.getApplication().getSessionFactory())
+
+        integAppHelper.runner.getApplication().withHibernateSession {
+            foundArtifact = integAppHelper.runner.getApplication().workFlow.artifactDAO.
+                    artifactExists("basic.group.1", "bg1", "1.2.345")
+            deployments = integAppHelper.runner.getApplication().workFlow.deploymentDAO.
+                    getByPage(0, 10)
+            promotionResults = promotionResultDAO.getByPage(0, 10)
+        }
+    }
+
+    def "delete of existing flow cleans up deployments and artifact"() {
+        given:
+        // Create the required config
+        mcfgHelper.createServicePromotionPipelineModelsConfigFiles()
+        mcfgHelper.createEnvironmentNoWebhooksConfigFile()
+
+        // load up the configuration
+        integAppHelper.runner.getApplication().loadModelConfiguration()
+
+        // create the artifact, which will create deployments and flow
+        integModelHelper.sendCreateArtifact()
+
+        when:
+
+        // remove the flow
+        integAppHelper.runner.getApplication().withHibernateSession {
+            Artifact artifact = integAppHelper.runner.getApplication().workFlow.artifactDAO.
+                    findArtifactByGroupNameVersion("basic.group.1", "bg1", "1.2.345")
+            integAppHelper.runner.getApplication().workFlow.flowDAO.
+                    deleteFlowByArtifactId(artifact.id)
+        }
+
+
+        then:
+        updateModelsExistence()
+
+        foundArtifact == false
+        deployments.isEmpty()
+        promotionResults.isEmpty()
+    }
 }

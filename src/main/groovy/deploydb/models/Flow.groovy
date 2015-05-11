@@ -24,7 +24,7 @@ import javax.persistence.Table
 @Table(name='flows')
 class Flow extends AbstractModel {
 
-    @OneToOne(optional=false)
+    @OneToOne(cascade = CascadeType.ALL, optional=false)
     @JoinColumn(name='artifactId', unique=false, nullable=false, updatable=false)
     @JsonProperty
     Artifact artifact

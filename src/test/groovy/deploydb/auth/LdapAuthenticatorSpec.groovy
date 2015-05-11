@@ -1,7 +1,6 @@
 package deploydb.auth
 
 import com.google.common.base.Optional
-import deploydb.IntegrationModelHelper
 import deploydb.IntegrationTestAppHelper
 import deploydb.ModelConfigHelper
 import io.dropwizard.auth.basic.BasicCredentials
@@ -28,7 +27,6 @@ class LdapAuthenticatorSpec extends Specification {
 
 class LdapAuthenticatorWithArgsSpec extends Specification {
     private IntegrationTestAppHelper integAppHelper = new IntegrationTestAppHelper()
-    private IntegrationModelHelper integModelHelper = new  IntegrationModelHelper(integAppHelper)
     private ModelConfigHelper mcfgHelper = new ModelConfigHelper()
     LdapConfiguration ldapConfiguration
 

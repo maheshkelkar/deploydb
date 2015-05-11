@@ -204,6 +204,21 @@ promotions:
         serviceFile.write(fileContents)
     }
 
+    def createServicePromotionPipelineModelsConfigFiles() {
+        createPromotionConfigFile()
+        createPipelineConfigFile()
+        createServiceConfigFile()
+    }
+
+    def createBasicProdServicePromotionPipelineModelsConfigFiles() {
+        createEnvironmentConfigFile()
+        createProdEnvironmentConfigFile()
+        createPromotionConfigFile()
+        createBasicProdPipelineConfigFile()
+        createServiceConfigFile()
+    }
+
+
 }
 
 class WebhooksModelConfigHelper extends deploydb.ModelConfigHelper {
@@ -367,19 +382,5 @@ webhook:
       - http://localhost:10000/job/basicEnv-promotion-completed-2/build
 """
         createEnvironmentWebhookConfigFile(fileContents, "basicEnv")
-    }
-
-    def createServicePromoitionPipelineModelsConfigFiles() {
-        createPromotionConfigFile()
-        createPipelineConfigFile()
-        createServiceConfigFile()
-    }
-
-    def createBasicProdServicePromoitionPipelineModelsConfigFiles() {
-        createEnvironmentConfigFile()
-        createProdEnvironmentConfigFile()
-        createPromotionConfigFile()
-        createBasicProdPipelineConfigFile()
-        createServiceConfigFile()
     }
 }
