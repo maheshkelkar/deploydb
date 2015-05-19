@@ -10,10 +10,11 @@ plugins {
 apply plugin: 'eclipse'
 apply plugin: 'groovy'
 apply plugin: 'application'
+apply plugin: 'distribution'
 apply plugin: 'codenarc'
 apply plugin: 'cobertura'
 
-version = '0.3.0'
+version = '0.3.1'
 group = 'com.github.lookout'
 description = 'DeployDB is a tool to provide a single source of truth for artifact-based deployments'
 // Needed for the application plugin's `run` task
@@ -156,6 +157,14 @@ shadowJar {
     dependsOn check
 }
 assemble.dependsOn shadowJar
+
+distributions {
+    main {
+        contents {
+            from shadowJar.outputs
+        }
+    }
+}
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
