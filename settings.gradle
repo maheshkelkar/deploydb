@@ -1,1 +1,1 @@
-include "dropwizard-integtest", "uat"
+include "dropwizard-integtest", "deploydb-uat"
