@@ -6,7 +6,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'com.jfrog.bintray'
 
 version = rootProject.version
-group = 'com.github.lookout.uat'
+group = rootProject.group
 description = 'User Acceptance Testing artifact for deploydb'
 
 mainClassName = 'uat.UatMainApp'
