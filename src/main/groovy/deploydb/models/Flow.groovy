@@ -3,6 +3,9 @@ package deploydb.models
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import deploydb.Status
+import org.hibernate.annotations.Fetch
+import org.hibernate.annotations.FetchMode
+
 import javax.persistence.Column
 import javax.persistence.CascadeType
 import javax.persistence.Entity
@@ -12,6 +15,7 @@ import javax.persistence.FetchType
 import javax.persistence.JoinColumn
 import javax.persistence.OneToMany
 import javax.persistence.OneToOne
+import javax.persistence.OrderBy
 import javax.persistence.Table
 //import java.util.LinkedHashSet
 
@@ -29,9 +33,15 @@ class Flow extends AbstractModel {
     @JsonProperty
     Artifact artifact
 
+    /**
+     * Use of FetchMode.SUBSELECT annotation forces hibernate to not use the Join,
+     * and instead sends multiple sql calls to the db to retrieve the data,
+     * thus eliminating the duplicates.
+     */
     @OneToMany(cascade = CascadeType.ALL, fetch=FetchType.EAGER, mappedBy = "flow")
     @JsonProperty
-    @javax.persistence.OrderBy("id")
+    @OrderBy(value = "id")
+    @Fetch(FetchMode.SUBSELECT)
     Set<Deployment> deployments = new LinkedHashSet<Deployment>()
 
     @Column(name="service")

@@ -65,7 +65,7 @@ Feature: Flow READ APIs
     Then the response should be 404
 
 
-  @wip @freezetime
+  @freezetime
   Scenario: Fetching all flows
 
     Given there is a flow
@@ -120,7 +120,7 @@ Feature: Flow READ APIs
     }]
     """
 
-  @wip @freezetime
+  @freezetime
   Scenario: Fetching an flow by the pageNumber and perPageSize
 
     Given there are flows

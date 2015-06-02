@@ -19,11 +19,15 @@ class FlowReadingSpec extends Specification {
     def setup() {
         mcfgHelper.setup()
         integAppHelper.startAppWithConfiguration('deploydb.spock.yml')
+        integAppHelper.startWebhookTestServerWithConfiguration('webhookTestServer.example.yml')
         integAppHelper.runner.getApplication().configuration.configDirectory = mcfgHelper.baseCfgDirName
+        integAppHelper.webhookRunner.requestWebhookObject.contentTypeParam =
+                "application/vnd.deploydb.deploymentcreated.v1+json"
     }
 
     def cleanup() {
         integAppHelper.stopApp()
+        integAppHelper.stopWebhookTestServerApp()
         mcfgHelper.cleanup()
     }
 
@@ -34,7 +38,6 @@ class FlowReadingSpec extends Specification {
         return response.status == 200 && flows.size == 1
     }
 
-    @Ignore
     def "artifact in multi promotion service should return single flow" () {
 
         given:

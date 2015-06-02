@@ -4,6 +4,7 @@ import deploydb.models.Flow
 import groovy.transform.InheritConstructors
 import io.dropwizard.hibernate.AbstractDAO
 import org.hibernate.Session
+import org.hibernate.criterion.Order
 import org.hibernate.criterion.Restrictions
 
 /**
@@ -23,5 +24,24 @@ class FlowDAO extends AbstractDAO<Flow> {
 
         // now delete the found flow
         session.delete(flow)
+    }
+
+    /**
+     * Locate an Flow based on the (group, name) pair
+     *
+     * @param pageNumber A valid page number for pagination
+     * @param perPageSize A valid per page size
+     */
+    List<Flow> getByPage(int pageNumber, int perPageSize) {
+
+        List<Flow> flows = criteria()
+                .setFirstResult(pageNumber)
+                .setMaxResults(perPageSize)
+                .addOrder(Order.asc('id')).list()
+
+        for (Flow flow : flows) {
+            println "***MVK: flow = ${flow}"
+        }
+        return flows
     }
 }

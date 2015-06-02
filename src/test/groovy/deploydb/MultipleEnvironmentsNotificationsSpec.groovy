@@ -20,7 +20,6 @@ class MultipleEnvironmentsNotificationsSpec extends Specification {
         integAppHelper.runner.getApplication().configuration.configDirectory = mcfgHelper.baseCfgDirName
         integAppHelper.webhookRunner.requestWebhookObject.contentTypeParam =
                 "application/vnd.deploydb.deploymentcreated.v1+json"
-        integAppHelper.startWebhookTestServerWithConfiguration('webhookTestServer.example.yml')
     }
 
     def cleanup() {
