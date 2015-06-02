@@ -34,7 +34,6 @@ class DeploymentReadingSpec extends Specification {
         return response.status == 200 && deployments.size == 1
     }
 
-    @Ignore
     def "artifact in multi promotion service should return single deployment" () {
 
         given:

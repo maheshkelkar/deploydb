@@ -3,6 +3,9 @@ package deploydb.models
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonIgnore
 import deploydb.Status
+import org.hibernate.annotations.Fetch
+import org.hibernate.annotations.FetchMode
+
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -63,9 +66,15 @@ class Deployment extends AbstractModel {
     @JsonProperty
     Status status = Status.NOT_STARTED
 
+    /**
+     * Use of FetchMode.SUBSELECT annotation forces hibernate to not use the Join,
+     * and instead sends multiple sql calls to the db to retrieve the data,
+     * thus eliminating the duplicates.
+     */
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "deployment")
     @JsonProperty(value = "promotions")
     @OrderBy(value = "id")
+    @Fetch(FetchMode.SUBSELECT)
     Set<PromotionResult> promotionResultSet = new ConcurrentHashSet<>()
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
@@ -132,6 +141,5 @@ class Deployment extends AbstractModel {
         return "id: ${id}, environment: ${environmentIdent}, service: ${serviceIdent}, " +
                 "status: ${status}, promotionResultSet: ${promotionResultSet}, " +
                 "flow: ${flow.id}"
-
     }
 }

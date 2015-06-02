@@ -218,7 +218,21 @@ promotions:
         createServiceConfigFile()
     }
 
+    def createMultiPromoServiceModelConfigFiles() {
+        createPromotionConfigFile()
+        createManualPromotionConfigFile()
+        createPipelineConfigFile()
+        createMultiPromoServiceConfigFile()
+    }
 
+    def createMultiPromoMultiEnvServiceModelConfigFiles() {
+        createPromotionConfigFile()
+        createManualPromotionConfigFile()
+        createEnvironmentConfigFile()
+        createProdEnvironmentConfigFile()
+        createBasicProdPipelineConfigFile()
+        createMultiPromoServiceConfigFile()
+    }
 }
 
 class WebhooksModelConfigHelper extends deploydb.ModelConfigHelper {
