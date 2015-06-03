@@ -39,7 +39,6 @@ class ArtifactDAO extends AbstractDAO<Artifact> {
 
         List<Artifact> artifacts = criteria().add(Restrictions.eq('group', group))
                           .add(Restrictions.eq('name', name))
-                          .addOrder(Order.desc('createdAt'))
                           .addOrder(Order.asc('id')).list()
 
         if(artifacts.size() > 0) {

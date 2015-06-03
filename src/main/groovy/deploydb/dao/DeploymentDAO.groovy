@@ -37,7 +37,6 @@ class DeploymentDAO extends AbstractDAO<Deployment> {
     Deployment getLatest() {
 
         List<Deployment> deployments = criteria()
-                .addOrder(Order.desc('createdAt'))
                 .addOrder(Order.asc('id')).list()
         if (deployments.size() > 0) {
             return deployments.last()

@@ -123,7 +123,7 @@ Feature: Flow READ APIs
   @freezetime
   Scenario: Fetching an flow by the pageNumber and perPageSize
 
-    Given there are flows
+    Given there is a flow
     When I GET "/api/flows?pageNumber=0&perPageSize=5"
     Then the response should be 200
     And the body should be JSON:
