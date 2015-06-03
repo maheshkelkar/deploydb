@@ -75,4 +75,21 @@ class DeploymentDAO extends AbstractDAO<Deployment> {
                 .list()
         return deployments
     }
+
+    /**
+     * Find deployments for an service
+     *
+     * @param serviceIdent identity of the Service
+     * @return deployments list of Deployments
+     */
+    List<Deployment> getByServiceIdent(String serviceIdent,
+                                       int pageNumber, int perPageSize) {
+        List<Deployment> deployments = criteria()
+                .add(Restrictions.eq('serviceIdent', serviceIdent))
+                .setFirstResult(pageNumber)
+                .setMaxResults(perPageSize)
+                .addOrder(Order.asc('id'))
+                .list()
+        return deployments
+    }
 }
