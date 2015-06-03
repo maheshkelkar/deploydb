@@ -38,10 +38,6 @@ class FlowDAO extends AbstractDAO<Flow> {
                 .setFirstResult(pageNumber)
                 .setMaxResults(perPageSize)
                 .addOrder(Order.asc('id')).list()
-
-        for (Flow flow : flows) {
-            println "***MVK: flow = ${flow}"
-        }
         return flows
     }
 }

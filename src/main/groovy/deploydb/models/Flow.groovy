@@ -33,14 +33,20 @@ class Flow extends AbstractModel {
     @JsonProperty
     Artifact artifact
 
-    /**
-     * Use of FetchMode.SUBSELECT annotation forces hibernate to not use the Join,
-     * and instead sends multiple sql calls to the db to retrieve the data,
-     * thus eliminating the duplicates.
-     */
+
     @OneToMany(cascade = CascadeType.ALL, fetch=FetchType.EAGER, mappedBy = "flow")
     @JsonProperty
     @OrderBy(value = "id")
+    /**
+     * Following setting dictates how to fetch the child tables.
+     *
+     * Use of FetchMode.SUBSELECT annotation forces hibernate to not use the Join,
+     * and instead sends multiple sql calls to the db to retrieve the data,
+     * thus eliminating the duplicates.
+     *
+     * This is different than the "fetch=FetchType.Eager"" setting in OneToMany
+     * annotation which controls whether to fetch child tables or not
+     */
     @Fetch(FetchMode.SUBSELECT)
     Set<Deployment> deployments = new LinkedHashSet<Deployment>()
 

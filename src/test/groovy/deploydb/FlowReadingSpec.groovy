@@ -31,7 +31,13 @@ class FlowReadingSpec extends Specification {
         mcfgHelper.cleanup()
     }
 
-    boolean verifyGetFlows() {
+    /**
+     * Verifies that REST API that fetches all flows in the system has successfully
+     * found 1 flow.
+     *
+     * @return true if we have found a single flow
+     */
+    boolean isFlowValid() {
         Response response = integrationRestApiClient.getFromPath("/api/flows", false)
         List<Flow> flows = response.readEntity(new GenericType<List<Flow>>(){})
         response.close()
@@ -50,11 +56,7 @@ class FlowReadingSpec extends Specification {
         // create the artifact
         integModelHelper.sendCreateArtifact()
 
-        when:
-        boolean success = verifyGetFlows()
-
-        then:
-        success == true
-
+        expect:
+        isFlowValid()
     }
 }
