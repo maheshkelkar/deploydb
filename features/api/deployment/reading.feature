@@ -333,7 +333,7 @@ Feature: Deployment READ APIs
     Then the response should be 400
 
 
-  @wip @freezetime
+  @freezetime
   Scenario: Fetching all deployments for a service
 
     Given there is a deployment
@@ -366,7 +366,7 @@ Feature: Deployment READ APIs
     """
 
 
-  @wip @freezetime
+  @freezetime
   Scenario: Fetching all deployments for a service by the pageNumber and perPageSize
 
     Given there are deployments
@@ -420,7 +420,7 @@ Feature: Deployment READ APIs
       }]
     """
 
-  @wip
+
   Scenario: Fetching deployments for a service that doesn't exist
 
     When I GET "/api/deployments/by-service/faas"

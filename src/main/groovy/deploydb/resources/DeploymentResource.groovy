@@ -247,4 +247,26 @@ public class DeploymentResource {
         return deploymentList
     }
 
+
+    /**
+     * Returns the deployments using artifact id
+     *
+     * @param artifactId id of the artifact
+     * @return deployments
+     */
+    @GET
+    @Path("/by-service/{serviceIdent}")
+    @UnitOfWork
+    @Timed(name = "get-requests")
+    List<Deployment> byServiceIdent(
+            @PathParam("serviceIdent") String serviceIdent,
+            @QueryParam("pageNumber") @DefaultValue("0") IntParam pageNumber,
+            @QueryParam("perPageSize") @DefaultValue("20") deploydb.ModelPageSizeParam perPageSize) {
+        List<Deployment> deploymentList = this.workFlow.deploymentDAO.getByServiceIdent(
+                serviceIdent, pageNumber.get(), perPageSize.get())
+        if (deploymentList == null || deploymentList.isEmpty()) {
+            throw new WebApplicationException(Response.Status.NOT_FOUND)
+        }
+        return deploymentList
+    }
 }
