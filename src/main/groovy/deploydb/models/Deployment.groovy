@@ -66,14 +66,19 @@ class Deployment extends AbstractModel {
     @JsonProperty
     Status status = Status.NOT_STARTED
 
-    /**
-     * Use of FetchMode.SUBSELECT annotation forces hibernate to not use the Join,
-     * and instead sends multiple sql calls to the db to retrieve the data,
-     * thus eliminating the duplicates.
-     */
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "deployment")
     @JsonProperty(value = "promotions")
     @OrderBy(value = "id")
+    /**
+     * Following setting dictates how to fetch the child tables.
+     *
+     * Use of FetchMode.SUBSELECT annotation forces hibernate to not use the Join,
+     * and instead sends multiple sql calls to the db to retrieve the data,
+     * thus eliminating the duplicates.
+     *
+     * This is different than the "fetch=FetchType.Eager"" setting in OneToMany
+     * annotation which controls whether to fetch child tables or not
+     */
     @Fetch(FetchMode.SUBSELECT)
     Set<PromotionResult> promotionResultSet = new ConcurrentHashSet<>()
 

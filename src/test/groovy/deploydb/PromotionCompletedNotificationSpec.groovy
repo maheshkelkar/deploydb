@@ -22,7 +22,6 @@ class PromotionCompletedNotificationsSpec extends Specification {
 
         integAppHelper.webhookRunner.requestWebhookObject.contentTypeParam =
                 "application/vnd.deploydb.promotioncompleted.v1+json"
-        integAppHelper.startWebhookTestServerWithConfiguration('webhookTestServer.example.yml')
     }
 
     def cleanup() {
